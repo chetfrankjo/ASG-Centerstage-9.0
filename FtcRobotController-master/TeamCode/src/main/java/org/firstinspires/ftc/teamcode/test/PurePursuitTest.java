@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.test;
+package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 @TeleOp
-public class PurePuresuitTest extends LinearOpMode {
+public class PurePursuitTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
