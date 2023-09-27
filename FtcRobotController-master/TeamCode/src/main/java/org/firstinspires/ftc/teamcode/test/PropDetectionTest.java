@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,34 +16,33 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
+import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline;
 
 
-
+@Config
 @TeleOp
 public class PropDetectionTest extends LinearOpMode
 {
-    OpenCvCamera phoneCam;
-    SkystoneDeterminationPipeline pipeline;
+    OpenCvCamera webcam;
+    PropDetectionPipeline pipeline;
     public static int avg1, avg2, avg3;
     @Override
     public void runOpMode()
     {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new SkystoneDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        pipeline = new PropDetectionPipeline(true);
+        webcam.setPipeline(pipeline);
 
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
 
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -52,6 +54,8 @@ public class PropDetectionTest extends LinearOpMode
             }
         });
 
+        FtcDashboard dash;
+        dash = FtcDashboard.getInstance();
         waitForStart();
 
         while (opModeIsActive())
@@ -62,12 +66,19 @@ public class PropDetectionTest extends LinearOpMode
             telemetry.addData("avg3", avg3);
             telemetry.update();
 
+
+            TelemetryPacket p = new TelemetryPacket();
+            p.put("avg1",avg1);
+            p.put("avg2", avg2);
+            p.put("avg3", avg3);
+            dash.sendTelemetryPacket(p);
             // Don't burn CPU cycles busy-looping in this sample
-            sleep(50);
+            // SIKE! BURN THE CPU!!!!!!
+            //sleep(50);
         }
     }
 
-    public static class SkystoneDeterminationPipeline extends OpenCvPipeline
+    public static class PropLocationPipeline extends OpenCvPipeline
     {
         /*
          * An enum to define the skystone position
@@ -173,8 +184,8 @@ public class PropDetectionTest extends LinearOpMode
                     BLUE, // The color the rectangle is drawn in
                     2); // Thickness of the rectangle lines
 
-            int maxOneTwo = Math.max(avg1, avg2);
-            int max = Math.max(maxOneTwo, avg3);
+            int maxOneTwo = Math.min(avg1, avg2);
+            int max = Math.min(maxOneTwo, avg3);
 
             if(max == avg1) // Was it from region 1?
             {

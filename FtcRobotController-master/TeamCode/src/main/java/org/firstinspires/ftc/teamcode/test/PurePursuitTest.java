@@ -12,10 +12,10 @@ public class PurePursuitTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Trajectory traj = new Trajectory(0, 0, 0.7, 25);
-        traj.addPoint(0, 50, 0);
-        traj.addPoint(40, 50, -90);
-        traj.addPoint(40, 10, -180);
+        Trajectory traj = new Trajectory(0, 0, 0.6, 10);
+        traj.addPoint(0, 48, 0);
+        traj.addPoint(48, 48, -90);
+        traj.addPoint(48, 0, -180);
         traj.build();
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
@@ -23,6 +23,11 @@ public class PurePursuitTest extends LinearOpMode {
         while (opModeIsActive()) {
             driver.update();
             driver.followCurve(traj.path, 0);
+
+            telemetry.addData("x", driver.getCurrentPos().getX());
+            telemetry.addData("y", driver.getCurrentPos().getY());
+            telemetry.addData("head", driver.getCurrentPos().getHeading());
+            telemetry.update();
         }
     }
 }

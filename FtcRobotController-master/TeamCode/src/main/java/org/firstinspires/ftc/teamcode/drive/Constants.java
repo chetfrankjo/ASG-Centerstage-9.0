@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.opencv.core.Point;
+
 public class Constants {
 
     public static class AssemblyConstants {
@@ -46,6 +48,14 @@ public class Constants {
             public static final int SIXWD = 2;
             public static final int SWERVE = 3;
         }
+    }
+
+    public static final class VisionConstants {
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109, 98);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(181, 98);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253, 98);
+        public static final int REGION_WIDTH = 20;
+        public static final int REGION_HEIGHT = 20;
     }
 
     public static final class FieldConstants {
