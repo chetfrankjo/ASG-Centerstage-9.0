@@ -313,102 +313,18 @@ public class RobotDriver {
         }
     }
 
-    public void setTurretTarget(double angle) {
-        turretTarget = angle;
-    }
-    public void setTurretPower(double power) {
-        turretPower = power;
-    }
 
-    public void updateTurret() {                //Controls all turret movement
-        //All turret movement here
-        if (turretPID) {
-            //go to turret pos
-            double error = (turretTarget-turretHeading);
-            double p = turretPIDConstants.p * error;
-            turretI+=turretPIDConstants.i * error * loopSpeed;
-            double d = turretPIDConstants.d * (error-previousTurretError) / loopSpeed;
-            turret.setPower(p+turretI+d + (Math.signum(error)*turretPIDConstants.f));
-            previousTurretError=error;
-        } else {
-            turret.setPower(turretPower);
-        }
-    }
+    //1 Set internal transfer servos/motor power
 
-    public void setSlidesTarget(double length) {
-        slidesTarget = length;
-    }
-    public void setSlidesPower(double power) {
-        slidesPower = power;
-    }
-    public void updateSlides() {                //Controls all slides movement
-        if (slidesPID) {
-            //go to turret pos
-            double error = (slidesTarget-slidesLength);
-            double p = slidesPIDConstants.p * error;
-            slidesI+=slidesPIDConstants.i * error * loopSpeed;
-            double d = slidesPIDConstants.d * (error-previousSlidesError) / loopSpeed;
-            double power = (p+slidesI+d + (Math.signum(error)*slidesPIDConstants.f));
-            if (touchVal==1) {
-                if (slidesPower >= 0) {
-                    slides.setPower(power);
-                    slides2.setPower(-power);
-                } else {
-                    slides.setPower(0);
-                    slides2.setPower(0);
-                    slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    slides2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    slides2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }
-            } else {
-                slides.setPower(power);
-                slides2.setPower(-power);
-            }
-            slides.setPower(power);
-            slides2.setPower(-power);
-            previousSlidesError=error;
-        } else {
-            if (touchVal==1) {
-                if (slidesPower >= 0) {
-                    slides.setPower(slidesPower);
-                    slides2.setPower(-slidesPower);
-                } else {
-                    slides.setPower(0);
-                    slides2.setPower(0);
-                    slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    slides2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    slides2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }
-            } else {
-                slides.setPower(slidesPower);
-                slides2.setPower(-slidesPower);
-            }
+    //set gantry power
+    //2 Update gantry (gantry movement using pid stuff)
 
-        }
-    }
 
-    public void setV4barTarget(double angle) {
-        v4barTarget = angle;
-    }
-    public void setV4barPower(double power) {
-        v4barPower = power;
-    }
-    public void updatev4bar() {                //Controls all v4bar movement
-        //All turret movement here
-        if (v4barPID) {
-            //go to turret pos
-            double error = (v4barTarget-vbarHeading);
-            double p = v4barPIDConstants.p * error;
-            v4barI+=v4barPIDConstants.i * error * loopSpeed;
-            double d = v4barPIDConstants.d * (error-previousv4barError) / loopSpeed;
-            v4bar.setPower(p+v4barI+d + (Math.signum(error)*v4barPIDConstants.f));
-            previousv4barError=error;
-        } else {
-            v4bar.setPower(v4barPower);
-        }
-    }
+    //3 set slides power
+    //4 Update slides (slides movement using pid stuff)
+
+    //5 Either set lift power, or set intake stuff
+    //6 Update lift
 
     public double[] getAssemblyCoordinate() {                //Returns location of subsystems in 3D coordinate space
         double x = ((slidesLength*Math.cos(Math.toRadians(40.9)) + v4barLength*Math.cos(Math.toRadians(vbarHeading)))*Math.sin(Math.toRadians(turretHeading+currentPos.getHeading())))+ currentPos.getX();
