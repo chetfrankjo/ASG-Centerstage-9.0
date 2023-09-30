@@ -38,10 +38,6 @@ public class RobotDriverTest extends LinearOpMode {
             telemetry.addData("Global Y", currentPos.getY());
             telemetry.addData("Global Heading", currentPos.getHeading());
 
-            telemetry.addData("Slipped Left?", driver.getSlippedL());
-            telemetry.addData("Slipped Right?", driver.getSlippedR());
-            telemetry.addData("Slipped Hoz?", driver.getSlippedH());
-
             telemetry.addData("loop speed", driver.loopSpeed);
             telemetry.update();
             driver.update();
