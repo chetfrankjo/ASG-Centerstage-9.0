@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive;
-
+// hello do you see me
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -10,11 +10,8 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,6 +33,7 @@ import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline;
+import org.opencv.core.Mat;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
@@ -43,38 +41,27 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 @Config
 public class RobotDriver {
 
-    private DcMotorEx leftFront, leftRear, rightRear, rightFront, verticalLeft, verticalRight, horizontal, turret, slides, v4bar, slides2;
+    private DcMotorEx leftFront, leftRear, rightRear, rightFront, verticalLeft, verticalRight, horizontal, slides, slides2;
     private List<DcMotorEx> driveMotors, odometryEncoders;
-    private Servo verticalServo, horizontalServo, coneServo, vbarServo;
-    private RevColorSensorV3 color;
-    private ColorSensor color2;
-    private List<Servo> odometryServos;
     private IMU imu;
-    private RevTouchSensor touch;
-    private AnalogInput distleft, distright;
     private VoltageSensor batterylevel;
-    String verticalLeftEncoderName = "motorFrontLeft", horizontalEncoderName = "motorBackRight", verticalRightEncoderName = "motorBackLeft";
+    String verticalLeftEncoderName = "fl", horizontalEncoderName = "br", verticalRightEncoderName = "bl";
     public int[] encoders;
     public Localizer localizer;
-    public ATLocalizer ATlocalizer;
     public Pose2d CurrentVelocities = new Pose2d();
     private Pose2d PreviousVelocities  = new Pose2d();
     static Pose2d currentPos = new Pose2d(0, 0, 0);
-
+    private RevTouchSensor touch;
     private List<LynxModule> allHubs;
-    private double slidesLength, turretHeading, vbarHeading, distLeft, distRight, touchVal, imuheading;
-    double turretTarget, slidesTarget, v4barTarget, turretPower, slidesPower, v4barPower;
+    private double slidesLength, touchVal, imuheading;
+    double slidesTarget, slidesPower;
     static double frp=0, flp=0, brp=0, blp=0;
     public int[] colorLeft, colorRight;
-    public boolean turretPID = true, slidesPID = true, v4barPID = true;
+    public boolean slidesPID = true;
     final double slideTickToInch = AssemblyConstants.slideTickToInch;
-    final double vbarTickToInch = AssemblyConstants.vbarTickToInch;
-    final double zeroV4barAngle = AssemblyConstants.zeroV4barAngle;
     public int loops = 0;
     long lastLoopTime = System.nanoTime();
     public double loopSpeed = 0;
-    final double v4barLength = AssemblyConstants.v4barLength;
-    double turretI = 0, slidesI = 0, v4barI = 0, previousTurretError=0, previousSlidesError = 0, previousv4barError = 0;
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
     public Canvas overlay;
     public boolean useIMU = false;
@@ -86,9 +73,7 @@ public class RobotDriver {
     private double cy = DriveConstants.cy;
 
     final FtcDashboard dashboard;
-    PIDFCoefficients turretPIDConstants = AssemblyConstants.turretPIDConstants;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
-    PIDFCoefficients v4barPIDConstants = AssemblyConstants.v4barPIDConstants;
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -102,17 +87,17 @@ public class RobotDriver {
         blp = 0;
 
         localizer = new Localizer();
-        ATlocalizer = new ATLocalizer();
         encoders = new int[localizer.encoders.length];
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "motorFrontLeft");
-        leftRear = hardwareMap.get(DcMotorEx.class, "motorBackLeft");
-        rightRear = hardwareMap.get(DcMotorEx.class, "motorFrontRight");
-        rightFront = hardwareMap.get(DcMotorEx.class, "motorBackRight");
+        leftFront = hardwareMap.get(DcMotorEx.class, "fl");
+        leftRear = hardwareMap.get(DcMotorEx.class, "bl");
+        rightRear = hardwareMap.get(DcMotorEx.class, "fr");
+        rightFront = hardwareMap.get(DcMotorEx.class, "br");
 
         verticalLeft = hardwareMap.get(DcMotorEx.class, verticalLeftEncoderName);
         verticalRight = hardwareMap.get(DcMotorEx.class, verticalRightEncoderName);
         horizontal = hardwareMap.get(DcMotorEx.class, horizontalEncoderName);
+
         verticalLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         verticalRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -123,20 +108,11 @@ public class RobotDriver {
         driveMotors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
-        verticalServo = hardwareMap.get(Servo.class, "verticalServo");
-        horizontalServo = hardwareMap.get(Servo.class, "horizontalServo");
-        odometryServos = Arrays.asList(verticalServo, horizontalServo);
-        vbarServo = hardwareMap.servo.get("vBarServo");
-
         if (useIMU) {
             imu = hardwareMap.get(IMU.class, "imu");
             imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
             imu.resetYaw();
         }
-
-        turret = hardwareMap.get(DcMotorEx.class, "turret");
-        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         slides = hardwareMap.get(DcMotorEx.class, "slides");
         slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -146,19 +122,8 @@ public class RobotDriver {
         slides2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slides2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        v4bar = hardwareMap.get(DcMotorEx.class, "v4bar");
-        v4bar.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        v4bar.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        coneServo = hardwareMap.get(Servo.class, "coneGrabber");
-
-        color = hardwareMap.get(RevColorSensorV3.class, "color");
-        color2 = hardwareMap.get(ColorSensor.class, "color2");
 
         touch = hardwareMap.get(RevTouchSensor.class, "touch");
-
-        distleft = hardwareMap.get(AnalogInput.class, "distleft");
-        distright = hardwareMap.get(AnalogInput.class, "distright");
 
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
@@ -206,9 +171,6 @@ public class RobotDriver {
         lastLoopTime = currentTime;
         updateEstimate();           // Updates localization data and motor encoders
         updateDriveMotors();        // Updates drive motor power
-        updateTurret();             // Updates turret power/PID
-        updateSlides();             // Updates slides power/PID
-        updatev4bar();              // Updates v4bar power/PID
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -219,10 +181,6 @@ public class RobotDriver {
             packet.put("heading (imu)", imuheading);
         }
         packet.put("slides", slidesLength);
-        packet.put("turret", turretHeading);
-        packet.put("v4bar", vbarHeading);
-        packet.put("dist right", distRight);
-        packet.put("dist left", distLeft);
         packet.put("color right", colorRight);
         packet.put("color left", colorLeft);
         packet.put("loop speed", loopSpeed);
@@ -260,21 +218,28 @@ public class RobotDriver {
         encoders[2] = -horizontal.getCurrentPosition();
         encoders[1] = verticalRight.getCurrentPosition();
         slidesLength = -slides2.getCurrentPosition()/slideTickToInch;
-        turretHeading = turret.getCurrentPosition()*25;
-        vbarHeading = (v4bar.getCurrentPosition()/vbarTickToInch)+zeroV4barAngle;
-        distRight = (distright.getVoltage()*1000)/3.2;
-        distLeft = (distleft.getVoltage()*1000)/3.2;
-        colorLeft[0] = color.red();
-        colorLeft[1] = color.green();
-        colorLeft[2] = color.blue();
-        colorRight[0] = color2.red();
-        colorRight[1] = color2.green();
-        colorRight[2] = color2.blue();
+        //turretHeading = turret.getCurrentPosition()*25;
+        //vbarHeading = (v4bar.getCurrentPosition()/vbarTickToInch)+zeroV4barAngle;
+        //distRight = (distright.getVoltage()*1000)/3.2;
+        //distLeft = (distleft.getVoltage()*1000)/3.2;
+
         touchVal = touch.getValue();
         if (useIMU) {
             imuheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
     }
+
+
+
+
+    public double getSlidesLength() {
+        return slides.getCurrentPosition() * slideTickToInch;
+    }
+    public void updateSlides() {
+
+    }
+
+
 
 
     //1 Set internal transfer servos/motor power
@@ -296,19 +261,22 @@ public class RobotDriver {
 
 
     public double[] getAssemblyCoordinate() {                //Returns location of subsystems in 3D coordinate space
-        double x = ((slidesLength*Math.cos(Math.toRadians(40.9)) + v4barLength*Math.cos(Math.toRadians(vbarHeading)))*Math.sin(Math.toRadians(turretHeading+currentPos.getHeading())))+ currentPos.getX();
-        double y = ((slidesLength*Math.cos(Math.toRadians(40.9)) + v4barLength*Math.cos(Math.toRadians(vbarHeading)))*Math.cos(Math.toRadians(turretHeading+currentPos.getHeading())))+ currentPos.getY();
-        double z = slidesLength*Math.sin(Math.toRadians(40.9)) + v4barLength*Math.sin(vbarHeading);
-        return new double[] {x, y, z};
+
+        double relativeXToPoint = Math.cos(Math.toRadians(90)-Math.toRadians(currentPos.getHeading()));
+        double relativeYToPoint = Math.sin(Math.toRadians(90)-Math.toRadians(currentPos.getHeading()));
+        double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+        double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+        double x = (gantrypos);
+        double z = (slidesLength * Math.sin(Math.toRadians(60))) + someOffset;
+        double y = (slidesLength * Math.cos(Math.toRadians(60)));
+        return new double[] {(movementXPower*y)+(movementYPower*x)+ currentPos.getX(), (movementYPower*y)+(movementXPower*x) + currentPos.getY(), z};
     }
 
     public void setAssemblyCoordinates(double x, double y, double z, double v4barAngle) {       //Sets subsystems to best possible 3D location
         double deltaX = x - currentPos.getX();
         double deltaY = y - currentPos.getY();
         double deltaTheta = Math.toDegrees(Math.atan(deltaY/deltaX));
-        turretTarget = deltaTheta - currentPos.getHeading();
-        slidesTarget = (deltaX + (v4barLength*Math.cos(Math.toRadians(v4barAngle))))/Math.sin(Math.toRadians(40.9));
-        v4barTarget=v4barAngle;
+        slidesTarget = 0;
     }
 
 
@@ -370,24 +338,7 @@ public class RobotDriver {
     public double verticalPos() {return verticalLeft.getCurrentPosition();}
     public double horizontalPos() {return horizontal.getCurrentPosition();}
 
-    public double verticalServoPos() {return verticalServo.getPosition();}
-    public double horizontalServoPos() {return horizontalServo.getPosition();}
-    public void liftOdometry() {
-        setHorizontalServo(0.4);
-        setVerticalServo(0.7);
-    }
-    public void lowerOdometry() {
-        setHorizontalServo(0.15);
-        setVerticalServo(1);
-    }
 
-    public void setVServoPos(double pos) {
-        vbarServo.setPosition(pos);
-    }
-
-
-    public void setVerticalServo(double pos) {verticalServo.setPosition(pos);}
-    public void setHorizontalServo(double pos) {horizontalServo.setPosition(pos);}
 
     public double getIMUHeading() {
         return imuheading;
@@ -543,9 +494,5 @@ public class RobotDriver {
 
         driveXY(movement_x, movement_y, movement_turn);
     }
-
-
-
-
 
 }
