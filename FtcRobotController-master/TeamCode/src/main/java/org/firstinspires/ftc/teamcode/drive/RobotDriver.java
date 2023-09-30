@@ -289,8 +289,10 @@ public class RobotDriver {
     //5 Either set lift power, or set intake stuff
     //6 Update lift
 
+
     //7 Set angles for all subsystems (used to be here)
     //8 Set ZeroPower, mode, and pos for all subsystems
+
 
 
     public double[] getAssemblyCoordinate() {                //Returns location of subsystems in 3D coordinate space
