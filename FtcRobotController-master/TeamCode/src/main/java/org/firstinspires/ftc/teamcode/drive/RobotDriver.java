@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -34,13 +33,11 @@ import java.util.List;
 
 import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
-import org.firstinspires.ftc.teamcode.DataTypes.booleanInt;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
 @Config
@@ -81,20 +78,12 @@ public class RobotDriver {
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
     public Canvas overlay;
     public boolean useIMU = false;
-    public boolean RSlipped, LSlipped, HSlipped;
-    private int Riterations, Literations, Hiterations;
-    boolean localizeWithCamera = false;
 
     private double tagsize = DriveConstants.tagsize;
     private double fx = DriveConstants.fx;
     private double fy = DriveConstants.fy;
     private double cx = DriveConstants.cx;
     private double cy = DriveConstants.cy;
-    private boolean cameraReady = false;
-    private boolean useOdometry = true;
-    private boolean cameraIsStreaming = false;
-    private boolean useSlipCheck = true;
-
 
     final FtcDashboard dashboard;
     PIDFCoefficients turretPIDConstants = AssemblyConstants.turretPIDConstants;
@@ -181,7 +170,8 @@ public class RobotDriver {
         {
             @Override
             public void onOpened() {
-                cameraReady = true;}
+                //cameraReady = true;
+            }
             @Override
             public void onError(int errorCode) {}
         });
@@ -201,13 +191,9 @@ public class RobotDriver {
     /**
      * Function for quickly defining certain parameters for RobotDriver
      * @param useIMU
-     * @param useOdometry
-     * @param useSlipCheck
      */
-    public void setKeyParameters(boolean useIMU, boolean useOdometry, boolean useSlipCheck) {
+    public void setKeyParameters(boolean useIMU) {
         this.useIMU = useIMU;
-        this.useOdometry = useOdometry;
-        this.useSlipCheck = useSlipCheck;
     }
 
     public void update() {              // Updates all motors and sensors. Nothing will happen if this function is not called
@@ -223,26 +209,9 @@ public class RobotDriver {
         updateTurret();             // Updates turret power/PID
         updateSlides();             // Updates slides power/PID
         updatev4bar();              // Updates v4bar power/PID
-        if (useSlipCheck) {
-            checkForSlip();         // Analyses odometry velocities for potential slippage
-        }
-        // If one of the encoders has slipped and we don't already know it
-        if ((HSlipped || RSlipped || LSlipped) && !localizeWithCamera) {
-            // activate camera localization
-            localizeWithCamera = true;
-        }
-
-        // if camera localization is activated, run the camera localizer
-        if (localizeWithCamera || !useOdometry) {
-            getCameraLocalization();
-        }
 
         TelemetryPacket packet = new TelemetryPacket();
-        if (!useOdometry) {
-            packet.put("RUNNING CAMERA LOCALIZATION PER USER SETTINGS", "");
-        }
-        packet.put("localizing with camera", (localizeWithCamera || !useOdometry));
-        packet.put("analyzing wheel slippage", useSlipCheck);
+
         packet.put("x", currentPos.getY());
         packet.put("y", currentPos.getX());
         packet.put("heading (deg)", currentPos.getHeading());
@@ -277,12 +246,6 @@ public class RobotDriver {
         CurrentVelocities = localizer.getvelocity();
 
     }
-
-    public void useOdometry(boolean val) {
-        useOdometry = val;
-    }
-
-    public void runSlipCheck(boolean val) {useSlipCheck = val;}
 
     public Pose2d getCurrentPos() {
         return currentPos;
@@ -579,89 +542,6 @@ public class RobotDriver {
         driveXY(movement_x, movement_y, movement_turn);
     }
 
-    // Analyses the acceleration of each odo pod for slippage
-    public void checkForSlip() {
-        booleanInt result = slipCheck(CurrentVelocities.getY(), PreviousVelocities.getY(), Literations);
-        LSlipped = result.getBool();
-        Literations = result.getNum();
-        result = slipCheck(CurrentVelocities.getX(), PreviousVelocities.getX(), Riterations);
-        RSlipped = result.getBool();
-        Riterations = result.getNum();
-        result = slipCheck(CurrentVelocities.getHeading(), PreviousVelocities.getHeading(), Hiterations);
-        HSlipped = result.getBool();
-        Hiterations = result.getNum();
-    }
-
-    public boolean getSlippedL() {
-        return LSlipped;
-    }
-    public boolean getSlippedR() {
-        return RSlipped;
-    }
-    public boolean getSlippedH() {
-        return HSlipped;
-    }
-
-
-    private booleanInt slipCheck(double currentVelocity, double previousVelocity, int iterations) {
-        boolean slipped = false;
-        // if the velocity suddenly decreases
-        if (Math.abs(previousVelocity) < Math.abs(currentVelocity) - 10) {
-            //If it hasn't bounced back in a while, you just decelerating and no slipping occurred
-            if (iterations >= 15) {
-                iterations = 0;
-            }
-            // accumulate the amount of loops you've been waiting
-            iterations++;
-        } else {
-            // if the velocity bounces back, that means you slipped
-            if (iterations >= 15) {
-                slipped = true;
-                // reset iterations so that the loop can run again and again and...
-                iterations = 0;
-            }
-        }
-
-        return new booleanInt(slipped, iterations);
-    }
-
-
-    public void getCameraLocalization() {
-        // if the camera initialized with no errors
-        if (cameraReady) {
-            // start streaming the camera
-            if (!cameraIsStreaming) {
-                camera.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
-                cameraIsStreaming = true;
-            }
-            // run the pipeline and detemine positions
-            ATlocalizer.update(aprilTagDetectionPipeline);
-            // get the localizer's estimate
-            Pose2d ATEstimate = ATlocalizer.getEstimatePosition();
-            // if the localizer found a tag and relative position,
-
-            if (ATEstimate != null) {
-                // feed the new estimate to the odometry localizer
-                localizer.resetPosWithEstimate(ATEstimate);
-                currentPos = ATEstimate;
-                // the issue has been taken care of, reset trigger values
-                localizeWithCamera = false;
-                HSlipped=false;
-                RSlipped=false;
-                LSlipped=false;
-                // if we plan on using the odometry to determine position from now on
-                if (useOdometry) {
-                    // stop streaming the camera to conserve loop times
-                    camera.stopStreaming();
-                    cameraIsStreaming = false;
-                }
-            } else {
-                // if the localizer did not find a location, continue to run it until it does- TODO: Add a timeout for this
-                localizeWithCamera = true;
-            }
-        }
-
-    }
 
 
 
