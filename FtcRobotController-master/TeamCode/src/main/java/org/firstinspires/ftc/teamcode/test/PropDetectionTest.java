@@ -60,7 +60,11 @@ public class PropDetectionTest extends LinearOpMode
 
         while (opModeIsActive())
         {
+
             telemetry.addData("Analysis", pipeline.getAnalysis());
+            avg1 = pipeline.getReadings()[0];
+            avg2 = pipeline.getReadings()[1];
+            avg3 = pipeline.getReadings()[2];
             telemetry.addData("avg1", avg1);
             telemetry.addData("avg2", avg2);
             telemetry.addData("avg3", avg3);
