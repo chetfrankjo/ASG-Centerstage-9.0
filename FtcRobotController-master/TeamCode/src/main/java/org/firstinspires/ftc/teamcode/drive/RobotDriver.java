@@ -289,6 +289,12 @@ public class RobotDriver {
     //5 Either set lift power, or set intake stuff
     //6 Update lift
 
+
+    //7 Set angles for all subsystems (used to be here)
+    //8 Set ZeroPower, mode, and pos for all subsystems
+
+
+
     public double[] getAssemblyCoordinate() {                //Returns location of subsystems in 3D coordinate space
         double x = ((slidesLength*Math.cos(Math.toRadians(40.9)) + v4barLength*Math.cos(Math.toRadians(vbarHeading)))*Math.sin(Math.toRadians(turretHeading+currentPos.getHeading())))+ currentPos.getX();
         double y = ((slidesLength*Math.cos(Math.toRadians(40.9)) + v4barLength*Math.cos(Math.toRadians(vbarHeading)))*Math.cos(Math.toRadians(turretHeading+currentPos.getHeading())))+ currentPos.getY();
@@ -305,15 +311,6 @@ public class RobotDriver {
         v4barTarget=v4barAngle;
     }
 
-    public void setSlidesLength(double in) {
-        slidesTarget = in;
-    }
-    public void setTurretAngle(double deg) {
-        turretTarget = deg;
-    }
-    public void setV4barAngle(double deg) {
-        v4barTarget = deg;
-    }
 
     public double getBatteryVoltage() {return batterylevel.getVoltage();}
 
@@ -400,27 +397,7 @@ public class RobotDriver {
         imu.resetYaw();
     }
 
-    public void setTurretZeroPower(DcMotor.ZeroPowerBehavior behavior) {turret.setZeroPowerBehavior(behavior);}
-    public double getTurretPos() {return turretHeading;}
-    public void setTurretMode(DcMotor.RunMode mode) {turret.setMode(mode);}
 
-    public void setSlidesZeroPower(DcMotor.ZeroPowerBehavior behavior) {
-        slides.setZeroPowerBehavior(behavior);
-        slides2.setZeroPowerBehavior(behavior);
-    }
-
-    public double getSlidesPos() {return slidesLength;}
-    public void setSlidesMode(DcMotor.RunMode mode) {
-        slides.setMode(mode);
-        slides2.setMode(mode);
-    }
-
-    public void setv4barZeroPower(DcMotor.ZeroPowerBehavior behavior) {v4bar.setZeroPowerBehavior(behavior);}
-    public double getv4barPos() {return vbarHeading;}
-
-    public void setv4barMode(DcMotor.RunMode mode) {v4bar.setMode(mode);}
-
-    public void setGrabberPos(double pos) {coneServo.setPosition(pos);}
 
     public void waitAndUpdate(long time){
         long startTime = System.currentTimeMillis();
