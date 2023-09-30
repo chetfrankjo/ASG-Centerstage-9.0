@@ -56,7 +56,7 @@ public class PropDetectionPipeline extends OpenCvPipeline {
      * and extracts the Cb channel to the 'Cb' variable
      */
     void inputToCb(Mat input) {
-        //Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2RGBA);
+        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2BGR);
         Core.extractChannel(YCrCb, Cb, 2);
     }
 
@@ -75,9 +75,9 @@ public class PropDetectionPipeline extends OpenCvPipeline {
 
         inputToCb(input);
 
-        avg1 = (int) Core.mean(region1_Cb).val[2];
-        avg2 = (int) Core.mean(region2_Cb).val[2];
-        avg3 = (int) Core.mean(region3_Cb).val[2];
+        avg1 = (int) Core.mean(region1_Cb).val[0];
+        avg2 = (int) Core.mean(region2_Cb).val[0];
+        avg3 = (int) Core.mean(region3_Cb).val[0];
 
         if (overlay) {
             Imgproc.rectangle(
@@ -145,4 +145,5 @@ public class PropDetectionPipeline extends OpenCvPipeline {
     public SpikePosition getAnalysis() {
         return position;
     }
+    public int[] getReadings() {return new int[] {avg1, avg2, avg3};}
 }
