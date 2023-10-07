@@ -266,10 +266,11 @@ public class RobotDriver {
         double relativeYToPoint = Math.sin(Math.toRadians(90)-Math.toRadians(currentPos.getHeading()));
         double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
         double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-        double x = (gantrypos);
-        double z = (slidesLength * Math.sin(Math.toRadians(60))) + someOffset;
+        //double x = (gantrypos);
+        //double z = (slidesLength * Math.sin(Math.toRadians(60))) + someOffset;
         double y = (slidesLength * Math.cos(Math.toRadians(60)));
-        return new double[] {(movementXPower*y)+(movementYPower*x)+ currentPos.getX(), (movementYPower*y)+(movementXPower*x) + currentPos.getY(), z};
+        //return new double[] {(movementXPower*y)+(movementYPower*x)+ currentPos.getX(), (movementYPower*y)+(movementXPower*x) + currentPos.getY(), z};
+        return new double[] {9, 3};
     }
 
     public void setAssemblyCoordinates(double x, double y, double z, double v4barAngle) {       //Sets subsystems to best possible 3D location
