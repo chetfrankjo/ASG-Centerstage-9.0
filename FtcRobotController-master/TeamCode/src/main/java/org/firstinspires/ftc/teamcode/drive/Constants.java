@@ -51,11 +51,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109, 98);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(181, 98);
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70, 98);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(220, 98);
         public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253, 98);
-        public static final int REGION_WIDTH = 20;
-        public static final int REGION_HEIGHT = 20;
+        public static final int REGION_WIDTH = 40;
+        public static final int REGION_HEIGHT = 40;
     }
 
     public static final class FieldConstants {

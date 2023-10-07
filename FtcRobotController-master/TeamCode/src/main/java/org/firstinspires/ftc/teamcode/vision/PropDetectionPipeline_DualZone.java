@@ -23,7 +23,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
      */
     static final Scalar BLUE = new Scalar(0, 0, 255);
     static final Scalar GREEN = new Scalar(0, 255, 0);
-    static final int MIN_THRESH = 50;
+    static final int MIN_THRESH = 170;
     /*
      * The core values which define the location and size of the sample regions
      */
@@ -116,6 +116,12 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
             }
         } else {
             position = SpikePosition.RIGHT; // Record our analysis
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    new Point(0,0), // First point which defines the rectangle
+                    new Point(15, 15), // Second point which defines the rectangle
+                    GREEN, // The color the rectangle is drawn in
+                    -1); // Negative thickness means solid fill
         }
 
         return input;
