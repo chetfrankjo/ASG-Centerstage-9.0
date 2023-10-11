@@ -43,11 +43,8 @@ public class Constants {
         // UNITS ARE METERS
         public static final double tagsize = 0.155;
 
-        public static final class Drivetrain {
-            public static final int MECANUM = 1;
-            public static final int SIXWD = 2;
-            public static final int SWERVE = 3;
-        }
+        public static final double CAMERA_X_OFFSET = 6; // UNITS ARE INCHES
+        public static final double CAMERA_Y_OFFSET = 6;
     }
 
     public static final class VisionConstants {
@@ -56,6 +53,7 @@ public class Constants {
         public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253, 98);
         public static final int REGION_WIDTH = 40;
         public static final int REGION_HEIGHT = 40;
+        public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 
     public static final class FieldConstants {

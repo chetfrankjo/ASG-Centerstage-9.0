@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive;
-// hello do you see me
+
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -21,6 +21,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -29,13 +31,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
+import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
+import org.firstinspires.ftc.teamcode.DataTypes.General.*;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.opencv.core.Mat;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
 @Config
@@ -65,6 +75,16 @@ public class RobotDriver {
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
     public Canvas overlay;
     public boolean useIMU = false;
+    private boolean detectProp = true;
+    private CameraMode cameraMode = CameraMode.IDLE;
+    boolean cameraReady = false;
+    boolean getCameraEstimate = false;
+    private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET;
+    private static final double CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
+    SpikePosition propLocation;
+
+    OpenCvCamera OpenCvCam;
+    PropDetectionPipeline_DualZone propPipeline;
 
     private double tagsize = DriveConstants.tagsize;
     private double fx = DriveConstants.fx;
@@ -75,8 +95,10 @@ public class RobotDriver {
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
 
-    OpenCvCamera camera;
-    AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
+    private AprilTagProcessor aprilTag;
+    private TfodProcessor tfod;
+    private VisionPortal visionPortal;
 
     public RobotDriver(HardwareMap hardwareMap, boolean useIMU) {
 
@@ -128,18 +150,51 @@ public class RobotDriver {
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
-        camera.setPipeline(aprilTagDetectionPipeline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened() {
-                //cameraReady = true;
-            }
-            @Override
-            public void onError(int errorCode) {}
-        });
+        OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        propPipeline = new PropDetectionPipeline_DualZone(true);
+        OpenCvCam.setPipeline(propPipeline);
+
+        aprilTag = new AprilTagProcessor.Builder()
+                //.setDrawAxes(false)
+                //.setDrawCubeProjection(false)
+                //.setDrawTagOutline(true)
+                //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
+                //.setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+
+                // == CAMERA CALIBRATION ==
+                // If you do not manually specify calibration parameters, the SDK will attempt
+                // to load a predefined calibration for your camera.
+                //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
+
+                // ... these parameters are fx, fy, cx, cy.
+
+                .build();
+        tfod = new TfodProcessor.Builder()
+                // Use setModelAssetName() if the TF Model is built in as an asset.
+                // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
+                //.setModelAssetName(TFOD_MODEL_ASSET)
+                //.setModelFileName(TFOD_MODEL_FILE)
+
+                //.setModelLabels(LABELS)
+                //.setIsModelTensorFlow2(true)
+                //.setIsModelQuantized(true)
+                //.setModelInputSize(300)
+                //.setModelAspectRatio(16.0 / 9.0)
+                .build();
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"));
+
+        //builder.setCameraResolution(new Size(640, 480));
+
+        // Set and enable the processor.
+        builder.addProcessors(aprilTag, tfod);
+
+        // Build the Vision Portal, using the above settings.
+        visionPortal = builder.build();
+
 
         allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : allHubs) {
@@ -171,6 +226,7 @@ public class RobotDriver {
         lastLoopTime = currentTime;
         updateEstimate();           // Updates localization data and motor encoders
         updateDriveMotors();        // Updates drive motor power
+        updateCamera();             // Updates current requested camera operation (if any)
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -229,8 +285,71 @@ public class RobotDriver {
         }
     }
 
+    /**
+     * Handles ALL camera functions. Switching between detection states is done with a variable
+     */
+    public void updateCamera() {
+        if (cameraMode == CameraMode.PROP) {
+            if (!cameraReady) {
+                OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                    @Override
+                    public void onOpened() {
+                        OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                        cameraReady = true;
+                    }
+
+                    @Override
+                    public void onError(int errorCode) {
+                        /*
+                         * This will be called if the camera could not be opened
+                         */
+                    }
+                });
+                if (getCameraEstimate) {
+                    propLocation = propPipeline.getAnalysis(); //get the estimate
+                    getCameraEstimate = false; //close down all camera functions (we won't need them again)
+                    OpenCvCam.stopStreaming();
+                    OpenCvCam.closeCameraDevice();
+                    cameraMode = CameraMode.IDLE;
+                }
+            }
+
+        } else if (cameraMode == CameraMode.APRILTAG) {
+            visionPortal.setProcessorEnabled(aprilTag, true);
+            visionPortal.resumeStreaming();
+            if (getCameraEstimate) {
+                Pose2d result = getAprilTagEstimate();
+                if (result != null) { // We got a result
+                    localizer.resetPosWithEstimate(result); // apply the new estimate to odometry and shut down the camera
+                    currentPos = result;
+                    getCameraEstimate = false;
+                    visionPortal.setProcessorEnabled(aprilTag, false);
+                    if (!visionPortal.getProcessorEnabled(tfod)) { // if we aren't actively running tensorflow, shut down the camera service (save loop time)
+                        visionPortal.stopStreaming();
+                        cameraMode = CameraMode.IDLE;
+                    }
+                } else {
+                    //continue looping until we have an estimate
+                }
+            }
+        } else if (cameraMode == CameraMode.APLS) {
+            visionPortal.setProcessorEnabled(tfod, true);
+            visionPortal.resumeStreaming();
+            if (getCameraEstimate) {
+                // do apls stuff
+            }
+        }
+
+    }
 
 
+    public void setCameraMode(CameraMode mode) {
+        cameraMode = mode;
+    }
+
+    public void getCameraEstimate() {
+        getCameraEstimate = true;
+    }
 
     public double getSlidesLength() {
         return slides.getCurrentPosition() * slideTickToInch;
@@ -367,6 +486,51 @@ public class RobotDriver {
         canvas.strokeLine(x1, -y1, x2, -y2);
     }
 
+
+    /**
+     * Runs calculations for the robots pose based on detected apriltags.
+     */
+    public Pose2d getAprilTagEstimate() {
+        //TODO: the position estimate needs to account for the camera's offset on the robot.
+        //      This will require some complex trig to account for the possible change in the robots angle
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        double head;
+        if (useIMU) {
+            head = getIMUHeading();
+        } else {
+            head = currentPos.getHeading();
+        }
+        Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
+                CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
+                head
+                );
+        Pose2d tagEstimate = null;
+
+        // Step through the list of detections
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+
+                for (int i : Constants.VisionConstants.ACCEPTED_IDS) {
+                    if (i==detection.id) {
+                        if (tagEstimate == null) {
+                            tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, head);
+                        } else { // if multiple tags are detected, take the average of the estiamtes
+                            tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x)/2, (tagEstimate.getY()+detection.ftcPose.y)/2, head);
+                        }
+                    }
+                }
+
+            } else {
+                // unknown tag ID
+            }
+        }
+        if (tagEstimate == null) {
+            return null;
+        } else {
+            return new Pose2d(tagEstimate.getX() - offsetPose.getX(), tagEstimate.getY() - offsetPose.getY(), head);
+        }
+    }
 
 
 
