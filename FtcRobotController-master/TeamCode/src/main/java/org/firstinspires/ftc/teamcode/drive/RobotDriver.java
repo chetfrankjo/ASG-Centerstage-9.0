@@ -491,8 +491,6 @@ public class RobotDriver {
      * Runs calculations for the robots pose based on detected apriltags.
      */
     public Pose2d getAprilTagEstimate() {
-        //TODO: the position estimate needs to account for the camera's offset on the robot.
-        //      This will require some complex trig to account for the possible change in the robots angle
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         double head;
@@ -501,6 +499,7 @@ public class RobotDriver {
         } else {
             head = currentPos.getHeading();
         }
+        // offset the camera estimation based off of where the camera is on the robot
         Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
                 CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
                 head
@@ -511,11 +510,11 @@ public class RobotDriver {
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
 
-                for (int i : Constants.VisionConstants.ACCEPTED_IDS) {
+                for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
                     if (i==detection.id) {
                         if (tagEstimate == null) {
                             tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, head);
-                        } else { // if multiple tags are detected, take the average of the estiamtes
+                        } else { // if multiple tags are detected, take the average of the estimates
                             tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x)/2, (tagEstimate.getY()+detection.ftcPose.y)/2, head);
                         }
                     }
