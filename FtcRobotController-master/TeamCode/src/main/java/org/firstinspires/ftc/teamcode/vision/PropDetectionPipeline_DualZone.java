@@ -24,6 +24,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     static final Scalar BLUE = new Scalar(0, 0, 255);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final int MIN_THRESH = 170;
+    static final int EXTREME_MIN_THRESH = 100;
     /*
      * The core values which define the location and size of the sample regions
      */
@@ -90,6 +91,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
 
         }
         int max = Math.max(avg1, avg2);
+
 
         if (max == avg1 && max > MIN_THRESH) // Was it from region 1?
         {

@@ -12,17 +12,19 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -31,18 +33,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
-import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
-import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.vision.tfod.TfodProcessor;
-import org.opencv.core.Mat;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -51,74 +50,67 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Config
 public class RobotDriver {
 
-    private DcMotorEx leftFront, leftRear, rightRear, rightFront, verticalLeft, verticalRight, horizontal, slides, slides2;
-    private List<DcMotorEx> driveMotors, odometryEncoders;
+    private DcMotorEx fl, bl, fr, br, verticalLeft, verticalRight, horizontal, slidesL, slidesR, intake;
+    private List<DcMotorEx> driveMotors, odometryEncoders, slides;
     private IMU imu;
     private VoltageSensor batterylevel;
-    String verticalLeftEncoderName = "fl", horizontalEncoderName = "br", verticalRightEncoderName = "bl";
+    private CRServoImplEx gantry;
+    private Servo plunger;
+    private AnalogInput gantryEnc;
+    private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
     public Localizer localizer;
-    public Pose2d CurrentVelocities = new Pose2d();
-    private Pose2d PreviousVelocities  = new Pose2d();
+    public Pose2d CurrentVelocities = new Pose2d(), PreviousVelocities  = new Pose2d();
+    public static double[] globalCoords;
     static Pose2d currentPos = new Pose2d(0, 0, 0);
     private RevTouchSensor touch;
     private List<LynxModule> allHubs;
-    private double slidesLength, touchVal, imuheading;
-    double slidesTarget, slidesPower;
+    private double slidesLength, touchVal, imuheading, gantryPos;
+    double slidesTarget, slidesPower, gantryTarget, gantryPower, intakePower, plungerPos;
     static double frp=0, flp=0, brp=0, blp=0;
-    public int[] colorLeft, colorRight;
-    public boolean slidesPID = true;
+    public boolean useIMU = false;
     final double slideTickToInch = AssemblyConstants.slideTickToInch;
     public int loops = 0;
     long lastLoopTime = System.nanoTime();
     public double loopSpeed = 0;
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
     public Canvas overlay;
-    public boolean useIMU = false;
-    private boolean detectProp = true;
     private CameraMode cameraMode = CameraMode.IDLE;
-    boolean cameraReady = false;
-    boolean getCameraEstimate = false;
-    private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET;
-    private static final double CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
+    boolean cameraReady = false, getCameraEstimate = false;
+    private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET, CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
+    private LocalMode localizationMode;
+    ElapsedTime tagTimer;
     SpikePosition propLocation;
+    IntakeMode intakeMode = IntakeMode.LOCK;
+    PlungerMode plungerMode = PlungerMode.LOAD;
 
     OpenCvCamera OpenCvCam;
     PropDetectionPipeline_DualZone propPipeline;
 
-    private double tagsize = DriveConstants.tagsize;
-    private double fx = DriveConstants.fx;
-    private double fy = DriveConstants.fy;
-    private double cx = DriveConstants.cx;
-    private double cy = DriveConstants.cy;
-
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
-
+    PIDFCoefficients gantryPIDConstants = AssemblyConstants.gantryPIDConstants;
 
     private AprilTagProcessor aprilTag;
-    private TfodProcessor tfod;
     private VisionPortal visionPortal;
 
     public RobotDriver(HardwareMap hardwareMap, boolean useIMU) {
-
-
         frp = 0;
         flp = 0;
         brp = 0;
         blp = 0;
-
+        localizationMode = LocalMode.ODOMETRY;
         localizer = new Localizer();
         encoders = new int[localizer.encoders.length];
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "fl");
-        leftRear = hardwareMap.get(DcMotorEx.class, "bl");
-        rightRear = hardwareMap.get(DcMotorEx.class, "fr");
-        rightFront = hardwareMap.get(DcMotorEx.class, "br");
+        fl = hardwareMap.get(DcMotorEx.class, "fl");
+        bl = hardwareMap.get(DcMotorEx.class, "bl");
+        fr = hardwareMap.get(DcMotorEx.class, "fr");
+        br = hardwareMap.get(DcMotorEx.class, "br");
 
-        verticalLeft = hardwareMap.get(DcMotorEx.class, verticalLeftEncoderName);
-        verticalRight = hardwareMap.get(DcMotorEx.class, verticalRightEncoderName);
-        horizontal = hardwareMap.get(DcMotorEx.class, horizontalEncoderName);
+        verticalLeft = hardwareMap.get(DcMotorEx.class, "fl");
+        verticalRight = hardwareMap.get(DcMotorEx.class, "fr");
+        horizontal = hardwareMap.get(DcMotorEx.class, "bl");
 
         verticalLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         verticalRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -127,25 +119,33 @@ public class RobotDriver {
         verticalRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         horizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveMotors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
+        driveMotors = Arrays.asList(fl, bl, fr, br);
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
-        if (useIMU) {
-            imu = hardwareMap.get(IMU.class, "imu");
-            imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
-            imu.resetYaw();
-        }
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
+        imu.resetYaw();
 
-        slides = hardwareMap.get(DcMotorEx.class, "slides");
-        slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // SLIDES
+        slidesL = hardwareMap.get(DcMotorEx.class, "slidesL");
+        slidesL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slidesL.setDirection(DcMotorSimple.Direction.REVERSE);
+        slidesL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slidesR = hardwareMap.get(DcMotorEx.class, "slidesR");
+        slidesR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slides = Arrays.asList(slidesL, slidesR);
+        // INTAKE
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        slides2 = hardwareMap.get(DcMotorEx.class, "slides2");
-        slides2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slides2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        gantry = hardwareMap.get(CRServoImplEx.class, "gantry");
+        gantryEnc = hardwareMap.get(AnalogInput.class, "gantryEnc");
+        gantyEncoder = new ContinousAnalogAxon(gantryEnc);
+        plunger = hardwareMap.get(Servo.class, "plunger");
 
-
-        touch = hardwareMap.get(RevTouchSensor.class, "touch");
+        touch = hardwareMap.get(RevTouchSensor.class, "slidesTouch");
 
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
@@ -170,27 +170,15 @@ public class RobotDriver {
                 // ... these parameters are fx, fy, cx, cy.
 
                 .build();
-        tfod = new TfodProcessor.Builder()
-                // Use setModelAssetName() if the TF Model is built in as an asset.
-                // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-                //.setModelAssetName(TFOD_MODEL_ASSET)
-                //.setModelFileName(TFOD_MODEL_FILE)
-
-                //.setModelLabels(LABELS)
-                //.setIsModelTensorFlow2(true)
-                //.setIsModelQuantized(true)
-                //.setModelInputSize(300)
-                //.setModelAspectRatio(16.0 / 9.0)
-                .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
-        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"));
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         //builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        builder.addProcessors(aprilTag, tfod);
+        builder.addProcessor(aprilTag);
 
         // Build the Vision Portal, using the above settings.
         visionPortal = builder.build();
@@ -200,21 +188,11 @@ public class RobotDriver {
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-        colorLeft = new int[3];
-        colorRight = new int[3];
 
         dashboard = FtcDashboard.getInstance();
-
-
+        tagTimer = new ElapsedTime();
     }
 
-    /**
-     * Function for quickly defining certain parameters for RobotDriver
-     * @param useIMU
-     */
-    public void setKeyParameters(boolean useIMU) {
-        this.useIMU = useIMU;
-    }
 
     public void update() {              // Updates all motors and sensors. Nothing will happen if this function is not called
         loops++;
@@ -225,11 +203,12 @@ public class RobotDriver {
         loopSpeed = (currentTime - lastLoopTime)/1000000000.0;
         lastLoopTime = currentTime;
         updateEstimate();           // Updates localization data and motor encoders
-        updateDriveMotors();        // Updates drive motor power
         updateCamera();             // Updates current requested camera operation (if any)
+        updateDriveMotors();        // Updates drive motor power
 
         TelemetryPacket packet = new TelemetryPacket();
 
+        packet.put("Pulling APRILTAG Localization", localizationMode.equals(LocalMode.APRILTAG));
         packet.put("x", currentPos.getY());
         packet.put("y", currentPos.getX());
         packet.put("heading (deg)", currentPos.getHeading());
@@ -237,12 +216,7 @@ public class RobotDriver {
             packet.put("heading (imu)", imuheading);
         }
         packet.put("slides", slidesLength);
-        packet.put("color right", colorRight);
-        packet.put("color left", colorLeft);
         packet.put("loop speed", loopSpeed);
-        packet.put("velocity left", CurrentVelocities.getX());
-        packet.put("velocity right", CurrentVelocities.getY());
-        packet.put("velocity hor", CurrentVelocities.getHeading());
 
         overlay = packet.fieldOverlay();
 
@@ -253,11 +227,27 @@ public class RobotDriver {
 
     public void updateEstimate(){           // Updates all encoders and re-estimates localization
         getSensors();
-        localizer.updateEncoders(encoders);
-        localizer.update(loopSpeed);
-        currentPos = localizer.getPosEstimate();
-        PreviousVelocities = CurrentVelocities;
-        CurrentVelocities = localizer.getvelocity();
+        globalCoords = getAssemblyCoordinate();
+        if (localizationMode == LocalMode.ODOMETRY) {
+            localizer.updateEncoders(encoders);
+            localizer.update(loopSpeed);
+            currentPos = localizer.getPosEstimate();
+            PreviousVelocities = CurrentVelocities;
+            CurrentVelocities = localizer.getvelocity();
+        } else if (localizationMode == LocalMode.FUSED) {
+            localizer.updateEncoders(encoders);
+            localizer.update(loopSpeed);
+            currentPos = localizer.getPosEstimate();
+            PreviousVelocities = CurrentVelocities;
+            CurrentVelocities = localizer.getvelocity();
+            if (tagTimer.time() >= 15) { // pull an AprilTag reading every 15 seconds
+                tagTimer.reset();
+                setCameraMode(CameraMode.APRILTAG);
+                getCameraEstimate();
+            }
+        } else if (localizationMode == LocalMode.APRILTAG) {
+            cameraMode = CameraMode.APRILTAG; // the updateCamera() method (called later) will handle everything from here
+        }
 
     }
 
@@ -266,22 +256,16 @@ public class RobotDriver {
     }
     public Pose2d getCurrentVelocities() {return CurrentVelocities;}
 
-    public double leftchange() {return localizer.leftchange();}
-    public double rightchange() {return localizer.rightchange();}
-
     public void getSensors() {             // Retrieves all encoder data
         encoders[0] = verticalLeft.getCurrentPosition();
         encoders[2] = -horizontal.getCurrentPosition();
         encoders[1] = verticalRight.getCurrentPosition();
-        slidesLength = -slides2.getCurrentPosition()/slideTickToInch;
-        //turretHeading = turret.getCurrentPosition()*25;
-        //vbarHeading = (v4bar.getCurrentPosition()/vbarTickToInch)+zeroV4barAngle;
-        //distRight = (distright.getVoltage()*1000)/3.2;
-        //distLeft = (distleft.getVoltage()*1000)/3.2;
-
+        slidesLength = -slides.get(0).getCurrentPosition()/slideTickToInch;
+        gantryPos = gantyEncoder.getCurrentPosition();
         touchVal = touch.getValue();
+
         if (useIMU) {
-            imuheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            pullIMUHeading();
         }
     }
 
@@ -307,6 +291,7 @@ public class RobotDriver {
                 });
                 if (getCameraEstimate) {
                     propLocation = propPipeline.getAnalysis(); //get the estimate
+                    //TODO: add logic for when a result is not found -- Impossible?
                     getCameraEstimate = false; //close down all camera functions (we won't need them again)
                     OpenCvCam.stopStreaming();
                     OpenCvCam.closeCameraDevice();
@@ -317,14 +302,14 @@ public class RobotDriver {
         } else if (cameraMode == CameraMode.APRILTAG) {
             visionPortal.setProcessorEnabled(aprilTag, true);
             visionPortal.resumeStreaming();
-            if (getCameraEstimate) {
+            if (getCameraEstimate || localizationMode == LocalMode.APRILTAG) {
                 Pose2d result = getAprilTagEstimate();
                 if (result != null) { // We got a result
                     localizer.resetPosWithEstimate(result); // apply the new estimate to odometry and shut down the camera
                     currentPos = result;
                     getCameraEstimate = false;
-                    visionPortal.setProcessorEnabled(aprilTag, false);
-                    if (!visionPortal.getProcessorEnabled(tfod)) { // if we aren't actively running tensorflow, shut down the camera service (save loop time)
+                    if (localizationMode != LocalMode.APRILTAG) { // Stop streaming unless if we are constantly getting localization data
+                        visionPortal.setProcessorEnabled(aprilTag, false);
                         visionPortal.stopStreaming();
                         cameraMode = CameraMode.IDLE;
                     }
@@ -333,30 +318,99 @@ public class RobotDriver {
                 }
             }
         } else if (cameraMode == CameraMode.APLS) {
-            visionPortal.setProcessorEnabled(tfod, true);
+            visionPortal.setProcessorEnabled(aprilTag, true);
             visionPortal.resumeStreaming();
             if (getCameraEstimate) {
                 // do apls stuff
+                //TODO: Get the tag location and translate that into a bounding box of the backdrop
             }
         }
 
     }
 
 
-    public void setCameraMode(CameraMode mode) {
-        cameraMode = mode;
-    }
-
-    public void getCameraEstimate() {
-        getCameraEstimate = true;
-    }
+    public void setCameraMode(CameraMode mode) {cameraMode = mode;}
+    public void getCameraEstimate() {getCameraEstimate = true;}
+    public void setLocalizationMode(LocalMode mode) {localizationMode = mode;}
 
     public double getSlidesLength() {
-        return slides.getCurrentPosition() * slideTickToInch;
+        return slidesLength;
+    }
+    public void setSlidesTarget(double target) {
+        slidesTarget = target;
+    }
+    public void setSlidesPower(double power) {
+        slidesPower = power;
     }
     public void updateSlides() {
-
+        if (slidesPower == 0) {
+            //DO PID STUFF
+        } else {
+            for (DcMotorEx slide : slides) {
+                slide.setPower(slidesPower);
+            }
+            slidesTarget = slidesLength; //TODO: this will make the PID one loop of error behind. This will need fixed if bounce-back is a problem.
+        }
     }
+
+    public double getGantryPos() {
+        return gantryPos;
+    }
+    public void setGantryTarget(double target) {
+        gantryTarget = target;
+    }
+    public void setGantryPower(double power) {
+        gantryPower = power;
+    }
+    public void updateGantry() {
+        if (gantryPower == 0) {
+            //DO PID STUFF
+        } else {
+            gantry.setPower(gantryPower);
+            gantryTarget = gantryPos;
+        }
+    }
+
+    public void setIntakeMode(IntakeMode mode) {
+        intakeMode = mode;
+    }
+    public void setIntakePower(double power) {
+        intakeMode = IntakeMode.MANUAL;
+        intakePower = power;
+    }
+    public void updateIntake() {
+        switch (intakeMode) {
+            case LOCK:
+                intake.setPower(0);
+            case INTAKE:
+                intake.setPower(1.0);
+            case OUTTAKE:
+                intake.setPower(-1.0);
+            case MANUAL:
+                intake.setPower(intakePower);
+        }
+    }
+    public void setPlungerMode(PlungerMode mode) {
+        plungerMode = mode;
+    }
+    public void setPlungerPosition(double pos) {
+        plungerPos = pos;
+        plungerMode = PlungerMode.MANUAL;
+    }
+    public void updatePlunger() {
+        switch (plungerMode) {
+            case LOAD:
+                plunger.setPosition(0);
+            case PRIME:
+                plunger.setPosition(0.5);
+            case DEPOSIT:
+                plunger.setPosition(1);
+            case MANUAL:
+                plunger.setPosition(plungerPos);
+        }
+    }
+
+
 
 
 
@@ -381,15 +435,11 @@ public class RobotDriver {
 
     public double[] getAssemblyCoordinate() {                //Returns location of subsystems in 3D coordinate space
 
-        double relativeXToPoint = Math.cos(Math.toRadians(90)-Math.toRadians(currentPos.getHeading()));
-        double relativeYToPoint = Math.sin(Math.toRadians(90)-Math.toRadians(currentPos.getHeading()));
-        double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-        double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-        //double x = (gantrypos);
-        //double z = (slidesLength * Math.sin(Math.toRadians(60))) + someOffset;
+
+        double x = (gantryPos);
+        double z = (slidesLength * Math.sin(Math.toRadians(60))); // TODO: add distance of vertex of slides to the ground
         double y = (slidesLength * Math.cos(Math.toRadians(60)));
-        //return new double[] {(movementXPower*y)+(movementYPower*x)+ currentPos.getX(), (movementYPower*y)+(movementXPower*x) + currentPos.getY(), z};
-        return new double[] {9, 3};
+        return new double[] {(x*Math.cos(Math.toRadians(currentPos.getHeading()))) + (y*Math.sin(Math.toRadians(currentPos.getHeading())))+ currentPos.getX(), -(x*Math.sin(Math.toRadians(currentPos.getHeading()))) + (y*Math.cos(Math.toRadians(currentPos.getHeading()))) + currentPos.getY(), z};
     }
 
     public void setAssemblyCoordinates(double x, double y, double z, double v4barAngle) {       //Sets subsystems to best possible 3D location
@@ -416,10 +466,10 @@ public class RobotDriver {
 
 
     public void updateDriveMotors() {
-        leftFront.setPower(flp);
-        leftRear.setPower(blp);
-        rightRear.setPower(brp);
-        rightFront.setPower(frp);
+        fl.setPower(flp);
+        bl.setPower(blp);
+        fr.setPower(brp);
+        br.setPower(frp);
     }
 
     public static void driveXY(double x, double y, double t) {
@@ -434,12 +484,7 @@ public class RobotDriver {
     }
 
     public void referenceDrive(double x, double y, double t, boolean IMU) {
-        double head;
-        if (IMU) {
-            head = getIMUHeading();
-        } else {
-            head = currentPos.getHeading();
-        }
+        double head = currentPos.getHeading(); // No matter what localization method we are using, this reading will be what we want (either the IMU or odometry)
         double relativeXToPoint = Math.cos(Math.toRadians(90)-Math.toRadians(head));
         double relativeYToPoint = Math.sin(Math.toRadians(90)-Math.toRadians(head));
 
@@ -463,6 +508,10 @@ public class RobotDriver {
     public double getIMUHeading() {
         return imuheading;
     }
+    public double pullIMUHeading() {
+        imuheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        return imuheading;
+    }
 
     public void resetIMUHeading() {
         imu.resetYaw();
@@ -484,6 +533,7 @@ public class RobotDriver {
         double x1 = pose.getX() + v.getX() / 2, y1 = pose.getY() + v.getY() / 2;
         double x2 = pose.getX() + v.getX(), y2 = pose.getY() + v.getY();
         canvas.strokeLine(x1, -y1, x2, -y2);
+        canvas.strokeCircle(globalCoords[0], globalCoords[1], 2);
     }
 
 
@@ -493,12 +543,7 @@ public class RobotDriver {
     public Pose2d getAprilTagEstimate() {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        double head;
-        if (useIMU) {
-            head = getIMUHeading();
-        } else {
-            head = currentPos.getHeading();
-        }
+        double head = pullIMUHeading(); // We don't have time to wait for the IMU to update in the next loop, so pull a reading right now
         // offset the camera estimation based off of where the camera is on the robot
         Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
                 CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
@@ -512,10 +557,12 @@ public class RobotDriver {
 
                 for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
                     if (i==detection.id) {
+                        Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
                         if (tagEstimate == null) {
-                            tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, head);
+                            //TODO: Update these field positions & add integration of robot's position
+                            tagEstimate = new Pose2d(detection.ftcPose.x + offset.getX(), offset.getY() - detection.ftcPose.y, head);
                         } else { // if multiple tags are detected, take the average of the estimates
-                            tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x)/2, (tagEstimate.getY()+detection.ftcPose.y)/2, head);
+                            tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x+offset.getX())/2, (offset.getY()-tagEstimate.getY()+detection.ftcPose.y)/2, head);
                         }
                     }
                 }
