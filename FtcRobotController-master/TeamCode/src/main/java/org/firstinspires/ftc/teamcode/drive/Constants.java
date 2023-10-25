@@ -8,14 +8,12 @@ import org.opencv.core.Point;
 public class Constants {
 
     public static class AssemblyConstants {
-        public static PIDFCoefficients turretPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
         public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
-        public static PIDFCoefficients v4barPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
+        public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
 
         public static final double slideTickToInch = 58.3;
-        public static final double vbarTickToInch = 8.055556;
-        public static final double zeroV4barAngle = -45;
-        public static final double v4barLength = 12;
+        public static final double gantryAngleToInch = 0.00;
+
     }
 
     public static final class DriveConstants {
@@ -57,10 +55,11 @@ public class Constants {
     }
 
     public static final class FieldConstants {
-        @Deprecated
-        public static final double[] relTagAngles = new double[] {0, 0, 90, 90, 180, 180, -90, -90};
 
-        public static final Pose2d[] TAG_POSITIONS = new Pose2d[] {new Pose2d(100, 600, 0), new Pose2d(500, 600, 0),
+        public static final Pose2d[] TAG_FIELD_POSITIONS = new Pose2d[] {new Pose2d(100, 600, 0), new Pose2d(500, 600, 0),
+                new Pose2d(600, 500, 90), new Pose2d(600, 100, 90), new Pose2d(500, 0, 180)
+        };
+        public static final Pose2d[] TAG_BACKDROP_POSITIONS = new Pose2d[] {new Pose2d(100, 600, 0), new Pose2d(500, 600, 0),
                 new Pose2d(600, 500, 90), new Pose2d(600, 100, 90), new Pose2d(500, 0, 180)
         };
     }
