@@ -136,7 +136,7 @@ public class RobotDriver {
         slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slides = Arrays.asList(slidesL, slidesR);
         // INTAKE
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -144,6 +144,8 @@ public class RobotDriver {
         gantryEnc = hardwareMap.get(AnalogInput.class, "gantryEnc");
         gantyEncoder = new ContinousAnalogAxon(gantryEnc);
         plunger = hardwareMap.get(Servo.class, "plunger");
+
+         */
 
         touch = hardwareMap.get(RevTouchSensor.class, "slidesTouch");
 
@@ -559,7 +561,7 @@ public class RobotDriver {
                     if (i==detection.id) {
                         Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
                         if (tagEstimate == null) {
-                            //TODO: Update these field positions & add integration of robot's position
+                            //TODO: Update these field positions
                             tagEstimate = new Pose2d(detection.ftcPose.x + offset.getX(), offset.getY() - detection.ftcPose.y, head);
                         } else { // if multiple tags are detected, take the average of the estimates
                             tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x+offset.getX())/2, (offset.getY()-tagEstimate.getY()+detection.ftcPose.y)/2, head);
