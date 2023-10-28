@@ -20,4 +20,12 @@ public class General {
     public enum PlungerMode {
         LOAD, PRIME, DEPOSIT, MANUAL
     }
+
+    public enum ClawMode {
+        GRAB, RELEASE
+    }
+
+    public enum WeaponsState {
+        INTAKING, HOLDING, PRIMED, DEPOSIT
+    }
 }

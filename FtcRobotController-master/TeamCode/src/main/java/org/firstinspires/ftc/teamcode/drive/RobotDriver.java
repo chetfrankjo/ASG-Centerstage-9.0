@@ -55,7 +55,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger;
+    private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight;
     private AnalogInput gantryEnc;
     private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
@@ -83,7 +83,9 @@ public class RobotDriver {
     SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
-
+    ClawMode clawMode = ClawMode.RELEASE;
+    WeaponsState weaponsState = WeaponsState.INTAKING;
+    Servo[] hangReleaseServos;
     OpenCvCamera OpenCvCam;
     PropDetectionPipeline_DualZone propPipeline;
 
@@ -135,6 +137,13 @@ public class RobotDriver {
         slidesR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slides = Arrays.asList(slidesL, slidesR);
+
+        claw = hardwareMap.get(Servo.class, "claw");
+        launcher = hardwareMap.get(Servo.class, "launcher");
+        hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
+        hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
+        hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
+
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -207,6 +216,8 @@ public class RobotDriver {
         updateEstimate();           // Updates localization data and motor encoders
         updateCamera();             // Updates current requested camera operation (if any)
         updateDriveMotors();        // Updates drive motor power
+        updateClaw();
+        updateSlides();
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -354,7 +365,13 @@ public class RobotDriver {
             slidesTarget = slidesLength; //TODO: this will make the PID one loop of error behind. This will need fixed if bounce-back is a problem.
         }
     }
-
+    public void resetSlidesEncoder() {
+        for (DcMotorEx slide: slides) {
+            slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+    }
+    /*
     public double getGantryPos() {
         return gantryPos;
     }
@@ -411,9 +428,44 @@ public class RobotDriver {
                 plunger.setPosition(plungerPos);
         }
     }
+*/
 
+    public void setClawMode(ClawMode mode) {
+        clawMode = mode;
+    }
+    public ClawMode getClawMode() {
+        return clawMode;
+    }
+    public void updateClaw() {
+        switch (clawMode) {
+            case GRAB:
+                claw.setPosition(1);
+            case RELEASE:
+                claw.setPosition(0);
+        }
+    }
 
+    public void setWeaponsState(WeaponsState mode) {
+        weaponsState = mode;
+    }
 
+    public void launchHang() {
+        for (Servo servo: hangReleaseServos) {
+            servo.setPosition(1);
+        }
+    }
+    public void storeHang() {
+        for (Servo servo: hangReleaseServos) {
+            servo.setPosition(0);
+        }
+    }
+
+    public void launchPlane() {
+        launcher.setPosition(1);
+    }
+    public void storePlane() {
+        launcher.setPosition(0);
+    }
 
 
 
@@ -485,14 +537,18 @@ public class RobotDriver {
         brp = backRightPower;
     }
 
-    public void referenceDrive(double x, double y, double t, boolean IMU) {
-        double head = currentPos.getHeading(); // No matter what localization method we are using, this reading will be what we want (either the IMU or odometry)
-        double relativeXToPoint = Math.cos(Math.toRadians(90)-Math.toRadians(head));
-        double relativeYToPoint = Math.sin(Math.toRadians(90)-Math.toRadians(head));
+    public void drive(double x, double y, double t, boolean fieldCentric) {
+        if (fieldCentric) {
+            double head = currentPos.getHeading(); // No matter what localization method we are using, this reading will be what we want (either the IMU or odometry)
+            double relativeXToPoint = Math.cos(Math.toRadians(90) - Math.toRadians(head));
+            double relativeYToPoint = Math.sin(Math.toRadians(90) - Math.toRadians(head));
 
-        double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-        double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-        driveXY((movementXPower*y)+(movementYPower*x), (movementYPower*-y)+(movementXPower*x), t);
+            double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+            double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+            driveXY((movementXPower * y) + (movementYPower * x), (movementYPower * -y) + (movementXPower * x), t);
+        } else {
+            driveXY(x, y, t);
+        }
     }
 
     public void resetOdometry() {
