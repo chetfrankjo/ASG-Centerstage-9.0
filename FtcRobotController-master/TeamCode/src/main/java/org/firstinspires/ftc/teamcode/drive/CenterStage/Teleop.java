@@ -37,7 +37,7 @@ public class Teleop extends LinearOpMode{
             if (gamepad2.left_bumper) {
                 driver.setWeaponsState(General.WeaponsState.DEPOSIT);
             }//Deposit
-            if (gamepad2.b) {driver.setSlidesTarget(0); driver.setClawMode(General.ClawMode.RELEASE);}
+            if (gamepad2.x) {driver.setSlidesTarget(0); driver.setClawMode(General.ClawMode.RELEASE);}
             if (gamepad1.right_bumper) {
                 switch (driver.getClawMode()) {
                     case RELEASE:
@@ -47,7 +47,7 @@ public class Teleop extends LinearOpMode{
                 }
             }
 
-            if (gamepad1.b) {
+            if (gamepad1.x) {
                 if (superMegaDrive) {
                     superMegaDrive = false;
                 } else {
@@ -61,7 +61,7 @@ public class Teleop extends LinearOpMode{
                 driver.launchHang();
             }//HANG
 
-            if (gamepad2.y) {
+            if (gamepad2.share) {
                 driver.resetSlidesEncoder();
             }
 

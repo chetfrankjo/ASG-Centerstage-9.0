@@ -78,8 +78,9 @@ public class RobotDriver {
     private CameraMode cameraMode = CameraMode.IDLE;
     boolean cameraReady = false, getCameraEstimate = false;
     private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET, CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
+    public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength;
     private LocalMode localizationMode;
-    ElapsedTime tagTimer;
+    ElapsedTime tagTimer, depositTimer;
     SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
@@ -202,6 +203,7 @@ public class RobotDriver {
 
         dashboard = FtcDashboard.getInstance();
         tagTimer = new ElapsedTime();
+        depositTimer = new ElapsedTime();
     }
 
 
@@ -216,6 +218,7 @@ public class RobotDriver {
         updateEstimate();           // Updates localization data and motor encoders
         updateCamera();             // Updates current requested camera operation (if any)
         updateDriveMotors();        // Updates drive motor power
+        updateAutomation();
         updateClaw();
         updateSlides();
 
@@ -262,6 +265,31 @@ public class RobotDriver {
             cameraMode = CameraMode.APRILTAG; // the updateCamera() method (called later) will handle everything from here
         }
 
+    }
+
+    public void updateAutomation() {
+        switch (weaponsState) {
+            case PRIMED:
+                slidesTarget = slidesPrimeTarget;
+                clawMode = ClawMode.GRAB;
+                weaponsState = WeaponsState.IDLE;
+            case DEPOSIT:
+                clawMode = ClawMode.RELEASE;
+                depositTimer.reset();
+                if (depositTimer.time() > 2) {
+                    weaponsState = WeaponsState.INTAKING;
+                }
+                // slides target set to 0 after some time
+            case INTAKING:
+                slidesTarget = 0;
+                clawMode = ClawMode.RELEASE;
+                weaponsState = WeaponsState.IDLE;
+            case HOLDING:
+                clawMode = ClawMode.GRAB;
+                weaponsState = WeaponsState.IDLE;
+            case IDLE:
+                //do nothing, as all parameters are now set
+        }
     }
 
     public Pose2d getCurrentPos() {
@@ -440,8 +468,12 @@ public class RobotDriver {
         switch (clawMode) {
             case GRAB:
                 claw.setPosition(1);
+                clawMode = ClawMode.IDLE;
             case RELEASE:
                 claw.setPosition(0);
+                clawMode = ClawMode.IDLE;
+            case IDLE:
+                //nothing
         }
     }
 

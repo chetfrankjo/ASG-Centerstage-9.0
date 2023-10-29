@@ -22,10 +22,10 @@ public class General {
     }
 
     public enum ClawMode {
-        GRAB, RELEASE
+        GRAB, RELEASE, IDLE
     }
 
     public enum WeaponsState {
-        INTAKING, HOLDING, PRIMED, DEPOSIT
+        INTAKING, HOLDING, PRIMED, DEPOSIT, IDLE
     }
 }
