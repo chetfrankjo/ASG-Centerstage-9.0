@@ -14,6 +14,10 @@ public class Constants {
         public static final double slideTickToInch = 58.3;
         public static final double gantryAngleToInch = 0.00;
 
+
+        public static final double defaultSlideLength = 40;
+
+
     }
 
     public static final class DriveConstants {
