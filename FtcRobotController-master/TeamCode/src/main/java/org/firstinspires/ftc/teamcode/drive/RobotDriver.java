@@ -57,7 +57,7 @@ public class RobotDriver {
     private CRServoImplEx gantry;
     private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight;
     private AnalogInput gantryEnc;
-    private ContinousAnalogAxon gantyEncoder;
+    //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
     public Localizer localizer;
     public Pose2d CurrentVelocities = new Pose2d(), PreviousVelocities  = new Pose2d();
@@ -112,7 +112,7 @@ public class RobotDriver {
         br = hardwareMap.get(DcMotorEx.class, "br");
 
         verticalLeft = hardwareMap.get(DcMotorEx.class, "fl");
-        verticalRight = hardwareMap.get(DcMotorEx.class, "fr");
+        verticalRight = hardwareMap.get(DcMotorEx.class, "br");
         horizontal = hardwareMap.get(DcMotorEx.class, "bl");
 
         verticalLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -157,7 +157,7 @@ public class RobotDriver {
 
          */
 
-        touch = hardwareMap.get(RevTouchSensor.class, "slidesTouch");
+        //touch = hardwareMap.get(RevTouchSensor.class, "slidesTouch");
 
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
@@ -298,12 +298,12 @@ public class RobotDriver {
     public Pose2d getCurrentVelocities() {return CurrentVelocities;}
 
     public void getSensors() {             // Retrieves all encoder data
-        encoders[0] = verticalLeft.getCurrentPosition();
-        encoders[2] = -horizontal.getCurrentPosition();
-        encoders[1] = verticalRight.getCurrentPosition();
+        encoders[0] = -verticalLeft.getCurrentPosition();
+        encoders[2] = horizontal.getCurrentPosition();
+        encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = -slides.get(0).getCurrentPosition()/slideTickToInch;
-        gantryPos = gantyEncoder.getCurrentPosition();
-        touchVal = touch.getValue();
+        //gantryPos = gantyEncoder.getCurrentPosition();
+        //touchVal = touch.getValue();
 
         if (useIMU) {
             pullIMUHeading();
@@ -554,17 +554,17 @@ public class RobotDriver {
     public void updateDriveMotors() {
         fl.setPower(flp);
         bl.setPower(blp);
-        fr.setPower(brp);
-        br.setPower(frp);
+        br.setPower(brp);
+        fr.setPower(frp);
     }
 
     public static void driveXY(double x, double y, double t) {
-        double frontLeftPower = (y + x + t);
+        double frontLeftPower = (y + x - t);
         double backLeftPower = (y - x + t);
-        double frontRightPower = (y + x - t);
-        double backRightPower = (y - x - t);
-        flp = -frontLeftPower;
-        blp = -backLeftPower;
+        double frontRightPower = (y - x - t);
+        double backRightPower = (y + x + t);
+        flp = frontLeftPower;
+        blp = backLeftPower;
         frp = frontRightPower;
         brp = backRightPower;
     }
@@ -577,7 +577,7 @@ public class RobotDriver {
 
             double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
             double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
-            driveXY((movementXPower * y) + (movementYPower * x), (movementYPower * -y) + (movementXPower * x), t);
+            driveXY((movementXPower * -y) + (movementYPower * x), (movementYPower * y) + (movementXPower * x), t);
         } else {
             driveXY(x, y, t);
         }
@@ -759,8 +759,10 @@ public class RobotDriver {
         double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
         double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
 
+
         movement_x = movementXPower * movementSpeed;
         movement_y = movementYPower * movementSpeed;
+
 
         // Strafing is hard (especially on a heavy robot). Help it out!
         if (movement_x > 0.1) {
