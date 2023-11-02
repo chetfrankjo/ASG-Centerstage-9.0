@@ -3,9 +3,28 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
+import org.firstinspires.ftc.teamcode.DataTypes.General;
+import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.opencv.core.Point;
 
+import java.util.ArrayList;
+
 public class Constants {
+
+
+
+    public static class AutoPaths {
+
+        public static Trajectory approach_1 = new Trajectory(0, 0,0.5, 15).addPoint(0, 25, 0).build();
+        public static Trajectory backup = new Trajectory(0, 25, 0.2, 10).addPoint(0, 10, 0).build();
+        public static Trajectory approach_2 = new Trajectory(0, 10, 0.4, 15).addPoint(0, 30, 0).addPoint(25, 30, 0).build();
+        public static Trajectory park = new Trajectory(25, 30, 0.5, 15).addPoint(25, 45, 0).addPoint(30, 30, 0).build();
+
+
+    }
+
+
 
     public static class AssemblyConstants {
         public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0, 0, 0, 0);

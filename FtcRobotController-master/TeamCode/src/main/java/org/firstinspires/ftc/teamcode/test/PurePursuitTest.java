@@ -24,7 +24,7 @@ public class PurePursuitTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
-            driver.followCurve(traj.path, 0);
+            driver.followCurve(traj.path);
 
             telemetry.addData("x", driver.getCurrentPos().getX());
             telemetry.addData("y", driver.getCurrentPos().getY());

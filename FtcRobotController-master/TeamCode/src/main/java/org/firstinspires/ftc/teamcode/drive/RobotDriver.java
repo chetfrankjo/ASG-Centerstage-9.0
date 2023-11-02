@@ -615,6 +615,13 @@ public class RobotDriver {
             update();
         }
     }
+    public void waitAndUpdateWithPath(long time, ArrayList<CurvePoint> path){
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < time){
+            followCurve(path);
+            update();
+        }
+    }
 
     public static void drawRobot(Canvas canvas, Pose2d pose) {
         canvas.strokeCircle(pose.getX(), -pose.getY(), ROBOT_RADIUS);
@@ -669,13 +676,26 @@ public class RobotDriver {
     }
 
 
+    public boolean runAutoPath(ArrayList<CurvePoint> path) {
+        followCurve(path);
+        if (Math.abs(currentPos.getX() - path.get(path.size() - 2).x) <= 1 &&
+                Math.abs(currentPos.getY() - path.get(path.size() - 2).y) <= 1)
+        {
+            // We are at our desired position
+            // bump index and apply it to the new trajectory
+            //waitAndUpdate(1000, currentTrajectory);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 
 
     // PURE PURSUIT FUNCTIONS //
     // robot angle is converted to radians
 
-    public void followCurve(ArrayList<CurvePoint> allPoints, double followAngle) {
+    public void followCurve(ArrayList<CurvePoint> allPoints) {
 
         for (int i = 0; i < allPoints.size() - 1; i++) {
             // Generate a field visualization of the path
