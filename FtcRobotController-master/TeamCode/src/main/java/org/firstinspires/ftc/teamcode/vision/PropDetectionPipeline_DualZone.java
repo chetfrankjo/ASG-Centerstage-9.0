@@ -14,8 +14,16 @@ import org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants;
 
 public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     boolean overlay;
-    public PropDetectionPipeline_DualZone(boolean enableOverlay) {
+    public static int MIN_THRESH;
+    General.AllianceLocation color = General.AllianceLocation.RED_NORTH;
+    public PropDetectionPipeline_DualZone(boolean enableOverlay, General.AllianceLocation color) {
         overlay = enableOverlay;
+        if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
+            MIN_THRESH = 170;
+        } else {
+            MIN_THRESH = 150;
+        }
+        this.color=color;
     }
 
     /*
@@ -23,8 +31,10 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
      */
     static final Scalar BLUE = new Scalar(0, 0, 255);
     static final Scalar GREEN = new Scalar(0, 255, 0);
-    static final int MIN_THRESH = 170;
+
     static final int EXTREME_MIN_THRESH = 100;
+
+
     /*
      * The core values which define the location and size of the sample regions
      */
@@ -55,7 +65,11 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
      */
     void inputToCb(Mat input) {
         Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2BGR);
-        Core.extractChannel(YCrCb, Cb, 2);
+        if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
+            Core.extractChannel(YCrCb, Cb, 2);
+        } else {
+            Core.extractChannel(YCrCb, Cb, 0);
+        }
     }
 
     @Override

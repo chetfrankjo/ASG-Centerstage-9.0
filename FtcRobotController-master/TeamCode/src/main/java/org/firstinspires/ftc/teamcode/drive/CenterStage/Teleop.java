@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
+import org.firstinspires.ftc.teamcode.drive.Reader;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 @TeleOp
@@ -17,6 +18,20 @@ public class Teleop extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
+
+        Reader r = new Reader();
+        String info = r.readFile("Alliance");
+
+        switch (info){
+            case "blue_south":
+                break;
+            case "blue_north":
+                break;
+            case "red_south":
+                break;
+            case "red_north":
+                break;
+        }
 
         waitForStart();
         while (opModeIsActive()) {
