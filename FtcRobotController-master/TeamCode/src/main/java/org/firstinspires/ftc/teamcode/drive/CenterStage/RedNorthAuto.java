@@ -12,54 +12,82 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 @Autonomous
 public class RedNorthAuto extends LinearOpMode {
-    General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
+    General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.VISION;
     ElapsedTime timer;
+    General.SpikePosition position = General.SpikePosition.LEFT;
     @Override
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-        driver.localizer.setEstimatePos(132, 84, -90);
+        driver.update();
         timer = new ElapsedTime();
+        timer.reset();
         waitForStart();
 
         while (opModeIsActive()) {
 
             driver.update();
+            telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
+            telemetry.addData("Spike Position", position);
+            telemetry.update();
 
             switch (autoMode) {
-                case APPROACH_1:
-                     boolean result = driver.runAutoPath(Constants.AutoPaths.approach_1.path);
 
+                case VISION:
+                    while (timer.time() < 2 && opModeIsActive()) {
+                        driver.setCameraMode(General.CameraMode.PROP);
+                        driver.getCameraEstimate();
+                        driver.update();
+                        position = driver.propLocation;
+                    }
+                    driver.setCameraMode(General.CameraMode.IDLE);
+                    autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
+                    break;
+                case APPROACH_1:
+                     boolean result = driver.runAutoPath(Constants.AutoPaths.approach_1_2.path);
+                     telemetry.addLine("Running Approach 1");
+                     //telemetry.update();
                      if (result) {
                          // the path is ready to move on
                          timer.reset();
-                         while (timer.time() < 1) {
-                             driver.followCurve(Constants.AutoPaths.approach_1.path);
+
+                         while (timer.time() < 1 && opModeIsActive()) {
+                             driver.followCurve(Constants.AutoPaths.approach_1_2.path);
                              // release pixel
                              driver.update();
                          }
                          autoMode = General.AUTO_RED_NORTH_1.BACKUP;
                      }
+                     break;
                 case BACKUP:
                     result = driver.runAutoPath(Constants.AutoPaths.backup.path);
                     if (result) {
                         autoMode = General.AUTO_RED_NORTH_1.APPROACH_2;
                     }
+                    break;
                 case APPROACH_2:
-                    result = driver.runAutoPath(Constants.AutoPaths.approach_2.path);
+                    result = driver.runAutoPath(Constants.AutoPaths.approach_2_2.path);
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
                         timer.reset();
-                        while (timer.time() < 1) {
+                        while (timer.time() < 1 && opModeIsActive()) {
                             driver.drive(0, 0.2, 0, false);
                             // release pixel
                             driver.update();
                         }
-                        autoMode = General.AUTO_RED_NORTH_1.PARK;
+                        autoMode = General.AUTO_RED_NORTH_1.PARK_1;
                     }
-                case PARK:
-                    driver.followCurve(Constants.AutoPaths.park.path);
+                    break;
+                case PARK_1:
+                    result = driver.runAutoPath(Constants.AutoPaths.park_1.path);
+                    if (result) {
+                        autoMode = General.AUTO_RED_NORTH_1.PARK2;
+                    }
+                    break;
+                case PARK2:
+                    driver.followCurve(Constants.AutoPaths.park_2.path);
+                    break;
             }
 
 

@@ -16,11 +16,23 @@ public class Constants {
 
     public static class AutoPaths {
 
-        public static Trajectory approach_1 = new Trajectory(132, 84,0.2, 25).addPoint(120, 84, 0).addPoint(108, 72, 0).build();
-        public static Trajectory backup = new Trajectory(108, 72, 0.2, 25).addPoint(120, 84, 180).build();
-        public static Trajectory approach_2 = new Trajectory(120, 84, 0.2, 25).addPoint(108, 84, 0).addPoint(108, 120, 0).build();
-        public static Trajectory park = new Trajectory(108, 120, 0.2, 25).addPoint(84, 120, 90).addPoint(84, 132, 0).build();
+        /*public static Trajectory approach_1 = new Trajectory(132, 84,0.4, 25).addPoint(120, 84, 0).addPoint(108, 72, 0).build();
+        public static Trajectory backup = new Trajectory(108, 72, 0.4, 25).addPoint(120, 84, 180).build();
+        public static Trajectory approach_2 = new Trajectory(120, 84, 0.4, 25).addPoint(108, 84, 0).addPoint(108, 120, 0).build();
+        public static Trajectory park = new Trajectory(108, 120, 0.4, 25).addPoint(84, 120, 90).addPoint(84, 132, 0).build();
 
+         */
+
+
+        public static Trajectory approach_1 = new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build();
+        public static Trajectory approach_1_2 = new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build();
+
+        public static Trajectory approach_1_1 = new Trajectory(0, 0,0.3, 3).addPoint(0, 22, 0).addPointTurn(-4, 27, 0, 0.05).build();
+        public static Trajectory backup = new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build();
+        public static Trajectory approach_2 = new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build();
+        public static Trajectory approach_2_2 = new Trajectory(0, 22, 0.4, 15).addPoint(12, 22, 0).addPoint(12, 34, 0).addPoint(25, 34, 0).build();
+        public static Trajectory park_1 = new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 0).addPoint(20, 59, 90).build();
+        public static Trajectory park_2 = new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build();
 
     }
 

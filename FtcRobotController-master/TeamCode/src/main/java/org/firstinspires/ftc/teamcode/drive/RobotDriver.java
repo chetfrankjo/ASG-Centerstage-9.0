@@ -81,7 +81,7 @@ public class RobotDriver {
     public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength;
     private LocalMode localizationMode;
     ElapsedTime tagTimer, depositTimer;
-    SpikePosition propLocation;
+    public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
     ClawMode clawMode = ClawMode.RELEASE;
@@ -185,15 +185,15 @@ public class RobotDriver {
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
-        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         //builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        builder.addProcessor(aprilTag);
+        //builder.addProcessor(aprilTag);
 
         // Build the Vision Portal, using the above settings.
-        visionPortal = builder.build();
+        //visionPortal = builder.build();
 
 
         allHubs = hardwareMap.getAll(LynxModule.class);
@@ -330,14 +330,11 @@ public class RobotDriver {
                          */
                     }
                 });
-                if (getCameraEstimate) {
-                    propLocation = propPipeline.getAnalysis(); //get the estimate
-                    //TODO: add logic for when a result is not found -- Impossible?
-                    getCameraEstimate = false; //close down all camera functions (we won't need them again)
-                    OpenCvCam.stopStreaming();
-                    OpenCvCam.closeCameraDevice();
-                    cameraMode = CameraMode.IDLE;
-                }
+                propLocation = propPipeline.getAnalysis(); //get the estimate
+                //OpenCvCam.stopStreaming();
+                //OpenCvCam.closeCameraDevice();
+                //cameraReady = false;
+                //cameraMode = CameraMode.IDLE;
             }
 
         } else if (cameraMode == CameraMode.APRILTAG) {

@@ -29,7 +29,18 @@ public class RobotSetup extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         telemetry.addLine("ENTER AUTO START ZONE");
-        telemetry.addLine(msg);
+        telemetry.addLine("            BLUE_N --V   ");
+        telemetry.addLine("   ------------.-'   _  '-..+   ");
+        telemetry.addLine("            |   _  ( Y )  _  |  ");
+        telemetry.addLine("BLUE_S ->  |  ( X )  _  ( B ) | <-- RED_N ");
+        telemetry.addLine("      ___  '.      ( A )     /|   ");
+        telemetry.addLine("    .'    '.    '-._____.-'  .' ");
+        telemetry.addLine("   |       |         ^       | ");
+        telemetry.addLine("    '.___.' '.       |       | ");
+        telemetry.addLine("             '.    RED_S     /  ");
+        telemetry.addLine("               |.          .");
+        telemetry.addLine("                |________|");
+
         telemetry.update();
 
         while (!advance && opModeInInit()) {

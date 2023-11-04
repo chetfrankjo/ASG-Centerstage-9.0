@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
+import org.opencv.core.Mat;
 
 
 public class Localizer {
@@ -55,12 +56,14 @@ public class Localizer {
         double p = ((rightChange + leftChange) / 2);
         double n = horizontalChange;
         deltaX = (p*Math.sin(angle) + n*Math.cos(angle));
-        deltaY = (p*Math.cos(angle) - n*Math.sin(angle));
+        deltaY = (p*Math.cos(angle) - n*Math.sin(angle)); // was negative
 
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, (y/COUNTS_PER_INCH)+startYOffset, Math.toDegrees(angle)+startAngleOffset);
+        robotpos = new Pose2d((x/COUNTS_PER_INCH)+(startYOffset*Math.cos(angle))-(startXOffset*Math.sin(angle)), ((y/COUNTS_PER_INCH)+(startYOffset*Math.sin(angle))-(startXOffset*Math.cos(angle))), Math.toDegrees(angle));
+        //robotpos = new Pose2d((x/COUNTS_PER_INCH), (y/COUNTS_PER_INCH), Math.toDegrees(angle));
+
         for (int i=0; i<prevencoders.length; i++) {
             prevencoders[i] = encoders[i];
         }
@@ -95,6 +98,7 @@ public class Localizer {
         startXOffset = x;
         startYOffset = y;
         startAngleOffset = angle;
+        this.angle = Math.toRadians(angle);
     }
 
     public void resetPosWithEstimate(Pose2d pos) {
@@ -104,5 +108,11 @@ public class Localizer {
         x = 0;
         y = 0;
         angle = 0;
+    }
+    public void setPos(double xd, double yd, double angled) {
+        robotpos = new Pose2d(x, y, angle);
+        x=xd;
+        y=yd;
+        angle=Math.toRadians(angled);
     }
 }

@@ -23,7 +23,12 @@ public class Trajectory {
      * @param targetAngle Degrees relative to line
      */
     public Trajectory addPoint(double x, double y, double targetAngle) {
-        path.add(new CurvePoint(x, y, movespeed, 0.7, Math.toRadians(targetAngle), followDistance, Math.toRadians(50), 0.5, false, 0));
+        path.add(new CurvePoint(x, y, movespeed, 0.4, Math.toRadians(targetAngle), followDistance, Math.toRadians(50), 0.5, false, 0));
+        return this;
+    }
+
+    public Trajectory addPointTurn(double x, double y, double targetAngle, double turnSpeed) {
+        path.add(new CurvePoint(x, y, movespeed, turnSpeed, Math.toRadians(targetAngle), followDistance, Math.toRadians(50), 0.5, false, 0));
         return this;
     }
 
