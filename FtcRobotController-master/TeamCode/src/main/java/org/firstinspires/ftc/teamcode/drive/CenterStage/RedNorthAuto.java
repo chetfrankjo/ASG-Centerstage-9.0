@@ -19,7 +19,7 @@ public class RedNorthAuto extends LinearOpMode {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-        driver.localizer.setEstimatePos(0, 0, 0);
+        driver.localizer.setEstimatePos(132, 84, -90);
         timer = new ElapsedTime();
         waitForStart();
 
@@ -34,7 +34,7 @@ public class RedNorthAuto extends LinearOpMode {
                      if (result) {
                          // the path is ready to move on
                          timer.reset();
-                         while (timer.time() < 2) {
+                         while (timer.time() < 1) {
                              driver.followCurve(Constants.AutoPaths.approach_1.path);
                              // release pixel
                              driver.update();
@@ -49,7 +49,13 @@ public class RedNorthAuto extends LinearOpMode {
                 case APPROACH_2:
                     result = driver.runAutoPath(Constants.AutoPaths.approach_2.path);
                     if (result) {
-                        driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
+                        //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
+                        timer.reset();
+                        while (timer.time() < 1) {
+                            driver.drive(0, 0.2, 0, false);
+                            // release pixel
+                            driver.update();
+                        }
                         autoMode = General.AUTO_RED_NORTH_1.PARK;
                     }
                 case PARK:

@@ -16,10 +16,10 @@ public class Constants {
 
     public static class AutoPaths {
 
-        public static Trajectory approach_1 = new Trajectory(0, 0,0.5, 15).addPoint(0, 25, 0).build();
-        public static Trajectory backup = new Trajectory(0, 25, 0.2, 10).addPoint(0, 10, 0).build();
-        public static Trajectory approach_2 = new Trajectory(0, 10, 0.4, 15).addPoint(0, 30, 0).addPoint(25, 30, 0).build();
-        public static Trajectory park = new Trajectory(25, 30, 0.5, 15).addPoint(25, 45, 0).addPoint(30, 30, 0).build();
+        public static Trajectory approach_1 = new Trajectory(132, 84,0.2, 25).addPoint(120, 84, 0).addPoint(108, 72, 0).build();
+        public static Trajectory backup = new Trajectory(108, 72, 0.2, 25).addPoint(120, 84, 180).build();
+        public static Trajectory approach_2 = new Trajectory(120, 84, 0.2, 25).addPoint(108, 84, 0).addPoint(108, 120, 0).build();
+        public static Trajectory park = new Trajectory(108, 120, 0.2, 25).addPoint(84, 120, 90).addPoint(84, 132, 0).build();
 
 
     }
@@ -72,11 +72,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70, 98);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(220, 98);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253, 98);
-        public static final int REGION_WIDTH = 40;
-        public static final int REGION_HEIGHT = 40;
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(10, 125);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(180, 125);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(270, 125);
+        public static final int REGION_WIDTH = 25;
+        public static final int REGION_HEIGHT = 25;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 

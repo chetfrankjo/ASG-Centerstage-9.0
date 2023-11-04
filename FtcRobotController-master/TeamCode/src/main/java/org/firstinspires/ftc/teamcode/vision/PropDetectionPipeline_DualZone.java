@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
-import org.firstinspires.ftc.teamcode.test.PropDetectionTest;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -19,9 +18,9 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     public PropDetectionPipeline_DualZone(boolean enableOverlay, General.AllianceLocation color) {
         overlay = enableOverlay;
         if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
-            MIN_THRESH = 170;
+            MIN_THRESH = 120;
         } else {
-            MIN_THRESH = 150;
+            MIN_THRESH = 120;
         }
         this.color=color;
     }
@@ -51,11 +50,12 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     /*
      * Working variables
      */
-    Mat region1_Cb, region2_Cb;
+    Mat region1_Cb, region2_Cb, region1_green, region2_green;
     Mat YCrCb = new Mat();
-    Mat Cb = new Mat();
+    Mat primaryColor = new Mat();
+    Mat green_mat = new Mat();
 
-    private int avg1, avg2, avg3;
+    private int avg1, avg2, avg1g, avg2g;
 
     private SpikePosition position = SpikePosition.CENTER;
 
@@ -66,10 +66,11 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     void inputToCb(Mat input) {
         Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2BGR);
         if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
-            Core.extractChannel(YCrCb, Cb, 2);
+            Core.extractChannel(YCrCb, primaryColor, 2);
         } else {
-            Core.extractChannel(YCrCb, Cb, 0);
+            Core.extractChannel(YCrCb, primaryColor, 0);
         }
+        Core.extractChannel(YCrCb, green_mat, 1);
     }
 
     @Override
@@ -77,8 +78,10 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
 
         inputToCb(firstFrame);
 
-        region1_Cb = Cb.submat(new Rect(region1_pointA, region1_pointB));
-        region2_Cb = Cb.submat(new Rect(region2_pointA, region2_pointB));
+        region1_Cb = primaryColor.submat(new Rect(region1_pointA, region1_pointB));
+        region1_green = green_mat.submat(new Rect(region1_pointA, region1_pointB));
+        region2_Cb = primaryColor.submat(new Rect(region2_pointA, region2_pointB));
+        region2_green = green_mat.submat(new Rect(region2_pointA, region2_pointB));
     }
 
     @Override
@@ -88,6 +91,12 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
 
         avg1 = (int) Core.mean(region1_Cb).val[0];
         avg2 = (int) Core.mean(region2_Cb).val[0];
+        avg1g = (int) Core.mean(region1_green).val[0];
+        avg2g = (int) Core.mean(region2_green).val[0];
+
+        if (color == General.AllianceLocation.BLUE_NORTH) {
+            avg1 = avg1 + 30;
+        }
 
         if (overlay) {
             Imgproc.rectangle(
@@ -107,7 +116,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         int max = Math.max(avg1, avg2);
 
 
-        if (max == avg1 && max > MIN_THRESH) // Was it from region 1?
+        if (max == avg1 && max > MIN_THRESH && avg1g < 130) // Was it from region 1?
         {
             position = SpikePosition.LEFT; // Record our analysis
 
@@ -119,7 +128,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
                         GREEN, // The color the rectangle is drawn in
                         -1); // Negative thickness means solid fill
             }
-        } else if (max == avg2 && max > MIN_THRESH) // Was it from region 2?
+        } else if (max == avg2 && max > MIN_THRESH && avg2g < 130) // Was it from region 2?
         {
             position = SpikePosition.CENTER; // Record our analysis
             if (overlay) {
@@ -146,5 +155,5 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     public SpikePosition getAnalysis() {
         return position;
     }
-    public int[] getReadings() {return new int[] {avg1, avg2, avg3};}
+    public int[] getReadings() {return new int[] {avg1, avg2, avg1g, avg2g};}
 }

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -27,14 +28,14 @@ public class PropDetectionTest extends LinearOpMode
 {
     OpenCvCamera webcam;
     PropDetectionPipeline_DualZone pipeline;
-    public static int avg1, avg2, avg3;
+    public static int avg1, avg2, avg3, avg4;
     @Override
     public void runOpMode()
     {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new PropDetectionPipeline_DualZone(true);
+        pipeline = new PropDetectionPipeline_DualZone(true, General.AllianceLocation.BLUE_NORTH);
         webcam.setPipeline(pipeline);
 
 
@@ -66,9 +67,11 @@ public class PropDetectionTest extends LinearOpMode
             avg1 = pipeline.getReadings()[0];
             avg2 = pipeline.getReadings()[1];
             avg3 = pipeline.getReadings()[2];
+            avg4 = pipeline.getReadings()[3];
             telemetry.addData("avg1", avg1);
             telemetry.addData("avg2", avg2);
             telemetry.addData("avg3", avg3);
+            telemetry.addData("avg4", avg4);
             telemetry.update();
 
 
@@ -76,6 +79,7 @@ public class PropDetectionTest extends LinearOpMode
             p.put("avg1",avg1);
             p.put("avg2", avg2);
             p.put("avg3", avg3);
+            p.put("avg4", avg4);
             dash.sendTelemetryPacket(p);
             // Don't burn CPU cycles busy-looping in this sample
             // SIKE! BURN THE CPU!!!!!!

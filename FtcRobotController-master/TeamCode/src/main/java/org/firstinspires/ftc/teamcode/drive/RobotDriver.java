@@ -163,7 +163,7 @@ public class RobotDriver {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        propPipeline = new PropDetectionPipeline_DualZone(true);
+        propPipeline = new PropDetectionPipeline_DualZone(true, AllianceLocation.RED_NORTH);
         OpenCvCam.setPipeline(propPipeline);
 
         aprilTag = new AprilTagProcessor.Builder()
