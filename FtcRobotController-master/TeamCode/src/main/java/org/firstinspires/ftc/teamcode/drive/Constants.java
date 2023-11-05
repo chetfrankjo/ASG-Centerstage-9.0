@@ -22,6 +22,69 @@ public class Constants {
         public static Trajectory park = new Trajectory(108, 120, 0.4, 25).addPoint(84, 120, 90).addPoint(84, 132, 0).build();
 
          */
+        public static ArrayList<Trajectory> generateAutoPaths(General.ParkLocation parkLocation, General.SpikePosition spikePosition, General.AllianceLocation allianceLocation) {
+            ArrayList<Trajectory> paths = new ArrayList<>();
+            switch (spikePosition) {
+
+                case LEFT:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.3, 3).addPoint(0, 22, 0).addPointTurn(-4, 27, 0, 0.05).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build());
+                            paths.add(new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 0).addPoint(20, 59, 90).build());
+                            paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+                case CENTER:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build());
+                            paths.add(new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 0).addPoint(20, 59, 90).build());
+                            paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+                case RIGHT:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 22, 0.4, 15).addPoint(12, 22, 0).addPoint(12, 34, 0).addPoint(25, 34, 0).build());
+                            paths.add(new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 0).addPoint(20, 59, 90).build());
+                            paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+
+            }
+
+        return paths;
+        }
 
 
         public static Trajectory approach_1 = new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build();
