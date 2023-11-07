@@ -3,15 +3,134 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
+import org.firstinspires.ftc.teamcode.DataTypes.General;
+import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.opencv.core.Point;
+
+import java.util.ArrayList;
 
 public class Constants {
 
+
+
+    public static class AutoPaths {
+
+        /*public static Trajectory approach_1 = new Trajectory(132, 84,0.4, 25).addPoint(120, 84, 0).addPoint(108, 72, 0).build();
+        public static Trajectory backup = new Trajectory(108, 72, 0.4, 25).addPoint(120, 84, 180).build();
+        public static Trajectory approach_2 = new Trajectory(120, 84, 0.4, 25).addPoint(108, 84, 0).addPoint(108, 120, 0).build();
+        public static Trajectory park = new Trajectory(108, 120, 0.4, 25).addPoint(84, 120, 90).addPoint(84, 132, 0).build();
+
+         */
+        public static ArrayList<Trajectory> generateAutoPaths(General.ParkLocation parkLocation, General.SpikePosition spikePosition, General.AllianceLocation allianceLocation) {
+            ArrayList<Trajectory> paths = new ArrayList<>();
+            switch (spikePosition) {
+
+                case LEFT:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(-6, 29, 0).build());
+                            paths.add(new Trajectory(-5, 29, 0.6, 5).addPoint(0, 15, 180).build());
+                            paths.add(new Trajectory(0, 12, 0.4, 15).addPoint(0, 30, 0).addPoint(12, 44, 0).addPoint(25, 44, 0).build());
+                            switch (parkLocation) {
+
+                                case LEFT:
+                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
+                                    break;
+                            }
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+                case CENTER:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
+                                    break;
+                            }
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+                case RIGHT:
+                    switch (allianceLocation) {
+                        case RED_SOUTH:
+                            // Either no auto, or park only
+                            break;
+                        case RED_NORTH:
+                            paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 22, 0.4, 15).addPoint(12, 22, -90).addPoint(12, 30, 0).addPoint(25, 30, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(25, 30, 0.4, 20).addPoint(20, 34, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(25, 30, 0.4, 20).addPoint(20, 34, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
+                                    break;
+                            }
+                            break;
+                        case BLUE_SOUTH:
+                            break;
+                        case BLUE_NORTH:
+                            break;
+                    }
+                    break;
+
+            }
+
+        return paths;
+        }
+
+
+        public static Trajectory approach_1 = new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build();
+        public static Trajectory approach_1_2 = new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build();
+
+        public static Trajectory approach_1_1 = new Trajectory(0, 0,0.3, 3).addPoint(0, 22, 0).addPointTurn(-4, 27, 0, 0.05).build();
+        public static Trajectory backup = new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build();
+        public static Trajectory approach_2 = new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build();
+        public static Trajectory approach_2_2 = new Trajectory(0, 22, 0.4, 15).addPoint(12, 22, 0).addPoint(12, 34, 0).addPoint(25, 34, 0).build();
+        public static Trajectory park_1 = new Trajectory(25, 34, 0.4, 20).addPoint(20, 34, 0).addPoint(20, 59, 90).build();
+        public static Trajectory park_2 = new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build();
+
+    }
+
+
+
     public static class AssemblyConstants {
-        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
+        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.12, 0.08, 0, 0.05);
         public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
 
-        public static final double slideTickToInch = 58.3;
+        public static final double slideTickToInch = -29.16666666666667;
         public static final double gantryAngleToInch = 0.00;
 
 
@@ -24,9 +143,12 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 7.6616107;
+        public static final double wheelbaseseparation = 13.72449; //13.37
         public static final double COUNTS_PER_INCH = 1752.875;
-        public static final double horizontalTickOffset = 7.75; //TODO:  RR says 5
+        public static final double horizontalTickOffset = -5.15;
+
+        public static double X_MULT = 1.025016554017347;
+        public static double Y_MULT = 0.99781777;
 
         public static final float DECIMATION_HIGH = 3;
         public static final float DECIMATION_LOW = 2;
@@ -50,11 +172,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70, 98);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(220, 98);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253, 98);
-        public static final int REGION_WIDTH = 40;
-        public static final int REGION_HEIGHT = 40;
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(10, 125);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(180, 125);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(270, 125);
+        public static final int REGION_WIDTH = 25;
+        public static final int REGION_HEIGHT = 25;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 

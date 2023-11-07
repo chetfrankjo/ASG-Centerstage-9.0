@@ -28,4 +28,18 @@ public class General {
     public enum WeaponsState {
         INTAKING, HOLDING, PRIMED, DEPOSIT, IDLE
     }
+
+    public enum AUTO_RED_NORTH_1 {
+        VISION, APPROACH_1, SPIKE, BACKUP, APPROACH_2, PARK_1, PARK2
+    }
+
+    public enum AllianceLocation {
+        RED_SOUTH, RED_NORTH, BLUE_SOUTH, BLUE_NORTH
+    }
+
+    public enum ParkLocation {
+        LEFT, RIGHT
+    }
+
+
 }
