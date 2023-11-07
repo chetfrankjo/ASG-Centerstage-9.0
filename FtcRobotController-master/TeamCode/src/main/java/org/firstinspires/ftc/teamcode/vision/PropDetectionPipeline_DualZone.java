@@ -50,12 +50,13 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     /*
      * Working variables
      */
-    Mat region1_Cb, region2_Cb, region1_green, region2_green;
+    Mat region1_Cb, region2_Cb, region1_green, region2_green, calibration_region;
     Mat YCrCb = new Mat();
     Mat primaryColor = new Mat();
     Mat green_mat = new Mat();
+    Mat calibration = new Mat();
 
-    private int avg1, avg2, avg1g, avg2g;
+    private int avg1, avg2, avg1g, avg2g, avgcal;
 
     private SpikePosition position = SpikePosition.CENTER;
 
@@ -67,10 +68,13 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2BGR);
         if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
             Core.extractChannel(YCrCb, primaryColor, 2);
+            Core.extractChannel(YCrCb, calibration, 2);
         } else {
             Core.extractChannel(YCrCb, primaryColor, 0);
+            Core.extractChannel(YCrCb, calibration, 0);
         }
         Core.extractChannel(YCrCb, green_mat, 1);
+
     }
 
     @Override
@@ -82,6 +86,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         region1_green = green_mat.submat(new Rect(region1_pointA, region1_pointB));
         region2_Cb = primaryColor.submat(new Rect(region2_pointA, region2_pointB));
         region2_green = green_mat.submat(new Rect(region2_pointA, region2_pointB));
+        calibration_region = calibration.submat(new Rect(new Point(120, 200), new Point(140, 240)));
     }
 
     @Override
@@ -93,6 +98,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         avg2 = (int) Core.mean(region2_Cb).val[0];
         avg1g = (int) Core.mean(region1_green).val[0];
         avg2g = (int) Core.mean(region2_green).val[0];
+        avgcal = (int) Core.mean(calibration_region).val[0];
 
         if (color == General.AllianceLocation.BLUE_NORTH) {
             avg1 = avg1 + 30;
@@ -116,8 +122,9 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         int max = Math.max(avg1, avg2);
 
 
-        if (max == avg1 && max > MIN_THRESH && avg1g < 130) // Was it from region 1?
+        if (max == avg1 && max > MIN_THRESH && avg1g < 120) // Was it from region 1?
         {
+
             position = SpikePosition.LEFT; // Record our analysis
 
             if (overlay) {
@@ -128,7 +135,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
                         GREEN, // The color the rectangle is drawn in
                         -1); // Negative thickness means solid fill
             }
-        } else if (max == avg2 && max > MIN_THRESH && avg2g < 130) // Was it from region 2?
+        } else if ((max == avg2 || avg1g >= 120) && max > MIN_THRESH && avg2g < 120) // Was it from region 2?
         {
             position = SpikePosition.CENTER; // Record our analysis
             if (overlay) {
@@ -155,5 +162,5 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     public SpikePosition getAnalysis() {
         return position;
     }
-    public int[] getReadings() {return new int[] {avg1, avg2, avg1g, avg2g};}
+    public int[] getReadings() {return new int[] {avg1, avg2, avg1g, avg2g, avgcal};}
 }

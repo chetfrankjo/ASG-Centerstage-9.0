@@ -21,12 +21,11 @@ public class PurePursuitTest extends LinearOpMode {
         traj.build();
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
-        driver.localizer.setEstimatePos(0, 0, 0);
 
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
-            driver.followCurve(Constants.AutoPaths.approach_1_2.path);
+            driver.followCurve(new Trajectory(0, 0,0.2, 5, 0.3).addPoint(0, 10, 0).addPoint(0, 20, 0).addPoint(-5, 25, 0).build().path);
 
             telemetry.addData("x", driver.getCurrentPos().getX());
             telemetry.addData("y", driver.getCurrentPos().getY());

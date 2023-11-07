@@ -50,12 +50,12 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Config
 public class RobotDriver {
 
-    private DcMotorEx fl, bl, fr, br, verticalLeft, verticalRight, horizontal, slidesL, slidesR, intake;
+    private DcMotorEx fl, bl, fr, br, verticalLeft, verticalRight, horizontal, slidesL, slidesR, intake, leftSlidesEnc;
     private List<DcMotorEx> driveMotors, odometryEncoders, slides;
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight;
+    private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight, pancake;
     private AnalogInput gantryEnc;
     //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
@@ -80,6 +80,7 @@ public class RobotDriver {
     private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET, CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
     public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength;
     private LocalMode localizationMode;
+    double slidesI, previousSlidesError;
     ElapsedTime tagTimer, depositTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
@@ -132,17 +133,18 @@ public class RobotDriver {
         // SLIDES
         slidesL = hardwareMap.get(DcMotorEx.class, "slidesL");
         slidesL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slidesL.setDirection(DcMotorSimple.Direction.REVERSE);
         slidesL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slidesR = hardwareMap.get(DcMotorEx.class, "slidesR");
         slidesR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slides = Arrays.asList(slidesL, slidesR);
+        leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "fr");
 
         claw = hardwareMap.get(Servo.class, "claw");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
+        pancake = hardwareMap.get(Servo.class, "pancake");
         hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
 
         // INTAKE
@@ -165,6 +167,21 @@ public class RobotDriver {
         OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         propPipeline = new PropDetectionPipeline_DualZone(true, AllianceLocation.RED_NORTH);
         OpenCvCam.setPipeline(propPipeline);
+
+        OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                cameraReady = true;
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
 
         aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
@@ -301,7 +318,7 @@ public class RobotDriver {
         encoders[0] = -verticalLeft.getCurrentPosition();
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
-        slidesLength = -slides.get(0).getCurrentPosition()/slideTickToInch;
+        slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -336,6 +353,7 @@ public class RobotDriver {
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
+            propLocation = propPipeline.getAnalysis(); //get the estimate
 
         } else if (cameraMode == CameraMode.APRILTAG) {
             visionPortal.setProcessorEnabled(aprilTag, true);
@@ -383,6 +401,16 @@ public class RobotDriver {
     public void updateSlides() {
         if (slidesPower == 0) {
             //DO PID STUFF
+            double error = (slidesTarget-slidesLength);
+            double p = AssemblyConstants.slidesPIDConstants.p * error;
+            slidesI+=AssemblyConstants.slidesPIDConstants.i * error * loopSpeed;
+            double d = AssemblyConstants.slidesPIDConstants.d * (error-previousSlidesError) / loopSpeed;
+            double power = (p+slidesI+d + (Math.signum(error)*AssemblyConstants.slidesPIDConstants.f));
+            for (DcMotorEx slide : slides) {
+                slide.setPower(power);
+            }
+
+            previousSlidesError = error;
         } else {
             for (DcMotorEx slide : slides) {
                 slide.setPower(slidesPower);
@@ -395,6 +423,8 @@ public class RobotDriver {
             slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
+        leftSlidesEnc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftSlidesEnc.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     /*
     public double getGantryPos() {
@@ -493,10 +523,17 @@ public class RobotDriver {
         launcher.setPosition(1);
     }
     public void storePlane() {
-        launcher.setPosition(0);
+        launcher.setPosition(-1);
     }
 
+    public void dumpPancake() {pancake.setPosition(1);}
+    public void storePancake() {pancake.setPosition(-1);}
 
+    public void storeAll() {
+        storePancake();
+        storePlane();
+        storeHang();
+    }
 
     //1 Set internal transfer servos/motor power
 

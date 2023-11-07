@@ -15,6 +15,7 @@ public class slidesTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         DcMotorEx sl = hardwareMap.get(DcMotorEx.class, "slidesL");
         DcMotorEx sr = hardwareMap.get(DcMotorEx.class, "slidesR");
+        DcMotorEx enc = hardwareMap.get(DcMotorEx.class, "fr");
         sl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -26,10 +27,10 @@ public class slidesTest extends LinearOpMode {
 
 
             sl.setPower(-gamepad1.left_stick_y);
-            sr.setPower(gamepad1.left_stick_y);
+            sr.setPower(-gamepad1.left_stick_y);
 
-            telemetry.addData("Slides Raw", sl.getCurrentPosition());
-            telemetry.addData("Slides Length (in)", sl.getCurrentPosition()/cons);
+            telemetry.addData("Slides Raw", enc.getCurrentPosition());
+            telemetry.addData("Slides Length (in)", enc.getCurrentPosition()/cons);
             telemetry.update();
 
         }

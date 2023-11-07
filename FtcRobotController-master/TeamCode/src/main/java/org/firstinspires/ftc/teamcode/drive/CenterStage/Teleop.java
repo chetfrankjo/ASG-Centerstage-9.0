@@ -11,13 +11,14 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 @TeleOp
 public class Teleop extends LinearOpMode{
 
-    boolean superMegaDrive = true;
+    boolean superMegaDrive = false;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
+        driver.setWeaponsState(General.WeaponsState.IDLE);
 
         Reader r = new Reader();
         String info = r.readFile("Alliance");
@@ -35,7 +36,7 @@ public class Teleop extends LinearOpMode{
 
         waitForStart();
         while (opModeIsActive()) {
-
+            driver.update();
 
 
             if (!gamepad2.a) {
@@ -62,6 +63,10 @@ public class Teleop extends LinearOpMode{
                 }
             }
 
+            if (gamepad1.left_stick_button) {
+                driver.setSlidesTarget(12);
+            }
+
             if (gamepad1.x) {
                 if (superMegaDrive) {
                     superMegaDrive = false;
@@ -79,12 +84,15 @@ public class Teleop extends LinearOpMode{
             if (gamepad2.share) {
                 driver.resetSlidesEncoder();
             }
-
-            if (!gamepad2.a) {
+            if (gamepad1.y) {
+                driver.pullIMUHeading();
+                driver.drive(0, 0, (34.2-driver.getIMUHeading())/100, false);
+            } else if (!gamepad2.a) {
                 driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             } else {
                 driver.drive(gamepad2.left_stick_x/4, -gamepad2.left_stick_y/4, gamepad1.right_stick_x, superMegaDrive);
             }
+
 
 
         }

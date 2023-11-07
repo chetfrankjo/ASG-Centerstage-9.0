@@ -20,16 +20,16 @@ public class Auto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
-
+        driver.storeAll();
 
         timer = new ElapsedTime();
         timer.reset();
 
-        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.LEFT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.LEFT, General.SpikePosition.RIGHT, General.AllianceLocation.RED_NORTH);
 
 
         waitForStart();
-
+        timer.reset();
         while (opModeIsActive()) {
 
 
@@ -42,14 +42,18 @@ public class Auto extends LinearOpMode {
             switch (autoMode) {
 
                 case VISION:
-                    while (timer.time() < 2 && opModeIsActive()) {
+                    timer.reset();
+                    while (timer.time() < 3 && opModeIsActive()) {
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
                         position = driver.propLocation;
+                        telemetry.addData("Estimate", position.toString());
+                        telemetry.update();
                     }
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
+                    trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.RIGHT, position, General.AllianceLocation.RED_NORTH);
                     break;
                 case APPROACH_1:
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
@@ -64,6 +68,7 @@ public class Auto extends LinearOpMode {
                             // release pixel
                             driver.update();
                         }
+
                         autoMode = General.AUTO_RED_NORTH_1.BACKUP;
                     }
                     break;
@@ -75,11 +80,17 @@ public class Auto extends LinearOpMode {
                     break;
                 case APPROACH_2:
                     result = driver.runAutoPath(trajectories.get(2).path);
+                    driver.setSlidesTarget(4);
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
                         timer.reset();
-                        while (timer.time() < 1 && opModeIsActive()) {
+                        while (timer.time() < 2 && opModeIsActive()) {
                             driver.drive(0, 0.2, 0, false);
+                            driver.update();
+                        }
+                        while (timer.time() < 6 && opModeIsActive()) {
+                            driver.drive(0, 0, 0, false);
+                            driver.dumpPancake();
                             // release pixel
                             driver.update();
                         }
@@ -88,11 +99,13 @@ public class Auto extends LinearOpMode {
                     break;
                 case PARK_1:
                     result = driver.runAutoPath(trajectories.get(3).path);
+                    driver.storePancake();
                     if (result) {
                         autoMode = General.AUTO_RED_NORTH_1.PARK2;
                     }
                     break;
                 case PARK2:
+                    driver.setSlidesTarget(0);
                     driver.followCurve(trajectories.get(4).path);
                     break;
             }

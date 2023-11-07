@@ -28,14 +28,14 @@ public class PropDetectionTest extends LinearOpMode
 {
     OpenCvCamera webcam;
     PropDetectionPipeline_DualZone pipeline;
-    public static int avg1, avg2, avg3, avg4;
+    public static int avg1, avg2, avg3, avg4, avg5;
     @Override
     public void runOpMode()
     {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new PropDetectionPipeline_DualZone(true, General.AllianceLocation.BLUE_NORTH);
+        pipeline = new PropDetectionPipeline_DualZone(true, General.AllianceLocation.RED_NORTH);
         webcam.setPipeline(pipeline);
 
 
@@ -68,10 +68,12 @@ public class PropDetectionTest extends LinearOpMode
             avg2 = pipeline.getReadings()[1];
             avg3 = pipeline.getReadings()[2];
             avg4 = pipeline.getReadings()[3];
+            avg5 = pipeline.getReadings()[4];
             telemetry.addData("avg1", avg1);
             telemetry.addData("avg2", avg2);
             telemetry.addData("avg3", avg3);
             telemetry.addData("avg4", avg4);
+            telemetry.addData("avg5 (calibration)", avg5);
             telemetry.update();
 
 
