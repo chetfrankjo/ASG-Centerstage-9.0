@@ -11,22 +11,42 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 import java.util.ArrayList;
 
-@Autonomous
+@Autonomous(group = "a")
 public class Auto extends LinearOpMode {
     General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.VISION;
     General.SpikePosition position = General.SpikePosition.LEFT;
+    General.AllianceLocation allianceLocation;
+    General.ParkLocation parkLocation;
     ElapsedTime timer;
     @Override
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.storeAll();
+        driver.resetIMUHeading();
 
         timer = new ElapsedTime();
         timer.reset();
 
-        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.LEFT, General.SpikePosition.RIGHT, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        allianceLocation = driver.loadAlliancePreset();
+        parkLocation = driver.loadParkPreset();
 
+        telemetry.addLine("---------- Check Auto Presets -----------");
+
+        if (allianceLocation == General.AllianceLocation.NONE) {
+            telemetry.addLine("WARNING - ALLIANCE LOCATION NOT LOADED. RUNNING RED_NORTH AS DEFAULT");
+            allianceLocation = General.AllianceLocation.RED_NORTH;
+        } else {
+            telemetry.addData("Alliance Location", allianceLocation.toString());
+        }
+        if (parkLocation == General.ParkLocation.NONE) {
+            telemetry.addLine("WARNING - PARK LOCATION NOT LOADED. RUNNING RIGHT AS DEFAULT");
+            parkLocation = General.ParkLocation.RIGHT;
+        } else {
+            telemetry.addData("Park Location", parkLocation.toString());
+        }
+        telemetry.update();
 
         waitForStart();
         timer.reset();
@@ -53,7 +73,7 @@ public class Auto extends LinearOpMode {
                     }
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
-                    trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.RIGHT, position, General.AllianceLocation.RED_NORTH);
+                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
                     break;
                 case APPROACH_1:
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
@@ -75,12 +95,15 @@ public class Auto extends LinearOpMode {
                 case BACKUP:
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (result) {
+                        timer.reset();
                         autoMode = General.AUTO_RED_NORTH_1.APPROACH_2;
                     }
                     break;
                 case APPROACH_2:
                     result = driver.runAutoPath(trajectories.get(2).path);
-                    driver.setSlidesTarget(4);
+                    if (timer.time() > 3) {
+                        driver.setSlidesTarget(4);
+                    }
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
                         timer.reset();

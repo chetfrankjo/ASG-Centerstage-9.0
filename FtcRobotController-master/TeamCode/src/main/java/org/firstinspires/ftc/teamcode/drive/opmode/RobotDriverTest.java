@@ -17,7 +17,7 @@ public class RobotDriverTest extends LinearOpMode {
     boolean fieldCentric = false;
     @Override
     public void runOpMode() throws InterruptedException {
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setDriveZeroPower(FLOAT);
         //driver.setSlidesZeroPower(FLOAT);
         //driver.setTurretZeroPower(FLOAT);

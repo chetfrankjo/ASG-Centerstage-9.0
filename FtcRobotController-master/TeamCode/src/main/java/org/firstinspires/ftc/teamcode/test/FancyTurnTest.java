@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.test;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.drive.MathFunctions;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
+import kotlin.DslMarker;
+
+@Disabled
 @TeleOp
 public class FancyTurnTest extends LinearOpMode {
     Pose2d currentPos;
@@ -14,7 +18,7 @@ public class FancyTurnTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
 
         waitForStart();
 

@@ -8,16 +8,16 @@ import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.Reader;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
-@TeleOp
+@TeleOp(group = "a")
 public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
-
+    double planeTarget = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.IDLE);
 
         Reader r = new Reader();
@@ -25,18 +25,25 @@ public class Teleop extends LinearOpMode{
 
         switch (info){
             case "blue_south":
+                planeTarget = -90-34.2;
                 break;
             case "blue_north":
+                planeTarget = -90-34.2;
                 break;
             case "red_south":
+                planeTarget = 90+34.2;
                 break;
             case "red_north":
+                planeTarget = 90+34.2;
                 break;
         }
 
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
+
+            telemetry.addData("imu heading", driver.getIMUHeading());
+            telemetry.update();
 
 
             if (!gamepad2.a) {
@@ -85,8 +92,7 @@ public class Teleop extends LinearOpMode{
                 driver.resetSlidesEncoder();
             }
             if (gamepad1.y) {
-                driver.pullIMUHeading();
-                driver.drive(0, 0, (34.2-driver.getIMUHeading())/100, false);
+                driver.turnInPlace(planeTarget, true, 1.0);
             } else if (!gamepad2.a) {
                 driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             } else {

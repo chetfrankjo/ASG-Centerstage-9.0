@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 import java.util.ArrayList;
 
-@Autonomous
+@Autonomous(group = "b")
 public class RedNorthAuto extends LinearOpMode {
     General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.VISION;
     ElapsedTime timer;
