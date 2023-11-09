@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
+@Disabled
 @TeleOp
 public class APLSDetectionTest extends LinearOpMode {
 

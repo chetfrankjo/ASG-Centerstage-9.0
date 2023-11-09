@@ -98,7 +98,7 @@ public class RobotDriver {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
-    public RobotDriver(HardwareMap hardwareMap, boolean useIMU) {
+    public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
         brp = 0;
@@ -127,7 +127,7 @@ public class RobotDriver {
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
         imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
         imu.resetYaw();
 
         // SLIDES
@@ -168,20 +168,23 @@ public class RobotDriver {
         propPipeline = new PropDetectionPipeline_DualZone(true, AllianceLocation.RED_NORTH);
         OpenCvCam.setPipeline(propPipeline);
 
-        OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-                cameraReady = true;
-            }
+        if (prepAutoCamera) {
+            OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                @Override
+                public void onOpened() {
+                    OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                    cameraReady = true;
+                }
 
-            @Override
-            public void onError(int errorCode) {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-            }
-        });
+                @Override
+                public void onError(int errorCode) {
+                    /*
+                     * This will be called if the camera could not be opened
+                     */
+                }
+            });
+            cameraMode = CameraMode.PROP;
+        }
 
         aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
@@ -309,6 +312,42 @@ public class RobotDriver {
         }
     }
 
+    public AllianceLocation loadAlliancePreset() {
+        Reader r = new Reader();
+        String info = r.readFile("Alliance");
+        AllianceLocation location=AllianceLocation.NONE;
+        switch (info) {
+            case "blue_south":
+                location = AllianceLocation.BLUE_SOUTH;
+                break;
+            case "blue_north":
+                location = AllianceLocation.BLUE_NORTH;
+                break;
+            case "red_south":
+                location = AllianceLocation.RED_SOUTH;
+                break;
+            case "red_north":
+                location = AllianceLocation.RED_NORTH;
+                break;
+        }
+        return location;
+    }
+    public ParkLocation loadParkPreset() {
+        Reader r = new Reader();
+        String info = r.readFile("Park");
+        ParkLocation location=ParkLocation.NONE;
+        switch (info) {
+            case "left":
+                location = ParkLocation.LEFT;
+                break;
+            case "right":
+                location = ParkLocation.RIGHT;
+                break;
+        }
+        return location;
+    }
+
+
     public Pose2d getCurrentPos() {
         return currentPos;
     }
@@ -379,6 +418,12 @@ public class RobotDriver {
             if (getCameraEstimate) {
                 // do apls stuff
                 //TODO: Get the tag location and translate that into a bounding box of the backdrop
+            }
+        } else if (cameraMode == CameraMode.IDLE) {
+            if (cameraReady) {
+                OpenCvCam.stopStreaming();
+                OpenCvCam.closeCameraDevice();
+                cameraReady = false;
             }
         }
 
@@ -633,7 +678,7 @@ public class RobotDriver {
         return imuheading;
     }
     public double pullIMUHeading() {
-        imuheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        imuheading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         return imuheading;
     }
 
@@ -664,7 +709,7 @@ public class RobotDriver {
         double x1 = pose.getX() + v.getX() / 2, y1 = pose.getY() + v.getY() / 2;
         double x2 = pose.getX() + v.getX(), y2 = pose.getY() + v.getY();
         canvas.strokeLine(x1, -y1, x2, -y2);
-        canvas.strokeCircle(globalCoords[0], globalCoords[1], 2);
+        //canvas.strokeCircle(globalCoords[0], globalCoords[1], 2);
     }
 
 
@@ -850,6 +895,15 @@ public class RobotDriver {
         }
 
         driveXY(movement_x, movement_y, movement_turn);
+    }
+
+    public void turnInPlace(double targetAngle, boolean useIMU, double turnSpeed) {
+        if (useIMU) {
+            pullIMUHeading();
+            driveXY(0, 0, Range.clip(AngleWrap(Math.toRadians(targetAngle) - Math.toRadians(imuheading)) / Math.toRadians(30), -1, 1) * turnSpeed);
+        } else {
+            driveXY(0, 0, Range.clip(AngleWrap(Math.toRadians(targetAngle) - Math.toRadians(currentPos.getHeading())) / Math.toRadians(30), -1, 1) * turnSpeed);
+        }
     }
 
 }

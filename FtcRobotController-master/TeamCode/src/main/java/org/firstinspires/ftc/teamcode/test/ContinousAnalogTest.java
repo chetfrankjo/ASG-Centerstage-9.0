@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
 import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
 
+@Disabled
 @TeleOp
 public class ContinousAnalogTest extends LinearOpMode {
 

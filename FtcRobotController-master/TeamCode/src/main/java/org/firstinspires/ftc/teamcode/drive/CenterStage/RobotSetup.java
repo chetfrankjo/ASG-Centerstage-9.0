@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.Logger;
 
-@TeleOp
+@TeleOp(group = "a")
 public class RobotSetup extends LinearOpMode {
 
     String msg = "  \n" +
@@ -25,21 +25,22 @@ public class RobotSetup extends LinearOpMode {
 
     boolean advance = false;
     General.AllianceLocation location;
+    General.ParkLocation parkLocation;
     @Override
     public void runOpMode() throws InterruptedException {
 
         telemetry.addLine("ENTER AUTO START ZONE");
-        telemetry.addLine("            BLUE_N --V   ");
-        telemetry.addLine("   ------------.-'   _  '-..+   ");
-        telemetry.addLine("            |   _  ( Y )  _  |  ");
-        telemetry.addLine("BLUE_S ->  |  ( X )  _  ( B ) | <-- RED_N ");
-        telemetry.addLine("      ___  '.      ( A )     /|   ");
-        telemetry.addLine("    .'    '.    '-._____.-'  .' ");
-        telemetry.addLine("   |       |         ^       | ");
-        telemetry.addLine("    '.___.' '.       |       | ");
-        telemetry.addLine("             '.    RED_S     /  ");
-        telemetry.addLine("               |.          .");
-        telemetry.addLine("                |________|");
+        telemetry.addLine("                   BLUE_N --V   ");
+        telemetry.addLine("--------------------.-'         _         '-..+   ");
+        telemetry.addLine("                        |      _    ( Y )    _    |    ");
+        telemetry.addLine("BLUE_S ->   |    ( X )    _    ( B )  |  <-- RED_N ");
+        telemetry.addLine("            ___      '.            ( A )          /|   ");
+        telemetry.addLine("        .'        '.           '-._____.-'    .' ");
+        telemetry.addLine("      |              |                  ^              | ");
+        telemetry.addLine("        '.___.' '.                     |              | ");
+        telemetry.addLine("                          '.        RED_S       /  ");
+        telemetry.addLine("                              |.                    .");
+        telemetry.addLine("                                |________|");
 
         telemetry.update();
 
@@ -81,11 +82,29 @@ public class RobotSetup extends LinearOpMode {
                 advance=true;
             }
         }
-        advance = true; //TODO: Make this false once you add auto path choosing
+        advance = false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
-            telemetry.addLine("SELECT DESIRED AUTO PATH");
+            telemetry.addLine("SELECT DESIRED PARK LOCATION (Left or Right - use DPAD)");
             telemetry.update();
+            if (gamepad1.dpad_left) {
+                parkLocation = General.ParkLocation.LEFT;
+                Logger a = new Logger("Park",false);
+                String l = "left";
+                a.addData(l);
+                a.update();
+                a.close();
+                advance=true;
+            }
+            if (gamepad1.dpad_right) {
+                parkLocation = General.ParkLocation.RIGHT;
+                Logger a = new Logger("park",false);
+                String l = "right";
+                a.addData(l);
+                a.update();
+                a.close();
+                advance=true;
+            }
 
             //TODO: choose auto path
         }
@@ -93,7 +112,9 @@ public class RobotSetup extends LinearOpMode {
         while (opModeInInit()) {
             telemetry.addLine("PRESS START TO CONFIRM SETTINGS:\n");
             telemetry.addData("Alliance Location", location.toString());
+            telemetry.addData("Park Location", parkLocation.toString());
             telemetry.addData("Auto Path", "default");
+            telemetry.update();
         }
 
     }

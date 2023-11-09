@@ -3,34 +3,40 @@ package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.Reader;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
-@TeleOp
+@TeleOp(group = "a")
 public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
-
+    double planeTarget = 0;
+    boolean g1Launch = false, g2Launch = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.IDLE);
-
+        
         Reader r = new Reader();
         String info = r.readFile("Alliance");
 
         switch (info){
             case "blue_south":
+                planeTarget = -90-34.2;
                 break;
             case "blue_north":
+                planeTarget = -90-34.2;
                 break;
             case "red_south":
+                planeTarget = 90+34.2;
                 break;
             case "red_north":
+                planeTarget = 90+34.2;
                 break;
         }
 
@@ -38,12 +44,15 @@ public class Teleop extends LinearOpMode{
         while (opModeIsActive()) {
             driver.update();
 
+            telemetry.addData("imu heading", driver.getIMUHeading());
+            telemetry.update();
+
 
             if (!gamepad2.a) {
                 driver.setSlidesPower(gamepad2.left_stick_y); //manual slides
             }
 
-
+/*
             if (gamepad2.right_trigger > 0.5) {
                 driver.setWeaponsState(General.WeaponsState.PRIMED);
             }//priming
@@ -67,6 +76,9 @@ public class Teleop extends LinearOpMode{
                 driver.setSlidesTarget(12);
             }
 
+ */
+
+
             if (gamepad1.x) {
                 if (superMegaDrive) {
                     superMegaDrive = false;
@@ -75,18 +87,39 @@ public class Teleop extends LinearOpMode{
                 }
             }
             if (gamepad1.left_trigger > 0.7) {
+                if (!g1Launch && !g2Launch) {
+                    gamepad2.rumble(1, 0, 500);
+                }
+                g1Launch = true;
+            } else {
+                g1Launch = false;
+            }
+            if (gamepad2.left_trigger > 0.7) {
+                if (!g2Launch && !g1Launch) {
+                    gamepad1.rumble(1, 0, 500);
+                }
+                g2Launch = true;
+            } else {
+                g2Launch = false;
+            }
+
+            if (g1Launch && g2Launch) { // launch plane if both driver confirm
                 driver.launchPlane();
-            }//GO PLANE GO
-            if (gamepad1.right_trigger > 0.7) {
+                gamepad1.rumble(1, 1, 500);
+                gamepad2.rumble(1, 1, 500);
+                g1Launch = false;
+                g2Launch = false;
+            }
+
+            if (gamepad2.right_trigger > 0.7) {
                 driver.launchHang();
             }//HANG
 
-            if (gamepad2.share) {
+            if (gamepad2.back) {
                 driver.resetSlidesEncoder();
             }
             if (gamepad1.y) {
-                driver.pullIMUHeading();
-                driver.drive(0, 0, (34.2-driver.getIMUHeading())/100, false);
+                driver.turnInPlace(planeTarget, true, 1.0);
             } else if (!gamepad2.a) {
                 driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             } else {

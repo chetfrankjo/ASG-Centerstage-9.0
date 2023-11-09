@@ -29,7 +29,20 @@ public class Constants {
                 case LEFT:
                     switch (allianceLocation) {
                         case RED_SOUTH:
-                            // Either no auto, or park only
+                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(-6, 29, 0).build());
+                            paths.add(new Trajectory(-5, 29, 0.4, 5).addPoint(0, 4, 180).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 43, 0).addPoint(72, 43, 0).build());
+                            switch (parkLocation) {
+
+                                case LEFT:
+                                    paths.add(new Trajectory(72, 43, 0.4, 10).addPoint(65, 43, 180).addPoint(65, 59, 90).build());
+                                    paths.add(new Trajectory(65, 59, 0.3, 20).addPoint(87, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(70, 44, 0.4, 10).addPoint(65, 44, 180).addPoint(65, 8, -90).build());
+                                    paths.add(new Trajectory(65, 8, 0.3, 20).addPoint(87, 8, 0).build());
+                                    break;
+                            }
                             break;
                         case RED_NORTH:
                             paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(-6, 29, 0).build());
@@ -56,7 +69,19 @@ public class Constants {
                 case CENTER:
                     switch (allianceLocation) {
                         case RED_SOUTH:
-                            // Either no auto, or park only
+                            paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 34, 0).addPoint(72, 34, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(72, 34, 0.4, 20).addPoint(65, 34, 180).addPoint(65, 59, 90).build());
+                                    paths.add(new Trajectory(65, 59, 0.3, 20).addPoint(87, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(72, 34, 0.4, 20).addPoint(65, 34, 180).addPoint(65, 8, -90).build());
+                                    paths.add(new Trajectory(65, 8, 0.3, 20).addPoint(87, 8, 0).build());
+                                    break;
+                            }
                             break;
                         case RED_NORTH:
                             paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
@@ -82,7 +107,19 @@ public class Constants {
                 case RIGHT:
                     switch (allianceLocation) {
                         case RED_SOUTH:
-                            // Either no auto, or park only
+                            paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 4, 180).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 30, 0).addPoint(72, 30, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(72, 30, 0.4, 20).addPoint(65, 34, 180).addPoint(65, 59, 90).build());
+                                    paths.add(new Trajectory(65, 59, 0.3, 20).addPoint(87, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(72, 30, 0.4, 20).addPoint(65, 34, 180).addPoint(65, 8, -90).build());
+                                    paths.add(new Trajectory(65, 8, 0.3, 20).addPoint(87, 8, 0).build());
+                                    break;
+                            }
                             break;
                         case RED_NORTH:
                             paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 10, 0).addPoint(6, 28, 0).build());

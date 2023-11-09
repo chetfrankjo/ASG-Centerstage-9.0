@@ -34,11 +34,11 @@ public class General {
     }
 
     public enum AllianceLocation {
-        RED_SOUTH, RED_NORTH, BLUE_SOUTH, BLUE_NORTH
+        RED_SOUTH, RED_NORTH, BLUE_SOUTH, BLUE_NORTH, NONE
     }
 
     public enum ParkLocation {
-        LEFT, RIGHT
+        LEFT, RIGHT, NONE
     }
 
 

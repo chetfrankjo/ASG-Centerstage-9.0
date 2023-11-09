@@ -20,7 +20,7 @@ public class PurePursuitTest extends LinearOpMode {
         //traj.addPoint(48, 0, -180);
         traj.build();
 
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
 
         waitForStart();
         while (opModeIsActive()) {
