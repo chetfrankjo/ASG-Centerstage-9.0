@@ -128,7 +128,7 @@ public class RobotDriver {
 
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
-        imu.resetYaw();
+        //imu.resetYaw();
 
         // SLIDES
         slidesL = hardwareMap.get(DcMotorEx.class, "slidesL");
@@ -165,7 +165,7 @@ public class RobotDriver {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        propPipeline = new PropDetectionPipeline_DualZone(true, AllianceLocation.RED_NORTH);
+        propPipeline = new PropDetectionPipeline_DualZone(true, loadAlliancePreset());
         OpenCvCam.setPipeline(propPipeline);
 
         if (prepAutoCamera) {
@@ -554,14 +554,12 @@ public class RobotDriver {
     }
 
     public void launchHang() {
-        for (Servo servo: hangReleaseServos) {
-            servo.setPosition(1);
-        }
+        hangReleaseRight.setPosition(0.3);
+        hangReleaseLeft.setPosition(0.7);
     }
     public void storeHang() {
-        for (Servo servo: hangReleaseServos) {
-            servo.setPosition(0);
-        }
+        hangReleaseRight.setPosition(0);
+        hangReleaseLeft.setPosition(1);
     }
 
     public void launchPlane() {

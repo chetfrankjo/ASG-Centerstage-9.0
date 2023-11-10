@@ -14,13 +14,16 @@ import org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants;
 public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
     boolean overlay;
     public static int MIN_THRESH;
+    public static double GREEN_THRESH;
     General.AllianceLocation color = General.AllianceLocation.RED_NORTH;
     public PropDetectionPipeline_DualZone(boolean enableOverlay, General.AllianceLocation color) {
         overlay = enableOverlay;
         if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
             MIN_THRESH = 120;
+            GREEN_THRESH = 120;
         } else {
             MIN_THRESH = 120;
+            GREEN_THRESH = 125;
         }
         this.color=color;
     }
@@ -100,7 +103,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         avg2g = (int) Core.mean(region2_green).val[0];
         avgcal = (int) Core.mean(calibration_region).val[0];
 
-        if (color == General.AllianceLocation.BLUE_NORTH) {
+        if (color == General.AllianceLocation.BLUE_NORTH || color == General.AllianceLocation.BLUE_SOUTH) {
             avg1 = avg1 + 30;
         }
 
@@ -122,7 +125,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         int max = Math.max(avg1, avg2);
 
 
-        if (max == avg1 && max > MIN_THRESH && avg1g < 120) // Was it from region 1?
+        if (((max == avg1 && avg1 > 80 && avg1 < 150) || avg2g >= GREEN_THRESH) && max > MIN_THRESH && avg1g < GREEN_THRESH) // Was it from region 1?
         {
 
             position = SpikePosition.LEFT; // Record our analysis
@@ -135,7 +138,7 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
                         GREEN, // The color the rectangle is drawn in
                         -1); // Negative thickness means solid fill
             }
-        } else if ((max == avg2 || avg1g >= 120) && max > MIN_THRESH && avg2g < 120) // Was it from region 2?
+        } else if (((max == avg2 && avg2 > 80 && avg2 < 150) || avg1g >= GREEN_THRESH) && max > MIN_THRESH && avg2g < GREEN_THRESH) // Was it from region 2?
         {
             position = SpikePosition.CENTER; // Record our analysis
             if (overlay) {

@@ -47,7 +47,7 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
         telemetry.update();
-
+        driver.storePancake();
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
@@ -101,7 +101,11 @@ public class Auto extends LinearOpMode {
                     break;
                 case APPROACH_2:
                     result = driver.runAutoPath(trajectories.get(2).path);
-                    if (timer.time() > 3) {
+                    if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                        if (timer.time() > 3) {
+                            driver.setSlidesTarget(4);
+                        }
+                    } else {
                         driver.setSlidesTarget(4);
                     }
                     if (result) {
