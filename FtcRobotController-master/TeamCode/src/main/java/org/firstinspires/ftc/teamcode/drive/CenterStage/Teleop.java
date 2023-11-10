@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
@@ -14,14 +15,15 @@ public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
     double planeTarget = 0;
-    boolean g1Launch = false, g2Launch = false;
+    boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.IDLE);
-        
+        driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
+
         Reader r = new Reader();
         String info = r.readFile("Alliance");
 
@@ -78,6 +80,19 @@ public class Teleop extends LinearOpMode{
 
  */
 
+            if (gamepad1.a) {
+                driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);
+            }
+            if (gamepad1.b) {
+                driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+
+            if (gamepad1.back) {
+                driver.storePlane();
+            }
+            if (gamepad1.start) {
+                driver.storeHang();
+            }
 
             if (gamepad1.x) {
                 if (superMegaDrive) {
@@ -85,9 +100,10 @@ public class Teleop extends LinearOpMode{
                 } else {
                     superMegaDrive = true;
                 }
+                while (gamepad1.x) {}
             }
             if (gamepad1.left_trigger > 0.7) {
-                if (!g1Launch && !g2Launch) {
+                if (!g2Launch && !g1Launch) {
                     gamepad2.rumble(1, 0, 500);
                 }
                 g1Launch = true;
@@ -95,7 +111,7 @@ public class Teleop extends LinearOpMode{
                 g1Launch = false;
             }
             if (gamepad2.left_trigger > 0.7) {
-                if (!g2Launch && !g1Launch) {
+                if (!g1Launch && !g2Launch) {
                     gamepad1.rumble(1, 0, 500);
                 }
                 g2Launch = true;
@@ -111,11 +127,34 @@ public class Teleop extends LinearOpMode{
                 g2Launch = false;
             }
 
+            if (gamepad1.right_trigger > 0.7) {
+                if (!g2Hang && !g1Hang) {
+                    gamepad2.rumble(0,1, 500);
+                }
+                g1Hang = true;
+            } else {
+                g1Hang = false;
+            }
+
             if (gamepad2.right_trigger > 0.7) {
+                if (!g1Hang && !g2Hang) {
+                    gamepad1.rumble(0, 1, 500);
+                }
+                g2Hang = true;
+            } else {
+                g2Hang = false;
+            }
+
+            if (g1Hang && g2Hang) {
                 driver.launchHang();
-            }//HANG
+                gamepad1.rumble(1, 1, 500);
+                gamepad2.rumble(1, 1, 500);
+                g2Hang=false;
+                g1Hang=false;
+            }
 
             if (gamepad2.back) {
+                driver.resetSlidesEncoder();
                 driver.resetSlidesEncoder();
             }
             if (gamepad1.y) {
