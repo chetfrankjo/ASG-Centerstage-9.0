@@ -94,6 +94,17 @@ public class Teleop extends LinearOpMode{
                 driver.storeHang();
             }
 
+            if (gamepad2.start) {
+                driver.resetIMUHeading();
+            }
+
+            if (gamepad2.x) {
+                driver.storePancake();
+            }
+            if (gamepad2.y) {
+                driver.dumpPancake();
+            }
+
             if (gamepad1.x) {
                 if (superMegaDrive) {
                     superMegaDrive = false;
@@ -166,7 +177,12 @@ public class Teleop extends LinearOpMode{
             }
 
 
+            telemetry.addData("dist left", driver.getdistLeft());
+            telemetry.addData("dist right", driver.getdistRight());
+            telemetry.addData("IMU Heading", driver.getIMUHeading());
 
+            telemetry.addData("loop speed", driver.loopSpeed);
+            telemetry.update();
         }
     }
 }

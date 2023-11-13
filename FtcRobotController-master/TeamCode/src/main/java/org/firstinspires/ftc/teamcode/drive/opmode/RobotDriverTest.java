@@ -50,6 +50,8 @@ public class RobotDriverTest extends LinearOpMode {
             telemetry.addData("Global Y", currentPos.getY());
             telemetry.addData("Global Heading", currentPos.getHeading());
             driver.pullIMUHeading();
+            telemetry.addData("dist left", driver.getdistLeft());
+            telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
 
             telemetry.addData("loop speed", driver.loopSpeed);

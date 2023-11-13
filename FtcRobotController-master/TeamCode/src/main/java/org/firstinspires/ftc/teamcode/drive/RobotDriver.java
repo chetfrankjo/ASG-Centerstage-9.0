@@ -56,6 +56,7 @@ public class RobotDriver {
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
     private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight, pancake;
+    private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
@@ -146,6 +147,9 @@ public class RobotDriver {
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
         pancake = hardwareMap.get(Servo.class, "pancake");
         hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
+
+        distLeft = hardwareMap.get(AnalogInput.class, "distleft");
+        distRight = hardwareMap.get(AnalogInput.class, "distright");
 
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -364,6 +368,13 @@ public class RobotDriver {
         if (useIMU) {
             pullIMUHeading();
         }
+    }
+
+    public double getdistLeft() {
+        return ((distLeft.getVoltage()*1000)/3.2);
+    }
+    public double getdistRight() {
+        return ((distRight.getVoltage()*1000)/3.2);
     }
 
     /**
