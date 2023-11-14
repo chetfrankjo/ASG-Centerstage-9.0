@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 import java.util.logging.Logger;
 
-@TeleOp
+@TeleOp(group = "c")
 public class RobotDriverTest extends LinearOpMode {
     boolean fieldCentric = false;
     @Override

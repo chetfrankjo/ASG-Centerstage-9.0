@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline;
 
 
 @Config
-@TeleOp
+@TeleOp(group="c")
 public class PropDetectionTest extends LinearOpMode
 {
     OpenCvCamera webcam;
