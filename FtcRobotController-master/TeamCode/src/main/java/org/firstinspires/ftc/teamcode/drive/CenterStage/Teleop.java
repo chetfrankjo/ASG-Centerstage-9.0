@@ -10,11 +10,13 @@ import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.Reader;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
+import java.util.Arrays;
+
 @TeleOp(group = "a")
 public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
-    double planeTarget = 0;
+    double planeTarget = 0, wallTarget = 0;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false;
 
     @Override
@@ -30,15 +32,19 @@ public class Teleop extends LinearOpMode{
         switch (info){
             case "blue_south":
                 planeTarget = -90-34.2;
+                wallTarget = 90;
                 break;
             case "blue_north":
                 planeTarget = -90-34.2;
+                wallTarget = 90;
                 break;
             case "red_south":
                 planeTarget = 90+34.2;
+                wallTarget = -90;
                 break;
             case "red_north":
                 planeTarget = 90+34.2;
+                wallTarget = -90;
                 break;
         }
 
@@ -46,8 +52,6 @@ public class Teleop extends LinearOpMode{
         while (opModeIsActive()) {
             driver.update();
 
-            telemetry.addData("imu heading", driver.getIMUHeading());
-            telemetry.update();
 
 
             if (!gamepad2.a) {
@@ -113,7 +117,7 @@ public class Teleop extends LinearOpMode{
                 }
                 while (gamepad1.x) {}
             }
-            if (gamepad1.left_trigger > 0.7) {
+            if (gamepad1.left_bumper) {
                 if (!g2Launch && !g1Launch) {
                     gamepad2.rumble(1, 0, 500);
                 }
@@ -121,7 +125,7 @@ public class Teleop extends LinearOpMode{
             } else {
                 g1Launch = false;
             }
-            if (gamepad2.left_trigger > 0.7) {
+            if (gamepad2.left_bumper) {
                 if (!g1Launch && !g2Launch) {
                     gamepad1.rumble(1, 0, 500);
                 }
@@ -138,7 +142,7 @@ public class Teleop extends LinearOpMode{
                 g2Launch = false;
             }
 
-            if (gamepad1.right_trigger > 0.7) {
+            if (gamepad1.right_bumper) {
                 if (!g2Hang && !g1Hang) {
                     gamepad2.rumble(0,1, 500);
                 }
@@ -147,7 +151,7 @@ public class Teleop extends LinearOpMode{
                 g1Hang = false;
             }
 
-            if (gamepad2.right_trigger > 0.7) {
+            if (gamepad2.right_bumper) {
                 if (!g1Hang && !g2Hang) {
                     gamepad1.rumble(0, 1, 500);
                 }
@@ -168,7 +172,32 @@ public class Teleop extends LinearOpMode{
                 driver.resetSlidesEncoder();
                 driver.resetSlidesEncoder();
             }
-            if (gamepad1.y) {
+
+
+            if (gamepad1.right_trigger > 0.7) {
+                double head = driver.pullIMUHeading();
+                double distvalue=0;
+                double[] distarray=new double[8];
+                for (int i=0; i<8; i++) {
+                    //distvalue += driver.getdistRight();
+                    if (info.equals("red_south") || info.equals("red_north")) {
+                        distarray[i] = driver.getdistLeft();
+                    } else {
+                        distarray[i] = driver.getdistRight();
+                    }
+                }
+                double[] result = removeMinMax(distarray);
+                for (int i=0; i<2; i++) {
+                    distvalue += result[i];
+                }
+                distvalue=distvalue/2;
+
+                if (gamepad1.left_stick_x == 0) {
+                    driver.drive((8.1 - distvalue) / -3.5, -gamepad1.left_stick_y, gamepad1.right_stick_x/2, false);
+                } else {
+                    driver.drive(gamepad1.left_stick_x/3, -gamepad1.left_stick_y, gamepad1.right_stick_x/2, false);
+                }
+            } else if (gamepad1.y) {
                 driver.turnInPlace(planeTarget, true, 1.0);
             } else if (!gamepad2.a) {
                 driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
@@ -180,9 +209,13 @@ public class Teleop extends LinearOpMode{
             telemetry.addData("dist left", driver.getdistLeft());
             telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
-
+            telemetry.addData("dist", driver.getdistRight());
             telemetry.addData("loop speed", driver.loopSpeed);
             telemetry.update();
         }
+    }
+    public static double[] removeMinMax(double[] arr) {
+        Arrays.sort(arr);
+        return Arrays.copyOfRange(arr, 3, arr.length - 3);
     }
 }
