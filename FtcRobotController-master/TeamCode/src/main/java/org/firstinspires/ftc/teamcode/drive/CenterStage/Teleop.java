@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.Reader;
@@ -17,7 +18,7 @@ public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
     double planeTarget = 0, wallTarget = 0;
-    boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false;
+    boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -47,6 +48,8 @@ public class Teleop extends LinearOpMode{
                 wallTarget = -90;
                 break;
         }
+
+        ElapsedTime hangtime = new ElapsedTime();
 
         waitForStart();
         while (opModeIsActive()) {
@@ -173,8 +176,16 @@ public class Teleop extends LinearOpMode{
                 driver.resetSlidesEncoder();
             }
 
-
-            if (gamepad1.right_trigger > 0.7) {
+            if (hanging && !gamepad1.dpad_down) {
+                driver.drive(0, 0.25, 0, false);
+                if (hangtime.time() > 1) {
+                    hanging = false;
+                }
+            } else if (gamepad1.dpad_down) {
+                driver.drive(gamepad1.left_stick_x/2, -0.5, gamepad1.right_stick_x, false);
+                hangtime.reset();
+                hanging = true;
+            } else if (gamepad1.right_trigger > 0.7) {
                 double head = driver.pullIMUHeading();
                 double distvalue=0;
                 double[] distarray=new double[8];
