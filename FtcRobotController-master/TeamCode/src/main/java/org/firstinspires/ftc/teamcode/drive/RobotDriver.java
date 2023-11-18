@@ -37,6 +37,8 @@ import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
+import org.firstinspires.ftc.teamcode.vision.PDP_DualCamera;
+import org.firstinspires.ftc.teamcode.vision.PDP_LeftCam;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -69,7 +71,7 @@ public class RobotDriver {
     private double slidesLength, touchVal, imuheading, gantryPos;
     double slidesTarget, slidesPower, gantryTarget, gantryPower, intakePower, plungerPos;
     static double frp=0, flp=0, brp=0, blp=0;
-    public boolean useIMU = false;
+    public boolean useIMU = false, slidesDisable;
     final double slideTickToInch = AssemblyConstants.slideTickToInch;
     public int loops = 0;
     long lastLoopTime = System.nanoTime();
@@ -89,8 +91,10 @@ public class RobotDriver {
     ClawMode clawMode = ClawMode.RELEASE;
     WeaponsState weaponsState = WeaponsState.INTAKING;
     Servo[] hangReleaseServos;
-    OpenCvCamera OpenCvCam;
+    OpenCvCamera OpenCvCamL, OpenCvCamR;
     PropDetectionPipeline_DualZone propPipeline;
+    PDP_LeftCam pipelineLeft;
+    PDP_DualCamera pipelineRight;
 
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
@@ -168,15 +172,33 @@ public class RobotDriver {
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        propPipeline = new PropDetectionPipeline_DualZone(true, loadAlliancePreset());
-        OpenCvCam.setPipeline(propPipeline);
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
+        OpenCvCamL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
+        pipelineLeft = new PDP_LeftCam(true, loadAlliancePreset());
+        OpenCvCamL.setPipeline(pipelineLeft);
+        OpenCvCamR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[1]);
+        pipelineRight = new PDP_DualCamera(true, loadAlliancePreset());
+        OpenCvCamR.setPipeline(pipelineRight);
         if (prepAutoCamera) {
-            OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            OpenCvCamL.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                 @Override
                 public void onOpened() {
-                    OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                    OpenCvCamL.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                    cameraReady = true;
+                }
+
+                @Override
+                public void onError(int errorCode) {
+                    /*
+                     * This will be called if the camera could not be opened
+                     */
+                }
+            });
+            OpenCvCamR.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                @Override
+                public void onOpened() {
+                    OpenCvCamR.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                     cameraReady = true;
                 }
 
@@ -383,10 +405,10 @@ public class RobotDriver {
     public void updateCamera() {
         if (cameraMode == CameraMode.PROP) {
             if (!cameraReady) {
-                OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                OpenCvCamL.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                     @Override
                     public void onOpened() {
-                        OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                        OpenCvCamL.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                         cameraReady = true;
                     }
 
@@ -397,13 +419,28 @@ public class RobotDriver {
                          */
                     }
                 });
-                propLocation = propPipeline.getAnalysis(); //get the estimate
+                OpenCvCamR.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                    @Override
+                    public void onOpened() {
+                        OpenCvCamR.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                        cameraReady = true;
+                    }
+
+                    @Override
+                    public void onError(int errorCode) {
+                        /*
+                         * This will be called if the camera could not be opened
+                         */
+                    }
+                });
+                propLocation = pipelineRight.getAnalysis(pipelineLeft.getReadings()); //get the estimate
                 //OpenCvCam.stopStreaming();
                 //OpenCvCam.closeCameraDevice();
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
-            propLocation = propPipeline.getAnalysis(); //get the estimate
+            //propLocation = propPipeline.getAnalysis(); //get the estimate
+            propLocation = pipelineRight.getAnalysis(pipelineLeft.getReadings());
 
         } else if (cameraMode == CameraMode.APRILTAG) {
             visionPortal.setProcessorEnabled(aprilTag, true);
@@ -432,8 +469,10 @@ public class RobotDriver {
             }
         } else if (cameraMode == CameraMode.IDLE) {
             if (cameraReady) {
-                OpenCvCam.stopStreaming();
-                OpenCvCam.closeCameraDevice();
+                OpenCvCamL.stopStreaming();
+                OpenCvCamL.closeCameraDevice();
+                OpenCvCamR.stopStreaming();
+                OpenCvCamR.closeCameraDevice();
                 cameraReady = false;
             }
         }
@@ -445,6 +484,7 @@ public class RobotDriver {
     public void getCameraEstimate() {getCameraEstimate = true;}
     public void setLocalizationMode(LocalMode mode) {localizationMode = mode;}
 
+    public void setSlidesDisable(boolean disable) {slidesDisable = disable;}
     public double getSlidesLength() {
         return slidesLength;
     }
@@ -456,17 +496,23 @@ public class RobotDriver {
     }
     public void updateSlides() {
         if (slidesPower == 0) {
-            //DO PID STUFF
-            double error = (slidesTarget-slidesLength);
-            double p = AssemblyConstants.slidesPIDConstants.p * error;
-            slidesI+=AssemblyConstants.slidesPIDConstants.i * error * loopSpeed;
-            double d = AssemblyConstants.slidesPIDConstants.d * (error-previousSlidesError) / loopSpeed;
-            double power = (p+slidesI+d + (Math.signum(error)*AssemblyConstants.slidesPIDConstants.f));
-            for (DcMotorEx slide : slides) {
-                slide.setPower(power);
-            }
+            if (!slidesDisable) {
+                //DO PID STUFF
+                double error = (slidesTarget - slidesLength);
+                double p = AssemblyConstants.slidesPIDConstants.p * error;
+                slidesI += AssemblyConstants.slidesPIDConstants.i * error * loopSpeed;
+                double d = AssemblyConstants.slidesPIDConstants.d * (error - previousSlidesError) / loopSpeed;
+                double power = (p + slidesI + d + (Math.signum(error) * AssemblyConstants.slidesPIDConstants.f));
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(power);
+                }
 
-            previousSlidesError = error;
+                previousSlidesError = error;
+            } else {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(0);
+                }
+            }
         } else {
             for (DcMotorEx slide : slides) {
                 slide.setPower(slidesPower);

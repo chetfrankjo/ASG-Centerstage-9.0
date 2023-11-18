@@ -48,6 +48,7 @@ public class Teleop extends LinearOpMode{
                 wallTarget = -90;
                 break;
         }
+        driver.setSlidesDisable(true);
 
         ElapsedTime hangtime = new ElapsedTime();
 
@@ -58,8 +59,17 @@ public class Teleop extends LinearOpMode{
 
 
             if (!gamepad2.a) {
-                driver.setSlidesPower(gamepad2.left_stick_y); //manual slides
+
+                driver.setSlidesPower(-gamepad2.left_stick_y); //manual slides
             }
+
+            if (gamepad2.left_stick_y != 0) {
+                driver.setSlidesDisable(false);
+            }
+            if (gamepad2.b) {
+                driver.setSlidesDisable(true);
+            }
+
 
 /*
             if (gamepad2.right_trigger > 0.5) {
@@ -185,7 +195,31 @@ public class Teleop extends LinearOpMode{
                 driver.drive(gamepad1.left_stick_x/2, -0.5, gamepad1.right_stick_x, false);
                 hangtime.reset();
                 hanging = true;
-            } else if (gamepad1.right_trigger > 0.7) {
+            } else if (gamepad1.y) {
+                driver.turnInPlace(planeTarget, true, 1.0);
+            } else if (!gamepad2.a) {
+                driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
+            } else {
+                driver.drive(gamepad2.left_stick_x/4, -gamepad2.left_stick_y/4, gamepad1.right_stick_x, superMegaDrive);
+            }
+
+
+            telemetry.addData("dist left", driver.getdistLeft());
+            telemetry.addData("dist right", driver.getdistRight());
+            telemetry.addData("IMU Heading", driver.getIMUHeading());
+            telemetry.addData("dist", driver.getdistRight());
+            telemetry.addData("loop speed", driver.loopSpeed);
+            telemetry.update();
+        }
+    }
+    public static double[] removeMinMax(double[] arr) {
+        Arrays.sort(arr);
+        return Arrays.copyOfRange(arr, 3, arr.length - 3);
+    }
+
+
+    /*
+    } else if (gamepad1.right_trigger > 0.7) {
                 double head = driver.pullIMUHeading();
                 double distvalue=0;
                 double[] distarray=new double[8];
@@ -208,25 +242,5 @@ public class Teleop extends LinearOpMode{
                 } else {
                     driver.drive(gamepad1.left_stick_x/3, -gamepad1.left_stick_y, gamepad1.right_stick_x/2, false);
                 }
-            } else if (gamepad1.y) {
-                driver.turnInPlace(planeTarget, true, 1.0);
-            } else if (!gamepad2.a) {
-                driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
-            } else {
-                driver.drive(gamepad2.left_stick_x/4, -gamepad2.left_stick_y/4, gamepad1.right_stick_x, superMegaDrive);
-            }
-
-
-            telemetry.addData("dist left", driver.getdistLeft());
-            telemetry.addData("dist right", driver.getdistRight());
-            telemetry.addData("IMU Heading", driver.getIMUHeading());
-            telemetry.addData("dist", driver.getdistRight());
-            telemetry.addData("loop speed", driver.loopSpeed);
-            telemetry.update();
-        }
-    }
-    public static double[] removeMinMax(double[] arr) {
-        Arrays.sort(arr);
-        return Arrays.copyOfRange(arr, 3, arr.length - 3);
-    }
+     */
 }
