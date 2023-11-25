@@ -46,7 +46,7 @@ public class Constants {
                             break;
                         case RED_NORTH:
                             paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 23, 0).addPoint(-6, 29, 0).build());
-                            paths.add(new Trajectory(-5, 29, 0.6, 5).addPoint(0, 15, 180).build());
+                            paths.add(new Trajectory(-5, 29, 0.6, 5).addPoint(0, 18, 180).build());
                             paths.add(new Trajectory(0, 12, 0.4, 15).addPoint(0, 30, 0).addPoint(12, 44, 0).addPoint(25, 44, 0).build());
                             switch (parkLocation) {
 
@@ -63,15 +63,15 @@ public class Constants {
                         case BLUE_SOUTH:
                             paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 23, 0).addPoint(-4, 28, 0).build());
                             paths.add(new Trajectory(0, 28, 0.3, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-62, 22, 0).addPoint(-72, 22, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-62, 21, 0).addPoint(-72, 21, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(-72, 22, 0.4, 10).addPoint(-65, 22, 180).addPoint(-65, 5, 90).build());
+                                    paths.add(new Trajectory(-72, 21, 0.4, 10).addPoint(-65, 21, 180).addPoint(-65, 5, 90).build());
                                     paths.add(new Trajectory(-65, 5, 0.3, 20).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 27, 0.4, 10).addPoint(-65, 27, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 20).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 27, 0.4, 10).addPoint(-65, 27, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 20).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -85,8 +85,8 @@ public class Constants {
                                     paths.add(new Trajectory(-20, 8, 0.3, 20).addPoint(-42, 8, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 27, 0.4, 10).addPoint(-20, 27, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 27, 0.4, 10).addPoint(-20, 27, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;
@@ -134,8 +134,8 @@ public class Constants {
                                     paths.add(new Trajectory(-65, 5, 0.3, 10).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 34, 0.4, 10).addPoint(-65, 34, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 10).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 34, 0.4, 10).addPoint(-65, 34, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 10).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -149,8 +149,8 @@ public class Constants {
                                     paths.add(new Trajectory(-20, 5, 0.3, 20).addPoint(-42, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;
@@ -164,7 +164,7 @@ public class Constants {
                             paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(53, 4, -90).addPoint(60, 27, 0).addPoint(72, 27, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(72, 30, 0.4, 10).addPoint(65, 34, 180).addPoint(65, 59, 90).build());
+                                    paths.add(new Trajectory(72, 30, 0.4, 20).addPoint(65, 34, -180).addPoint(65, 59, 90).build());
                                     paths.add(new Trajectory(65, 59, 0.3, 20).addPoint(87, 59, 0).build());
                                     break;
                                 case RIGHT:
@@ -199,8 +199,8 @@ public class Constants {
                                     paths.add(new Trajectory(-65, 5, 0.3, 20).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 38, 0.4, 10).addPoint(-65, 38, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 20).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 38, 0.4, 10).addPoint(-65, 38, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 20).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -215,8 +215,8 @@ public class Constants {
                                     paths.add(new Trajectory(-20, 8, 0.3, 20).addPoint(-42, 8, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 44, 0.4, 10).addPoint(-20, 44, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 44, 0.4, 10).addPoint(-20, 44, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;

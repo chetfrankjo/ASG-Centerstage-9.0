@@ -63,7 +63,7 @@ public class Auto extends LinearOpMode {
 
                 case VISION:
                     timer.reset();
-                    while (timer.time() < 3 && opModeIsActive()) {
+                    while (timer.time() < 6 && opModeIsActive()) {
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
