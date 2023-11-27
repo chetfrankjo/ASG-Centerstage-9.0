@@ -57,7 +57,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight, pancake;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, pancake, clawLift;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     //private ContinousAnalogAxon gantyEncoder;
@@ -81,14 +81,14 @@ public class RobotDriver {
     private CameraMode cameraMode = CameraMode.IDLE;
     boolean cameraReady = false, getCameraEstimate = false;
     private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET, CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
-    public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength;
+    public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength, slidesDepositTarget = 12;
     private LocalMode localizationMode;
     double slidesI, previousSlidesError;
     ElapsedTime tagTimer, depositTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
-    ClawMode clawMode = ClawMode.RELEASE;
+    ClawMode clawMode = ClawMode.RELEASE_BOTH;
     WeaponsState weaponsState = WeaponsState.INTAKING;
     Servo[] hangReleaseServos;
     OpenCvCamera OpenCvCamL, OpenCvCamR;
@@ -145,7 +145,9 @@ public class RobotDriver {
         slides = Arrays.asList(slidesL, slidesR);
         leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "fr");
 
-        claw = hardwareMap.get(Servo.class, "claw");
+        clawL = hardwareMap.get(Servo.class, "lclaw");
+        clawR = hardwareMap.get(Servo.class, "rclaw");
+        clawLift = hardwareMap.get(Servo.class, "clawLift");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
@@ -317,23 +319,33 @@ public class RobotDriver {
         switch (weaponsState) {
             case PRIMED:
                 slidesTarget = slidesPrimeTarget;
-                clawMode = ClawMode.GRAB;
+                clawMode = ClawMode.PRIMED;
                 weaponsState = WeaponsState.IDLE;
+                break;
+            case EXTEND:
+                slidesTarget = slidesDepositTarget;
+                clawMode=ClawMode.PRIMED;
+                weaponsState=WeaponsState.IDLE;
+                break;
             case DEPOSIT:
-                clawMode = ClawMode.RELEASE;
+                clawMode = ClawMode.RELEASE_BOTH;
                 depositTimer.reset();
                 if (depositTimer.time() > 2) {
                     weaponsState = WeaponsState.INTAKING;
                 }
                 // slides target set to 0 after some time
+                break;
             case INTAKING:
                 slidesTarget = 0;
-                clawMode = ClawMode.RELEASE;
+                clawMode = ClawMode.INTAKING;
                 weaponsState = WeaponsState.IDLE;
+                break;
             case HOLDING:
-                clawMode = ClawMode.GRAB;
+                clawMode = ClawMode.GRAB_BOTH;
                 weaponsState = WeaponsState.IDLE;
+                break;
             case IDLE:
+                break;
                 //do nothing, as all parameters are now set
         }
     }
@@ -528,6 +540,9 @@ public class RobotDriver {
         leftSlidesEnc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftSlidesEnc.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    public void setSlidesDepositTarget(double target) {
+        slidesDepositTarget=target;
+    }
     /*
     public double getGantryPos() {
         return gantryPos;
@@ -595,15 +610,61 @@ public class RobotDriver {
     }
     public void updateClaw() {
         switch (clawMode) {
-            case GRAB:
-                claw.setPosition(1);
-                clawMode = ClawMode.IDLE;
-            case RELEASE:
-                claw.setPosition(0);
-                clawMode = ClawMode.IDLE;
+            case GRAB_L:
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.3);
+                break;
+            case GRAB_R:
+                clawR.setPosition(0.5);
+                clawL.setPosition(0.7);
+                break;
+            case GRAB_BOTH:
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.5);
+                break;
+            case RELEASE_L:
+                clawL.setPosition(0.7);
+                break;
+            case RELEASE_R:
+                clawR.setPosition(0.3);
+                break;
+            case RELEASE_BOTH:
+                // release both claws, do not change lift as you may be dropping on the ground
+                clawL.setPosition(0.7);
+                clawR.setPosition(0.3);
+                break;
+            case PRIMED:
+                // ensure both claws are grabbed, and lift the thingy
+                clawLift.setPosition(1);
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.5);
+                break;
+            case INTAKING:
+                // lift down, both claws open
+                clawLift.setPosition(0.5);
+                clawL.setPosition(0.7);
+                clawR.setPosition(0.3);
             case IDLE:
-                //nothing
+                break;
         }
+    }
+    public void setCLawLPos(double pos) {
+        clawL.setPosition(pos);
+    }
+    public void setCLawRPos(double pos) {
+        clawR.setPosition(pos);
+    }
+    public void setClawLiftPos(double pos) {
+        clawLift.setPosition(pos);
+    }
+    public double getClawLPos() {
+        return clawL.getPosition();
+    }
+    public double getClawRPos() {
+        return clawR.getPosition();
+    }
+    public double getClawLiftPos() {
+        return clawLift.getPosition();
     }
 
     public void setWeaponsState(WeaponsState mode) {

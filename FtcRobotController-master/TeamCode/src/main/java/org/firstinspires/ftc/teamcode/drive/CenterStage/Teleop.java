@@ -18,8 +18,9 @@ public class Teleop extends LinearOpMode{
 
     boolean superMegaDrive = false;
     double planeTarget = 0, wallTarget = 0;
-    boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false;
-
+    boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
+    int X, Y, B;
+    double slidesDepositTarget = 12;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -63,7 +64,7 @@ public class Teleop extends LinearOpMode{
                 driver.setSlidesPower(-gamepad2.left_stick_y); //manual slides
             }
 
-            if (gamepad2.left_stick_y != 0) {
+            /*if (gamepad2.left_stick_y != 0) {
                 driver.setSlidesDisable(false);
             }
             if (gamepad2.b) {
@@ -71,7 +72,210 @@ public class Teleop extends LinearOpMode{
             }
 
 
+
+            if (gamepad1.x && X == 0) {
+                if (driver.getClawLPos() >= 0.6) {
+                    driver.setCLawLPos(0.5);
+                } else {
+                    driver.setCLawLPos(0.7);
+                }
+                X = 1;
+            }
+            if (!gamepad1.x) {
+                X = 0;
+            }
+            if (gamepad1.b && B == 0) {
+                if (driver.getClawRPos() <= 0.4) {
+                    driver.setCLawRPos(0.5);
+                } else {
+                    driver.setCLawRPos(0.3);
+                }
+                B = 1;
+            }
+            if (!gamepad1.b) {
+                B = 0;
+            }
+            if (gamepad1.y && Y == 0) {
+                if (driver.getClawLiftPos() >= 0.8) {
+                    driver.setClawLiftPos(0.5);
+                } else {
+                    driver.setClawLiftPos(1);
+                }
+                Y = 1;
+            }
+            if (!gamepad1.y) {
+                Y = 0;
+            }
+
+             */
+
+
+            if (gamepad2.left_trigger > 0.7 && !tl) {
+                // generic toggle for left claw
+                tl=true;
+                switch (driver.getClawMode()) {
+                    case GRAB_L:
+                        driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case GRAB_R:
+                        // means that l is open, close it
+                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case GRAB_BOTH:
+                        driver.setClawMode(General.ClawMode.RELEASE_L);
+                        break;
+                    case RELEASE_L:
+                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case RELEASE_R:
+                        // means that L is closed, open it
+                        driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case RELEASE_BOTH:
+                        driver.setClawMode(General.ClawMode.GRAB_L);
+                        break;
+                    case PRIMED:
+                        driver.setClawMode(General.ClawMode.RELEASE_L);
+                        break;
+                    case INTAKING:
+                        driver.setClawMode(General.ClawMode.GRAB_L);
+                        break;
+                    case IDLE:
+                        break;
+                }
+            } else {
+                tl = false;
+            }
+
+            if (gamepad2.right_trigger > 0.7 && !tr) {
+                // generic toggle for left claw
+                tr = false;
+                switch (driver.getClawMode()) {
+                    case GRAB_L:
+                        // means that r is open, close it
+                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case GRAB_R:
+                        driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case GRAB_BOTH:
+                        driver.setClawMode(General.ClawMode.RELEASE_R);
+                        break;
+                    case RELEASE_L:
+                        // means that r is closed, open it
+                        driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case RELEASE_R:
+                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case RELEASE_BOTH:
+                        driver.setClawMode(General.ClawMode.GRAB_R);
+                        break;
+                    case PRIMED:
+                        driver.setClawMode(General.ClawMode.RELEASE_R);
+                        break;
+                    case INTAKING:
+                        driver.setClawMode(General.ClawMode.GRAB_R);
+                        break;
+                    case IDLE:
+                        break;
+                }
+            } else {
+                tr = false;
+            }
+
+
+
+            if (gamepad2.left_bumper && !bl) { //grabbing
+                bl = true;
+                switch (driver.getClawMode()) {
+
+                    case GRAB_L:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case GRAB_R:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case GRAB_BOTH:
+                        driver.setWeaponsState(General.WeaponsState.PRIMED);
+                        //driver.setClawMode(General.ClawMode.PRIMED);
+                        break;
+                    case RELEASE_L:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case RELEASE_R:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case RELEASE_BOTH:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case PRIMED:
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        break;
+                    case INTAKING:
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        //driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        break;
+                    case IDLE:
+                        break;
+                }
+            } else {
+                bl = false;
+            }
+
+            if (gamepad2.right_bumper && !br) { // deposit, priming, intaking
+                br = true;
+                switch (driver.getClawMode()) {
+
+                    case GRAB_L:
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        break;
+                    case GRAB_R:
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        break;
+                    case GRAB_BOTH:
+                        driver.setWeaponsState(General.WeaponsState.PRIMED);
+                        //driver.setClawMode(General.ClawMode.PRIMED);
+                        break;
+                    case RELEASE_L:
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        break;
+                    case RELEASE_R:
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        break;
+                    case RELEASE_BOTH:
+                        //lower systems and prepare for intaking
+                        //driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        //TODO: We do nothing here because the automation will automaticall set it to intaking
+                        //      when the timer is up for the deposit. This all happens within RobotDriver (~line 318)
+                        //driver.setSlidesTarget(0);
+                        //driver.setClawMode(General.ClawMode.INTAKING);
+                        break;
+                    case PRIMED:
+                        //deposit
+                        driver.setSlidesDepositTarget(driver.getSlidesLength());
+                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                        //slidesDepositTarget=driver.getSlidesLength();
+                        //driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case INTAKING:
+                        break;
+                    case IDLE:
+                        break;
+                }
+
+            } else {
+                br = false;
+            }
+
+
 /*
+
             if (gamepad2.right_trigger > 0.5) {
                 driver.setWeaponsState(General.WeaponsState.PRIMED);
             }//priming
@@ -96,6 +300,19 @@ public class Teleop extends LinearOpMode{
             }
 
  */
+
+            /*if (gamepad2.left_trigger > 0.7) {
+                driver.setClawMode(General.ClawMode.GRAB_BOTH);
+            }
+            if (gamepad2.right_trigger > 0.7) {
+                driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+            }
+
+             */
+
+            if (gamepad2.a) {
+                driver.setWeaponsState(General.WeaponsState.EXTEND);
+            }
 
             if (gamepad1.a) {
                 driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);

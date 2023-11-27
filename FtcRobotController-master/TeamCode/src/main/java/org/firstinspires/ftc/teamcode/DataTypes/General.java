@@ -22,11 +22,11 @@ public class General {
     }
 
     public enum ClawMode {
-        GRAB, RELEASE, IDLE
+        GRAB_L, GRAB_R, GRAB_BOTH, RELEASE_L, RELEASE_R, RELEASE_BOTH, PRIMED, INTAKING, IDLE
     }
 
     public enum WeaponsState {
-        INTAKING, HOLDING, PRIMED, DEPOSIT, IDLE
+        INTAKING, HOLDING, PRIMED, EXTEND, DEPOSIT, IDLE
     }
 
     public enum AUTO_RED_NORTH_1 {

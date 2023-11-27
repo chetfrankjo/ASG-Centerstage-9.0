@@ -251,7 +251,7 @@ public class Constants {
         public static final double gantryAngleToInch = 0.00;
 
 
-        public static final double defaultSlideLength = 40;
+        public static final double defaultSlideLength = 0;
 
 
     }
