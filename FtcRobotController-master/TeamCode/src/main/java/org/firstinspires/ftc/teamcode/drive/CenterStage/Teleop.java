@@ -25,9 +25,9 @@ public class Teleop extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         RobotDriver driver = new RobotDriver(hardwareMap, false);
-        driver.setWeaponsState(General.WeaponsState.IDLE);
+        driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        driver.resetSlidesEncoder();
         Reader r = new Reader();
         String info = r.readFile("Alliance");
 
@@ -49,7 +49,7 @@ public class Teleop extends LinearOpMode{
                 wallTarget = -90;
                 break;
         }
-        driver.setSlidesDisable(true);
+        driver.setSlidesDisable(false);
 
         ElapsedTime hangtime = new ElapsedTime();
 
@@ -59,10 +59,8 @@ public class Teleop extends LinearOpMode{
 
 
 
-            if (!gamepad2.a) {
 
-                driver.setSlidesPower(-gamepad2.left_stick_y); //manual slides
-            }
+            driver.setSlidesPower(-gamepad2.left_stick_y); //manual slides
 
             /*if (gamepad2.left_stick_y != 0) {
                 driver.setSlidesDisable(false);
@@ -143,13 +141,14 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
-            } else {
+            }
+            if (gamepad2.left_trigger <= 0.7) {
                 tl = false;
             }
 
             if (gamepad2.right_trigger > 0.7 && !tr) {
                 // generic toggle for left claw
-                tr = false;
+                tr = true;
                 switch (driver.getClawMode()) {
                     case GRAB_L:
                         // means that r is open, close it
@@ -180,7 +179,8 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
-            } else {
+            }
+            if (gamepad2.right_trigger <= 0.7) {
                 tr = false;
             }
 
@@ -224,7 +224,8 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
-            } else {
+            }
+            if (!gamepad2.left_bumper) {
                 bl = false;
             }
 
@@ -269,7 +270,8 @@ public class Teleop extends LinearOpMode{
                         break;
                 }
 
-            } else {
+            }
+            if (!gamepad2.right_bumper) {
                 br = false;
             }
 
@@ -332,12 +334,7 @@ public class Teleop extends LinearOpMode{
                 driver.resetIMUHeading();
             }
 
-            if (gamepad2.x) {
-                driver.storePancake();
-            }
-            if (gamepad2.y) {
-                driver.dumpPancake();
-            }
+
 
             if (gamepad1.x) {
                 if (superMegaDrive) {
@@ -355,7 +352,7 @@ public class Teleop extends LinearOpMode{
             } else {
                 g1Launch = false;
             }
-            if (gamepad2.left_bumper) {
+            if (gamepad2.dpad_left) {
                 if (!g1Launch && !g2Launch) {
                     gamepad1.rumble(1, 0, 500);
                 }
@@ -381,7 +378,7 @@ public class Teleop extends LinearOpMode{
                 g1Hang = false;
             }
 
-            if (gamepad2.right_bumper) {
+            if (gamepad2.dpad_right) {
                 if (!g1Hang && !g2Hang) {
                     gamepad1.rumble(0, 1, 500);
                 }
@@ -400,7 +397,6 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad2.back) {
                 driver.resetSlidesEncoder();
-                driver.resetSlidesEncoder();
             }
 
             if (hanging && !gamepad1.dpad_down) {
@@ -414,17 +410,17 @@ public class Teleop extends LinearOpMode{
                 hanging = true;
             } else if (gamepad1.y) {
                 driver.turnInPlace(planeTarget, true, 1.0);
-            } else if (!gamepad2.a) {
-                driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             } else {
-                driver.drive(gamepad2.left_stick_x/4, -gamepad2.left_stick_y/4, gamepad1.right_stick_x, superMegaDrive);
+                driver.drive(gamepad1.left_stick_x+(gamepad2.right_stick_x/3), -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             }
-
 
             telemetry.addData("dist left", driver.getdistLeft());
             telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
             telemetry.addData("dist", driver.getdistRight());
+            telemetry.addData("Claw State", driver.getClawMode().toString());
+            telemetry.addData("slides target", driver.getSlidesTarget());
+            telemetry.addData("slides deposit target", driver.slidesDepositTarget);
             telemetry.addData("loop speed", driver.loopSpeed);
             telemetry.update();
         }

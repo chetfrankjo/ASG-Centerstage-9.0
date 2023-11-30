@@ -289,11 +289,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(10, 125);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(180, 125);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(250, 95);
-        public static final int REGION_WIDTH = 25;
-        public static final int REGION_HEIGHT = 25;
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70, 160);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(300, 150);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(560, 150);
+        public static final int REGION_WIDTH = 50;
+        public static final int REGION_HEIGHT = 50;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 

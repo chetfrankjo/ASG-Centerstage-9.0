@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
+import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -27,7 +28,7 @@ import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline;
 public class PropDetectionTest extends LinearOpMode
 {
     OpenCvCamera webcam;
-    PropDetectionPipeline_DualZone pipeline;
+    ThreeZonePropDetectionPipeline pipeline;
     public static int avg1, avg2, avg3, avg4, avg5;
     @Override
     public void runOpMode()
@@ -35,7 +36,7 @@ public class PropDetectionTest extends LinearOpMode
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new PropDetectionPipeline_DualZone(true, General.AllianceLocation.RED_SOUTH);
+        pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.RED_SOUTH);
         webcam.setPipeline(pipeline);
 
 
@@ -44,7 +45,7 @@ public class PropDetectionTest extends LinearOpMode
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640,360, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override

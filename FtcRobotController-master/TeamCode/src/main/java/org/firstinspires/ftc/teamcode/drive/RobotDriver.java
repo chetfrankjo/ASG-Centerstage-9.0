@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.vision.PDP_DualCamera;
 import org.firstinspires.ftc.teamcode.vision.PDP_LeftCam;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
+import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -84,6 +85,7 @@ public class RobotDriver {
     public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength, slidesDepositTarget = 12;
     private LocalMode localizationMode;
     double slidesI, previousSlidesError;
+    private boolean waitingForDepsoit = false;
     ElapsedTime tagTimer, depositTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
@@ -91,10 +93,10 @@ public class RobotDriver {
     ClawMode clawMode = ClawMode.RELEASE_BOTH;
     WeaponsState weaponsState = WeaponsState.INTAKING;
     Servo[] hangReleaseServos;
-    OpenCvCamera OpenCvCamL, OpenCvCamR;
-    PropDetectionPipeline_DualZone propPipeline;
+    OpenCvCamera PropDetectionCamera;
     PDP_LeftCam pipelineLeft;
     PDP_DualCamera pipelineRight;
+    ThreeZonePropDetectionPipeline propPipeline;
 
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
@@ -174,19 +176,17 @@ public class RobotDriver {
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
+        //int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-        OpenCvCamL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), viewportContainerIds[0]);
-        pipelineLeft = new PDP_LeftCam(true, loadAlliancePreset());
-        OpenCvCamL.setPipeline(pipelineLeft);
-        OpenCvCamR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 2"), viewportContainerIds[1]);
-        pipelineRight = new PDP_DualCamera(true, loadAlliancePreset());
-        OpenCvCamR.setPipeline(pipelineRight);
+        PropDetectionCamera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
+        PropDetectionCamera.setPipeline(propPipeline);
+
         if (prepAutoCamera) {
-            OpenCvCamL.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            PropDetectionCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                 @Override
                 public void onOpened() {
-                    OpenCvCamL.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                    PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
                     cameraReady = true;
                 }
 
@@ -197,20 +197,7 @@ public class RobotDriver {
                      */
                 }
             });
-            OpenCvCamR.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-                @Override
-                public void onOpened() {
-                    OpenCvCamR.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-                    cameraReady = true;
-                }
 
-                @Override
-                public void onError(int errorCode) {
-                    /*
-                     * This will be called if the camera could not be opened
-                     */
-                }
-            });
             cameraMode = CameraMode.PROP;
         }
 
@@ -318,7 +305,7 @@ public class RobotDriver {
     public void updateAutomation() {
         switch (weaponsState) {
             case PRIMED:
-                slidesTarget = slidesPrimeTarget;
+                slidesTarget = 0;//slidesPrimeTarget
                 clawMode = ClawMode.PRIMED;
                 weaponsState = WeaponsState.IDLE;
                 break;
@@ -330,10 +317,8 @@ public class RobotDriver {
             case DEPOSIT:
                 clawMode = ClawMode.RELEASE_BOTH;
                 depositTimer.reset();
-                if (depositTimer.time() > 2) {
-                    weaponsState = WeaponsState.INTAKING;
-                }
-                // slides target set to 0 after some time
+                waitingForDepsoit = true;
+                weaponsState=WeaponsState.IDLE;
                 break;
             case INTAKING:
                 slidesTarget = 0;
@@ -345,6 +330,10 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE:
+                if (depositTimer.time() > 1.2 && waitingForDepsoit) {
+                    waitingForDepsoit=false;
+                    weaponsState = WeaponsState.INTAKING;
+                }
                 break;
                 //do nothing, as all parameters are now set
         }
@@ -417,10 +406,10 @@ public class RobotDriver {
     public void updateCamera() {
         if (cameraMode == CameraMode.PROP) {
             if (!cameraReady) {
-                OpenCvCamL.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                PropDetectionCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                     @Override
                     public void onOpened() {
-                        OpenCvCamL.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                        PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
                         cameraReady = true;
                     }
 
@@ -431,28 +420,15 @@ public class RobotDriver {
                          */
                     }
                 });
-                OpenCvCamR.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-                    @Override
-                    public void onOpened() {
-                        OpenCvCamR.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-                        cameraReady = true;
-                    }
 
-                    @Override
-                    public void onError(int errorCode) {
-                        /*
-                         * This will be called if the camera could not be opened
-                         */
-                    }
-                });
-                propLocation = pipelineRight.getAnalysis(pipelineLeft.getReadings()); //get the estimate
+                propLocation = propPipeline.getAnalysis(); //get the estimate
                 //OpenCvCam.stopStreaming();
                 //OpenCvCam.closeCameraDevice();
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
             //propLocation = propPipeline.getAnalysis(); //get the estimate
-            propLocation = pipelineRight.getAnalysis(pipelineLeft.getReadings());
+            propLocation = propPipeline.getAnalysis();
 
         } else if (cameraMode == CameraMode.APRILTAG) {
             visionPortal.setProcessorEnabled(aprilTag, true);
@@ -481,10 +457,8 @@ public class RobotDriver {
             }
         } else if (cameraMode == CameraMode.IDLE) {
             if (cameraReady) {
-                OpenCvCamL.stopStreaming();
-                OpenCvCamL.closeCameraDevice();
-                OpenCvCamR.stopStreaming();
-                OpenCvCamR.closeCameraDevice();
+                PropDetectionCamera.stopStreaming();
+                PropDetectionCamera.closeCameraDevice();
                 cameraReady = false;
             }
         }
@@ -509,6 +483,11 @@ public class RobotDriver {
     public void updateSlides() {
         if (slidesPower == 0) {
             if (!slidesDisable) {
+
+                if (slidesTarget<0) {
+                    slidesTarget=0;
+                }
+
                 //DO PID STUFF
                 double error = (slidesTarget - slidesLength);
                 double p = AssemblyConstants.slidesPIDConstants.p * error;
@@ -542,6 +521,9 @@ public class RobotDriver {
     }
     public void setSlidesDepositTarget(double target) {
         slidesDepositTarget=target;
+    }
+    public double getSlidesTarget() {
+        return slidesTarget;
     }
     /*
     public double getGantryPos() {
@@ -641,7 +623,7 @@ public class RobotDriver {
                 break;
             case INTAKING:
                 // lift down, both claws open
-                clawLift.setPosition(0.5);
+                clawLift.setPosition(0.55);
                 clawL.setPosition(0.7);
                 clawR.setPosition(0.3);
             case IDLE:
