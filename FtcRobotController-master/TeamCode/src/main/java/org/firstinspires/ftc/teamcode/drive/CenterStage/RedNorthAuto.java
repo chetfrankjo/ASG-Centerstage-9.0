@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 import java.util.ArrayList;
 
+@Disabled
 @Autonomous(group = "b")
 public class RedNorthAuto extends LinearOpMode {
     General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.VISION;

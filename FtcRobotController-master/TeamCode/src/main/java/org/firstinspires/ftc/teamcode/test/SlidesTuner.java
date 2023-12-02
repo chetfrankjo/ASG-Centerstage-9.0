@@ -10,11 +10,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.drive.Constants;
-@Disabled
+
 @Config
 @TeleOp
 public class SlidesTuner extends LinearOpMode {
-    public static double slidesTarget = -700;
+    public static double slidesTarget = -0;
     double slidesLength, slidesI, previousSlidesError;
     public static double pc, ic, dc, fc;
     long lastLoopTime = System.nanoTime();
@@ -43,7 +43,8 @@ public class SlidesTuner extends LinearOpMode {
 
 
             loops++;
-            long currentTime = System.nanoTime();
+
+            /*long currentTime = System.nanoTime();
             if (loops == 1){
                 lastLoopTime = currentTime;
             }
@@ -58,6 +59,10 @@ public class SlidesTuner extends LinearOpMode {
 
 
             previousSlidesError = error;
+
+             */
+
+            double power = (slidesTarget-slidesLength) * pc;
 
             sl.setPower(power);
             sr.setPower(power);

@@ -39,6 +39,15 @@ public class Trajectory {
         return this;
     }
 
+    public Trajectory addPointSpeed(double x, double y, double targetAngle, double movespeed) {
+        path.add(new CurvePoint(x, y, movespeed, 0.4, Math.toRadians(targetAngle), followDistance, Math.toRadians(50), 0.5, false, 0));
+        return this;
+    }
+    public Trajectory addPointFollow(double x, double y, double targetAngle, double followDistance) {
+        path.add(new CurvePoint(x, y, movespeed, 0.4, Math.toRadians(targetAngle), followDistance, Math.toRadians(50), 0.5, false, 0));
+        return this;
+    }
+
     public void addAdvanced(CurvePoint point) {
         path.add(point);
     }

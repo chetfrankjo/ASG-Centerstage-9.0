@@ -11,12 +11,12 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.firstinspires.ftc.teamcode.DataTypes.General.SpikePosition;
 import org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants;
 
-public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
+public class PDP_LeftCam extends OpenCvPipeline {
     boolean overlay;
     public static int MIN_THRESH;
     public static double GREEN_THRESH;
     General.AllianceLocation color = General.AllianceLocation.RED_NORTH;
-    public PropDetectionPipeline_DualZone(boolean enableOverlay, General.AllianceLocation color) {
+    public PDP_LeftCam(boolean enableOverlay, General.AllianceLocation color) {
         overlay = enableOverlay;
         if (color == General.AllianceLocation.RED_NORTH || color == General.AllianceLocation.RED_SOUTH) {
             MIN_THRESH = 120;
@@ -103,10 +103,6 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
         avg2g = (int) Core.mean(region2_green).val[0];
         avgcal = (int) Core.mean(calibration_region).val[0];
 
-        if (color == General.AllianceLocation.BLUE_NORTH || color == General.AllianceLocation.BLUE_SOUTH) {
-            avg1 = avg1 + 30;
-        }
-
         if (overlay) {
             Imgproc.rectangle(
                     input, // Buffer to draw on
@@ -121,42 +117,6 @@ public class PropDetectionPipeline_DualZone extends OpenCvPipeline {
                     BLUE, // The color the rectangle is drawn in
                     2); // Thickness of the rectangle lines
 
-        }
-        int max = Math.max(avg1, avg2);
-
-
-        if (((max == avg1 && avg1 > 80 && avg1 < 150) || (avg2g >= GREEN_THRESH && avg1 > 60)) && max > MIN_THRESH && avg1g < GREEN_THRESH) // Was it from region 1?
-        {
-
-            position = SpikePosition.LEFT; // Record our analysis
-
-            if (overlay) {
-                Imgproc.rectangle(
-                        input, // Buffer to draw on
-                        region1_pointA, // First point which defines the rectangle
-                        region1_pointB, // Second point which defines the rectangle
-                        GREEN, // The color the rectangle is drawn in
-                        -1); // Negative thickness means solid fill
-            }
-        } else if (((max == avg2 && avg2 > 80 && avg2 < 150) || (avg1g >= GREEN_THRESH && avg2 > 60)) && max > MIN_THRESH && avg2g < GREEN_THRESH) // Was it from region 2?
-        {
-            position = SpikePosition.CENTER; // Record our analysis
-            if (overlay) {
-                Imgproc.rectangle(
-                        input, // Buffer to draw on
-                        region2_pointA, // First point which defines the rectangle
-                        region2_pointB, // Second point which defines the rectangle
-                        GREEN, // The color the rectangle is drawn in
-                        -1); // Negative thickness means solid fill
-            }
-        } else {
-            position = SpikePosition.RIGHT; // Record our analysis
-            Imgproc.rectangle(
-                    input, // Buffer to draw on
-                    new Point(0,0), // First point which defines the rectangle
-                    new Point(15, 15), // Second point which defines the rectangle
-                    GREEN, // The color the rectangle is drawn in
-                    -1); // Negative thickness means solid fill
         }
 
         return input;

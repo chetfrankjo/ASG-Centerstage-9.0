@@ -31,7 +31,7 @@ public class Constants {
                         case RED_SOUTH:
                             paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(-6, 29, 0).build());
                             paths.add(new Trajectory(-5, 29, 0.4, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 43, 0).addPoint(72, 43, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(53, 4, -90).addPoint(60, 43, 0).addPoint(72, 43, 0).build());
                             switch (parkLocation) {
 
                                 case LEFT:
@@ -45,33 +45,33 @@ public class Constants {
                             }
                             break;
                         case RED_NORTH:
-                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(-6, 29, 0).build());
-                            paths.add(new Trajectory(-5, 29, 0.6, 5).addPoint(0, 15, 180).build());
-                            paths.add(new Trajectory(0, 12, 0.4, 15).addPoint(0, 30, 0).addPoint(12, 44, 0).addPoint(25, 44, 0).build());
+                            paths.add(new Trajectory(0, 0,0.27, 10, 0.25).addPoint(0, 23, 0).addPoint(-3, 28, 0).build());
+                            paths.add(new Trajectory(-3, 27, 0.6, 5).addPoint(0, 18, 180).build());
+                            paths.add(new Trajectory(0, 18, 0.4, 13).addPoint(0, 30, 0).addPoint(12, 34, 0).addPoint(31, 34, 0).addPointSpeed(31, 41, 90, 0.4).build());
                             switch (parkLocation) {
 
                                 case LEFT:
-                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(31, 41, 0.4, 15).addPoint(20, 41, 180).addPointSpeed(20, 59, 90, 0.3).build());
                                     paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(31, 41, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
                                     paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
                                     break;
                             }
                             break;
                         case BLUE_SOUTH:
-                            paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 20, 0).addPoint(-4, 28, 0).build());
-                            paths.add(new Trajectory(0, 27, 0.3, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-62, 27, 0).addPoint(-72, 27, 0).build());
+                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 23, 0).addPoint(-4, 28, 0).build());
+                            paths.add(new Trajectory(0, 28, 0.3, 5).addPoint(0, 4, 180).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-62, 21, 0).addPoint(-72, 21, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(-72, 27, 0.4, 10).addPoint(-65, 27, 180).addPoint(-65, 8, 90).build());
-                                    paths.add(new Trajectory(-65, 8, 0.3, 20).addPoint(-87, 8, 0).build());
+                                    paths.add(new Trajectory(-72, 21, 0.4, 10).addPoint(-65, 21, 180).addPoint(-65, 5, 90).build());
+                                    paths.add(new Trajectory(-65, 5, 0.3, 20).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 27, 0.4, 10).addPoint(-65, 27, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 20).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 27, 0.4, 10).addPoint(-65, 27, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 20).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -85,8 +85,8 @@ public class Constants {
                                     paths.add(new Trajectory(-20, 8, 0.3, 20).addPoint(-42, 8, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 27, 0.4, 10).addPoint(-20, 27, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 27, 0.4, 10).addPoint(-20, 27, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;
@@ -97,7 +97,7 @@ public class Constants {
                         case RED_SOUTH:
                             paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
                             paths.add(new Trajectory(0, 27, 0.3, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 34, 0).addPoint(72, 34, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(55, 4, -90).addPoint(60, 32, 0).addPoint(72, 32, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
                                     paths.add(new Trajectory(72, 34, 0.4, 10).addPoint(65, 34, 180).addPoint(65, 59, 90).build());
@@ -127,15 +127,15 @@ public class Constants {
                         case BLUE_SOUTH:
                             paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
                             paths.add(new Trajectory(0, 27, 0.3, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-63, 34, 0).addPoint(-72, 34, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-63, 30, 0).addPoint(-72, 30, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(-72, 34, 0.4, 10).addPoint(-65, 34, 180).addPoint(-65, 8, 90).build());
-                                    paths.add(new Trajectory(-65, 8, 0.3, 10).addPoint(-87, 8, 0).build());
+                                    paths.add(new Trajectory(-72, 30, 0.4, 10).addPoint(-65, 30, 180).addPoint(-65, 5, 90).build());
+                                    paths.add(new Trajectory(-65, 5, 0.3, 10).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 34, 0.4, 10).addPoint(-65, 34, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 10).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 34, 0.4, 10).addPoint(-65, 34, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 10).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -145,12 +145,12 @@ public class Constants {
                             paths.add(new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(-25, 34, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, 180).addPoint(-20, 8, 90).build());
-                                    paths.add(new Trajectory(-20, 8, 0.3, 20).addPoint(-42, 8, 0).build());
+                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, -180).addPoint(-20, 5, 90).build());
+                                    paths.add(new Trajectory(-20, 5, 0.3, 20).addPoint(-42, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 34, 0.4, 10).addPoint(-20, 34, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;
@@ -159,12 +159,12 @@ public class Constants {
                 case RIGHT:
                     switch (allianceLocation) {
                         case RED_SOUTH:
-                            paths.add(new Trajectory(0, 0,0.3, 10).addPoint(0, 20, 0).addPoint(4, 28, 0).build());
+                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 23, 0).addPoint(4, 28, 0).build());
                             paths.add(new Trajectory(0, 27, 0.3, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(50, 4, -90).addPoint(57, 30, 0).addPoint(72, 30, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(53, 4, -90).addPoint(60, 27, 0).addPoint(72, 27, 0).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(72, 30, 0.4, 10).addPoint(65, 34, 180).addPoint(65, 59, 90).build());
+                                    paths.add(new Trajectory(72, 30, 0.4, 20).addPoint(65, 34, -180).addPoint(65, 59, 90).build());
                                     paths.add(new Trajectory(65, 59, 0.3, 20).addPoint(87, 59, 0).build());
                                     break;
                                 case RIGHT:
@@ -191,16 +191,16 @@ public class Constants {
                         case BLUE_SOUTH:
                             paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 20, 0).addPoint(6, 29, 0).build());
                             paths.add(new Trajectory(5, 29, 0.4, 5).addPoint(0, 4, 180).build());
-                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-63, 43, 0).addPoint(-72, 43, 0).build());
+                            paths.add(new Trajectory(0, 4, 0.4, 15).addPoint(-55, 4, 90).addPoint(-63, 38, 0).addPoint(-72, 38, 0).build());
                             switch (parkLocation) {
 
                                 case LEFT:
-                                    paths.add(new Trajectory(-70, 44, 0.4, 10).addPoint(-65, 44, 180).addPoint(-65, 8, 90).build());
-                                    paths.add(new Trajectory(-65, 8, 0.3, 20).addPoint(-87, 8, 0).build());
+                                    paths.add(new Trajectory(-70, 38, 0.4, 10).addPoint(-65, 38, -180).addPoint(-65, 5, 90).build());
+                                    paths.add(new Trajectory(-65, 5, 0.3, 20).addPoint(-87, 5, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-72, 43, 0.4, 10).addPoint(-65, 43, 180).addPoint(-65, 59, -90).build());
-                                    paths.add(new Trajectory(-65, 59, 0.3, 20).addPoint(-87, 59, 0).build());
+                                    paths.add(new Trajectory(-72, 38, 0.4, 10).addPoint(-65, 38, 180).addPoint(-65, 56, -90).build());
+                                    paths.add(new Trajectory(-65, 56, 0.3, 20).addPoint(-87, 56, 0).build());
                                     break;
                             }
                             break;
@@ -215,8 +215,8 @@ public class Constants {
                                     paths.add(new Trajectory(-20, 8, 0.3, 20).addPoint(-42, 8, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(-25, 44, 0.4, 10).addPoint(-20, 44, 180).addPoint(-20, 59, -90).build());
-                                    paths.add(new Trajectory(-20, 59, 0.3, 20).addPoint(-42, 59, 0).build());
+                                    paths.add(new Trajectory(-25, 44, 0.4, 10).addPoint(-20, 44, 180).addPoint(-20, 56, -90).build());
+                                    paths.add(new Trajectory(-20, 56, 0.3, 20).addPoint(-42, 56, 0).build());
                                     break;
                             }
                             break;
@@ -251,7 +251,7 @@ public class Constants {
         public static final double gantryAngleToInch = 0.00;
 
 
-        public static final double defaultSlideLength = 40;
+        public static final double defaultSlideLength = 0;
 
 
     }
@@ -260,7 +260,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 13.72449; //13.37
+        public static final double wheelbaseseparation = 12.8125*1.001297978861487; //13.37
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = -5.15;
 
@@ -289,11 +289,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(10, 125);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(180, 125);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(270, 125);
-        public static final int REGION_WIDTH = 25;
-        public static final int REGION_HEIGHT = 25;
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70, 160);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(300, 150);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(560, 150);
+        public static final int REGION_WIDTH = 50;
+        public static final int REGION_HEIGHT = 50;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 

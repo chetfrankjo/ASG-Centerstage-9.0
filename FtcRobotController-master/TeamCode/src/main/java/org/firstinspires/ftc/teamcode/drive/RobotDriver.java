@@ -37,8 +37,11 @@ import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
+import org.firstinspires.ftc.teamcode.vision.PDP_DualCamera;
+import org.firstinspires.ftc.teamcode.vision.PDP_LeftCam;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
+import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -55,7 +58,8 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, claw, launcher, hangReleaseLeft, hangReleaseRight, pancake;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, pancake, clawLift;
+    private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
@@ -68,28 +72,32 @@ public class RobotDriver {
     private double slidesLength, touchVal, imuheading, gantryPos;
     double slidesTarget, slidesPower, gantryTarget, gantryPower, intakePower, plungerPos;
     static double frp=0, flp=0, brp=0, blp=0;
-    public boolean useIMU = false;
+    public boolean useIMU = false, slidesDisable;
     final double slideTickToInch = AssemblyConstants.slideTickToInch;
     public int loops = 0;
     long lastLoopTime = System.nanoTime();
     public double loopSpeed = 0;
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
+    public static double CONSTANT = DriveConstants.horizontalTickOffset;
     public Canvas overlay;
     private CameraMode cameraMode = CameraMode.IDLE;
     boolean cameraReady = false, getCameraEstimate = false;
     private static final double CAMERA_X_OFFSET = DriveConstants.CAMERA_X_OFFSET, CAMERA_Y_OFFSET = DriveConstants.CAMERA_Y_OFFSET;
-    public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength;
+    public double slidesPrimeTarget = AssemblyConstants.defaultSlideLength, slidesDepositTarget = 12;
     private LocalMode localizationMode;
     double slidesI, previousSlidesError;
+    private boolean waitingForDepsoit = false;
     ElapsedTime tagTimer, depositTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
-    ClawMode clawMode = ClawMode.RELEASE;
+    ClawMode clawMode = ClawMode.RELEASE_BOTH;
     WeaponsState weaponsState = WeaponsState.INTAKING;
     Servo[] hangReleaseServos;
-    OpenCvCamera OpenCvCam;
-    PropDetectionPipeline_DualZone propPipeline;
+    OpenCvCamera PropDetectionCamera;
+    PDP_LeftCam pipelineLeft;
+    PDP_DualCamera pipelineRight;
+    ThreeZonePropDetectionPipeline propPipeline;
 
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
@@ -140,12 +148,17 @@ public class RobotDriver {
         slides = Arrays.asList(slidesL, slidesR);
         leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "fr");
 
-        claw = hardwareMap.get(Servo.class, "claw");
+        clawL = hardwareMap.get(Servo.class, "lclaw");
+        clawR = hardwareMap.get(Servo.class, "rclaw");
+        clawLift = hardwareMap.get(Servo.class, "clawLift");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
         pancake = hardwareMap.get(Servo.class, "pancake");
         hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
+
+        distLeft = hardwareMap.get(AnalogInput.class, "distleft");
+        distRight = hardwareMap.get(AnalogInput.class, "distright");
 
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -164,15 +177,17 @@ public class RobotDriver {
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        propPipeline = new PropDetectionPipeline_DualZone(true, loadAlliancePreset());
-        OpenCvCam.setPipeline(propPipeline);
+        //int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
+
+        PropDetectionCamera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
+        PropDetectionCamera.setPipeline(propPipeline);
 
         if (prepAutoCamera) {
-            OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            PropDetectionCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                 @Override
                 public void onOpened() {
-                    OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                    PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
                     cameraReady = true;
                 }
 
@@ -183,6 +198,7 @@ public class RobotDriver {
                      */
                 }
             });
+
             cameraMode = CameraMode.PROP;
         }
 
@@ -290,24 +306,36 @@ public class RobotDriver {
     public void updateAutomation() {
         switch (weaponsState) {
             case PRIMED:
-                slidesTarget = slidesPrimeTarget;
-                clawMode = ClawMode.GRAB;
+                slidesTarget = 0;//slidesPrimeTarget
+                clawMode = ClawMode.PRIMED;
                 weaponsState = WeaponsState.IDLE;
+                break;
+            case EXTEND:
+                slidesTarget = slidesDepositTarget;
+                clawMode=ClawMode.PRIMED;
+                weaponsState=WeaponsState.IDLE;
+                break;
             case DEPOSIT:
-                clawMode = ClawMode.RELEASE;
+                clawMode = ClawMode.RELEASE_BOTH;
                 depositTimer.reset();
-                if (depositTimer.time() > 2) {
-                    weaponsState = WeaponsState.INTAKING;
-                }
-                // slides target set to 0 after some time
+                waitingForDepsoit = true;
+                weaponsState=WeaponsState.IDLE;
+                break;
             case INTAKING:
                 slidesTarget = 0;
-                clawMode = ClawMode.RELEASE;
+                clawMode = ClawMode.INTAKING;
                 weaponsState = WeaponsState.IDLE;
+                break;
             case HOLDING:
-                clawMode = ClawMode.GRAB;
+                clawMode = ClawMode.GRAB_BOTH;
                 weaponsState = WeaponsState.IDLE;
+                break;
             case IDLE:
+                if (depositTimer.time() > 1.2 && waitingForDepsoit) {
+                    waitingForDepsoit=false;
+                    weaponsState = WeaponsState.INTAKING;
+                }
+                break;
                 //do nothing, as all parameters are now set
         }
     }
@@ -366,16 +394,23 @@ public class RobotDriver {
         }
     }
 
+    public double getdistLeft() {
+        return ((distLeft.getVoltage()*1000)/3.2);
+    }
+    public double getdistRight() {
+        return ((distRight.getVoltage()*1000)/3.2);
+    }
+
     /**
      * Handles ALL camera functions. Switching between detection states is done with a variable
      */
     public void updateCamera() {
         if (cameraMode == CameraMode.PROP) {
             if (!cameraReady) {
-                OpenCvCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                PropDetectionCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                     @Override
                     public void onOpened() {
-                        OpenCvCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                        PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
                         cameraReady = true;
                     }
 
@@ -386,13 +421,15 @@ public class RobotDriver {
                          */
                     }
                 });
+
                 propLocation = propPipeline.getAnalysis(); //get the estimate
                 //OpenCvCam.stopStreaming();
                 //OpenCvCam.closeCameraDevice();
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
-            propLocation = propPipeline.getAnalysis(); //get the estimate
+            //propLocation = propPipeline.getAnalysis(); //get the estimate
+            propLocation = propPipeline.getAnalysis();
 
         } else if (cameraMode == CameraMode.APRILTAG) {
             visionPortal.setProcessorEnabled(aprilTag, true);
@@ -421,8 +458,8 @@ public class RobotDriver {
             }
         } else if (cameraMode == CameraMode.IDLE) {
             if (cameraReady) {
-                OpenCvCam.stopStreaming();
-                OpenCvCam.closeCameraDevice();
+                PropDetectionCamera.stopStreaming();
+                PropDetectionCamera.closeCameraDevice();
                 cameraReady = false;
             }
         }
@@ -434,6 +471,7 @@ public class RobotDriver {
     public void getCameraEstimate() {getCameraEstimate = true;}
     public void setLocalizationMode(LocalMode mode) {localizationMode = mode;}
 
+    public void setSlidesDisable(boolean disable) {slidesDisable = disable;}
     public double getSlidesLength() {
         return slidesLength;
     }
@@ -445,22 +483,40 @@ public class RobotDriver {
     }
     public void updateSlides() {
         if (slidesPower == 0) {
-            //DO PID STUFF
-            double error = (slidesTarget-slidesLength);
-            double p = AssemblyConstants.slidesPIDConstants.p * error;
-            slidesI+=AssemblyConstants.slidesPIDConstants.i * error * loopSpeed;
-            double d = AssemblyConstants.slidesPIDConstants.d * (error-previousSlidesError) / loopSpeed;
-            double power = (p+slidesI+d + (Math.signum(error)*AssemblyConstants.slidesPIDConstants.f));
-            for (DcMotorEx slide : slides) {
-                slide.setPower(power);
-            }
+            if (!slidesDisable) {
 
-            previousSlidesError = error;
+                if (slidesTarget<0) {
+                    slidesTarget=0;
+                }
+
+                //DO PID STUFF
+                double error = (slidesTarget - slidesLength);
+                double p = AssemblyConstants.slidesPIDConstants.p * error;
+                slidesI += AssemblyConstants.slidesPIDConstants.i * error * loopSpeed;
+                double d = AssemblyConstants.slidesPIDConstants.d * (error - previousSlidesError) / loopSpeed;
+                double power = (p + slidesI + d + (Math.signum(error) * AssemblyConstants.slidesPIDConstants.f));
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(power);
+                }
+
+                previousSlidesError = error;
+            } else {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(0);
+                }
+            }
         } else {
-            for (DcMotorEx slide : slides) {
-                slide.setPower(slidesPower);
+            if ((slidesLength <= 0 && slidesPower > 0) || (slidesLength > 0)) {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(slidesPower);
+                }
+            } else {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(0);
+                }
             }
             slidesTarget = slidesLength; //TODO: this will make the PID one loop of error behind. This will need fixed if bounce-back is a problem.
+
         }
     }
     public void resetSlidesEncoder() {
@@ -470,6 +526,12 @@ public class RobotDriver {
         }
         leftSlidesEnc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftSlidesEnc.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    public void setSlidesDepositTarget(double target) {
+        slidesDepositTarget=target;
+    }
+    public double getSlidesTarget() {
+        return slidesTarget;
     }
     /*
     public double getGantryPos() {
@@ -538,15 +600,61 @@ public class RobotDriver {
     }
     public void updateClaw() {
         switch (clawMode) {
-            case GRAB:
-                claw.setPosition(1);
-                clawMode = ClawMode.IDLE;
-            case RELEASE:
-                claw.setPosition(0);
-                clawMode = ClawMode.IDLE;
+            case GRAB_L:
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.3);
+                break;
+            case GRAB_R:
+                clawR.setPosition(0.5);
+                clawL.setPosition(0.7);
+                break;
+            case GRAB_BOTH:
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.5);
+                break;
+            case RELEASE_L:
+                clawL.setPosition(0.7);
+                break;
+            case RELEASE_R:
+                clawR.setPosition(0.3);
+                break;
+            case RELEASE_BOTH:
+                // release both claws, do not change lift as you may be dropping on the ground
+                clawL.setPosition(0.7);
+                clawR.setPosition(0.3);
+                break;
+            case PRIMED:
+                // ensure both claws are grabbed, and lift the thingy
+                clawLift.setPosition(1);
+                clawL.setPosition(0.5);
+                clawR.setPosition(0.5);
+                break;
+            case INTAKING:
+                // lift down, both claws open
+                clawLift.setPosition(0.55);
+                clawL.setPosition(0.7);
+                clawR.setPosition(0.3);
             case IDLE:
-                //nothing
+                break;
         }
+    }
+    public void setCLawLPos(double pos) {
+        clawL.setPosition(pos);
+    }
+    public void setCLawRPos(double pos) {
+        clawR.setPosition(pos);
+    }
+    public void setClawLiftPos(double pos) {
+        clawLift.setPosition(pos);
+    }
+    public double getClawLPos() {
+        return clawL.getPosition();
+    }
+    public double getClawRPos() {
+        return clawR.getPosition();
+    }
+    public double getClawLiftPos() {
+        return clawLift.getPosition();
     }
 
     public void setWeaponsState(WeaponsState mode) {
