@@ -78,6 +78,7 @@ public class RobotDriver {
     long lastLoopTime = System.nanoTime();
     public double loopSpeed = 0;
     public static double ROBOT_RADIUS = Constants.DriveConstants.ROBOT_RADIUS;
+    public static double CONSTANT = DriveConstants.horizontalTickOffset;
     public Canvas overlay;
     private CameraMode cameraMode = CameraMode.IDLE;
     boolean cameraReady = false, getCameraEstimate = false;
@@ -505,10 +506,17 @@ public class RobotDriver {
                 }
             }
         } else {
-            for (DcMotorEx slide : slides) {
-                slide.setPower(slidesPower);
+            if ((slidesLength <= 0 && slidesPower > 0) || (slidesLength > 0)) {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(slidesPower);
+                }
+            } else {
+                for (DcMotorEx slide : slides) {
+                    slide.setPower(0);
+                }
             }
             slidesTarget = slidesLength; //TODO: this will make the PID one loop of error behind. This will need fixed if bounce-back is a problem.
+
         }
     }
     public void resetSlidesEncoder() {

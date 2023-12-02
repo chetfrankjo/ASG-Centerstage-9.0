@@ -421,6 +421,7 @@ public class Teleop extends LinearOpMode{
             telemetry.addData("Claw State", driver.getClawMode().toString());
             telemetry.addData("slides target", driver.getSlidesTarget());
             telemetry.addData("slides deposit target", driver.slidesDepositTarget);
+            telemetry.addData("slides pos", driver.getSlidesLength());
             telemetry.addData("loop speed", driver.loopSpeed);
             telemetry.update();
         }

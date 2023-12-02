@@ -61,7 +61,7 @@ public class Localizer {
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        robotpos = new Pose2d((x/COUNTS_PER_INCH)+(startYOffset*Math.cos(angle))-(startXOffset*Math.sin(angle)), ((y/COUNTS_PER_INCH)+(startYOffset*Math.sin(angle))-(startXOffset*Math.cos(angle))), Math.toDegrees(angle));
+        robotpos = new Pose2d((x/COUNTS_PER_INCH)+(startYOffset*Math.cos(angle))-(startXOffset*Math.sin(angle)), -((y/COUNTS_PER_INCH)+(startYOffset*Math.sin(angle))-(startXOffset*Math.cos(angle))), Math.toDegrees(-angle));
         //robotpos = new Pose2d((x/COUNTS_PER_INCH), (y/COUNTS_PER_INCH), Math.toDegrees(angle));
 
         for (int i=0; i<prevencoders.length; i++) {

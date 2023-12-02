@@ -45,7 +45,7 @@ public class PropDetectionTest extends LinearOpMode
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(640,360, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(1920,1080, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override

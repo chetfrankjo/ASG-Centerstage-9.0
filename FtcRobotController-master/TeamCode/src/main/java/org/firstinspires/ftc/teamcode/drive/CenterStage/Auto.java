@@ -24,6 +24,8 @@ public class Auto extends LinearOpMode {
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.storeAll();
         driver.resetIMUHeading();
+        driver.setWeaponsState(General.WeaponsState.HOLDING);
+
 
         timer = new ElapsedTime();
         timer.reset();
@@ -47,12 +49,12 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
         telemetry.update();
-        driver.storePancake();
+        driver.setClawLiftPos(0.55);
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
 
-
+            driver.setSlidesDepositTarget(29);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);
@@ -63,7 +65,8 @@ public class Auto extends LinearOpMode {
 
                 case VISION:
                     timer.reset();
-                    while (timer.time() < 6 && opModeIsActive()) {
+
+                    while (timer.time() < 3 && opModeIsActive()) {
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
@@ -85,6 +88,23 @@ public class Auto extends LinearOpMode {
 
                         while (timer.time() < 1 && opModeIsActive()) {
                             driver.followCurve(trajectories.get(0).path);
+                            switch (allianceLocation) {
+                                case RED_SOUTH:
+                                    driver.setClawMode(General.ClawMode.RELEASE_R);
+                                    break;
+                                case RED_NORTH:
+                                    driver.setClawMode(General.ClawMode.RELEASE_L);
+                                    break;
+                                case BLUE_SOUTH:
+                                    driver.setClawMode(General.ClawMode.RELEASE_L);
+                                    break;
+                                case BLUE_NORTH:
+                                    driver.setClawMode(General.ClawMode.RELEASE_R);
+                                    break;
+                                case NONE:
+                                    break;
+                            }
+
                             // release pixel
                             driver.update();
                         }
@@ -93,6 +113,7 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case BACKUP:
+                    driver.setWeaponsState(General.WeaponsState.PRIMED);
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (result) {
                         timer.reset();
@@ -103,21 +124,24 @@ public class Auto extends LinearOpMode {
                     result = driver.runAutoPath(trajectories.get(2).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         if (timer.time() > 3) {
-                            driver.setSlidesTarget(4);
+                            //driver.setSlidesTarget(4);
+                            driver.setWeaponsState(General.WeaponsState.EXTEND);
                         }
                     } else {
-                        driver.setSlidesTarget(4);
+                        driver.setWeaponsState(General.WeaponsState.EXTEND);
+                        //driver.setSlidesTarget(4);
                     }
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
                         timer.reset();
-                        while (timer.time() < 2 && opModeIsActive()) {
+                        while (timer.time() < 0.5 && opModeIsActive()) {
                             driver.drive(0, 0.2, 0, false);
                             driver.update();
                         }
-                        while (timer.time() < 6 && opModeIsActive()) {
+                        while (timer.time() < 2 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
-                            driver.dumpPancake();
+                            driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            //driver.dumpPancake();
                             // release pixel
                             driver.update();
                         }
@@ -125,8 +149,10 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case PARK_1:
+                    telemetry.addData("cur pos x", driver.getCurrentPos().getX());
+                    telemetry.update();
                     result = driver.runAutoPath(trajectories.get(3).path);
-                    driver.storePancake();
+                    //driver.storePancake();
                     if (result) {
                         autoMode = General.AUTO_RED_NORTH_1.PARK2;
                     }

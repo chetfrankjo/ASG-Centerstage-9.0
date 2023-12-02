@@ -45,17 +45,17 @@ public class Constants {
                             }
                             break;
                         case RED_NORTH:
-                            paths.add(new Trajectory(0, 0,0.3, 10, 0.3).addPoint(0, 23, 0).addPoint(-6, 29, 0).build());
-                            paths.add(new Trajectory(-5, 29, 0.6, 5).addPoint(0, 18, 180).build());
-                            paths.add(new Trajectory(0, 12, 0.4, 15).addPoint(0, 30, 0).addPoint(12, 44, 0).addPoint(25, 44, 0).build());
+                            paths.add(new Trajectory(0, 0,0.27, 10, 0.25).addPoint(0, 23, 0).addPoint(-3, 28, 0).build());
+                            paths.add(new Trajectory(-3, 27, 0.6, 5).addPoint(0, 18, 180).build());
+                            paths.add(new Trajectory(0, 18, 0.4, 13).addPoint(0, 30, 0).addPoint(12, 34, 0).addPoint(31, 34, 0).addPointSpeed(31, 41, 90, 0.4).build());
                             switch (parkLocation) {
 
                                 case LEFT:
-                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(31, 41, 0.4, 15).addPoint(20, 41, 180).addPointSpeed(20, 59, 90, 0.3).build());
                                     paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(25, 44, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(31, 41, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
                                     paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
                                     break;
                             }
@@ -260,7 +260,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 13.72449; //13.37
+        public static final double wheelbaseseparation = 12.8125*1.001297978861487; //13.37
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = -5.15;
 

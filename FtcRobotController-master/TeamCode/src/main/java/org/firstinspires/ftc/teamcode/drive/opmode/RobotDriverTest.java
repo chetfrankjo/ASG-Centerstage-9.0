@@ -4,6 +4,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -15,6 +16,8 @@ import java.util.logging.Logger;
 @TeleOp(group = "c")
 public class RobotDriverTest extends LinearOpMode {
     boolean fieldCentric = false;
+    double headingAccum = 0;
+    double lastHeading = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         RobotDriver driver = new RobotDriver(hardwareMap, false);
@@ -40,8 +43,14 @@ public class RobotDriverTest extends LinearOpMode {
                 }
                 while (gamepad1.a) {}
             }
-            //double[] systemCoordinates = driver.getAssemblyCoordinate();
             currentPos = driver.getCurrentPos();
+
+            double heading = currentPos.getHeading();
+            double deltaHeading = heading - lastHeading;
+            headingAccum += Angle.normDelta(deltaHeading);
+            lastHeading = heading;
+            //double[] systemCoordinates = driver.getAssemblyCoordinate();
+
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
@@ -53,7 +62,7 @@ public class RobotDriverTest extends LinearOpMode {
             telemetry.addData("dist left", driver.getdistLeft());
             telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
-
+            telemetry.addData("accum", headingAccum);
             telemetry.addData("loop speed", driver.loopSpeed);
             telemetry.update();
             driver.update();
