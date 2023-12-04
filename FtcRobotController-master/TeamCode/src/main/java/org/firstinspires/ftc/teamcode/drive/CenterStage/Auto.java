@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
@@ -25,6 +26,7 @@ public class Auto extends LinearOpMode {
         driver.storeAll();
         driver.resetIMUHeading();
         driver.setWeaponsState(General.WeaponsState.HOLDING);
+        driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
         timer = new ElapsedTime();
@@ -49,12 +51,12 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
         telemetry.update();
-        driver.setClawLiftPos(0.55);
+        driver.setClawLiftPos(0.6);
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(29);
+            driver.setSlidesDepositTarget(35);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);
@@ -76,7 +78,8 @@ public class Auto extends LinearOpMode {
                     }
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
-                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
+                    //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
+                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, General.SpikePosition.LEFT, allianceLocation);
                     break;
                 case APPROACH_1:
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
@@ -87,7 +90,8 @@ public class Auto extends LinearOpMode {
                         timer.reset();
 
                         while (timer.time() < 1 && opModeIsActive()) {
-                            driver.followCurve(trajectories.get(0).path);
+                            driver.drive(0, 0, 0, false);
+                            //driver.followCurve(trajectories.get(0).path);
                             switch (allianceLocation) {
                                 case RED_SOUTH:
                                     driver.setClawMode(General.ClawMode.RELEASE_R);
@@ -133,33 +137,46 @@ public class Auto extends LinearOpMode {
                     }
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
-                        timer.reset();
-                        while (timer.time() < 0.5 && opModeIsActive()) {
-                            driver.drive(0, 0.2, 0, false);
-                            driver.update();
-                        }
-                        while (timer.time() < 2 && opModeIsActive()) {
-                            driver.drive(0, 0, 0, false);
-                            driver.setWeaponsState(General.WeaponsState.DEPOSIT);
-                            //driver.dumpPancake();
-                            // release pixel
-                            driver.update();
-                        }
-                        autoMode = General.AUTO_RED_NORTH_1.PARK_1;
+                        autoMode = General.AUTO_RED_NORTH_1.APPROACH_3;
                     }
                     break;
+                case APPROACH_3:
+                    timer.reset();
+                    while (timer.time() < 0.8 && opModeIsActive()) {
+                        driver.followCurve(trajectories.get(3).path);
+                        //driver.drive(0, 0.2, 0, false);
+                        driver.update();
+                    }
+                    while (timer.time() < 1.6 && opModeIsActive()) {
+                        driver.drive(0, 0.2, 0, false);
+                        driver.update();
+                    }
+                    while (timer.time() < 3 && opModeIsActive()) {
+                        driver.drive(0, 0, 0, false);
+                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                        // release pixel
+                        driver.update();
+                    }
+                    autoMode = General.AUTO_RED_NORTH_1.PARK_1;
                 case PARK_1:
-                    telemetry.addData("cur pos x", driver.getCurrentPos().getX());
+                    telemetry.addData("x", driver.getCurrentPos().getX());
+                    telemetry.addData("y", driver.getCurrentPos().getY());
+                    telemetry.addData("head", driver.getCurrentPos().getHeading());
                     telemetry.update();
-                    result = driver.runAutoPath(trajectories.get(3).path);
+                    driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                    result = driver.runAutoPath(trajectories.get(4).path);
                     //driver.storePancake();
                     if (result) {
                         autoMode = General.AUTO_RED_NORTH_1.PARK2;
                     }
                     break;
                 case PARK2:
+                    telemetry.addData("x", driver.getCurrentPos().getX());
+                    telemetry.addData("y", driver.getCurrentPos().getY());
+                    telemetry.addData("head", driver.getCurrentPos().getHeading());
+                    telemetry.update();
                     driver.setSlidesTarget(0);
-                    driver.followCurve(trajectories.get(4).path);
+                    driver.followCurve(trajectories.get(5).path);
                     break;
             }
 

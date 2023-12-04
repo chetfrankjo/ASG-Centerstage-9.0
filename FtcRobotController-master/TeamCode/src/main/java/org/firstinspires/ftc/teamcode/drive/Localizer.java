@@ -61,7 +61,7 @@ public class Localizer {
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        robotpos = new Pose2d((x/COUNTS_PER_INCH)+(startYOffset*Math.cos(angle))-(startXOffset*Math.sin(angle)), -((y/COUNTS_PER_INCH)+(startYOffset*Math.sin(angle))-(startXOffset*Math.cos(angle))), Math.toDegrees(-angle));
+        robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, -((y/COUNTS_PER_INCH)+startYOffset), Math.toDegrees(-angle)+startAngleOffset);
         //robotpos = new Pose2d((x/COUNTS_PER_INCH), (y/COUNTS_PER_INCH), Math.toDegrees(angle));
 
         for (int i=0; i<prevencoders.length; i++) {
@@ -95,10 +95,15 @@ public class Localizer {
      * @param angle degress, not radians
      */
     public void setEstimatePos(double x, double y, double angle) {
-        startXOffset = x;
+
+        startXOffset += x - robotpos.getX();
+        startYOffset += y - robotpos.getY();
+        startAngleOffset += angle - robotpos.getHeading(); // was = now +=
+
+        /*startXOffset = x;
         startYOffset = y;
         startAngleOffset = angle;
-        this.angle = Math.toRadians(angle);
+        this.angle = Math.toRadians(angle);*/
     }
 
     public void resetPosWithEstimate(Pose2d pos) {

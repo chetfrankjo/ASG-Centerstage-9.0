@@ -631,7 +631,7 @@ public class RobotDriver {
                 break;
             case INTAKING:
                 // lift down, both claws open
-                clawLift.setPosition(0.55);
+                clawLift.setPosition(0.6);
                 clawL.setPosition(0.7);
                 clawR.setPosition(0.3);
             case IDLE:

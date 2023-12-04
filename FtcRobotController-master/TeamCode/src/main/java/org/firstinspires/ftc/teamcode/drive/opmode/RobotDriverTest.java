@@ -25,6 +25,7 @@ public class RobotDriverTest extends LinearOpMode {
         //driver.setSlidesZeroPower(FLOAT);
         //driver.setTurretZeroPower(FLOAT);
         //driver.setv4barZeroPower(FLOAT);
+        driver.localizer.setEstimatePos(0, 0, 0);
         Pose2d currentPos;
         driver.setLocalizationMode(General.LocalMode.ODOMETRY);
         driver.resetIMUHeading();
