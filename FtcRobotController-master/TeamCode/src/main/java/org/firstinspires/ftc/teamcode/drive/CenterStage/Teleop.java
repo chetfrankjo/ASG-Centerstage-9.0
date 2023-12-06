@@ -316,6 +316,7 @@ public class Teleop extends LinearOpMode{
              */
 
             if (gamepad2.y) {
+                //driver.setClawLiftPos(1);
                 driver.setClawMode(General.ClawMode.PRIMED);
             }
             if (gamepad2.x) {
@@ -459,6 +460,8 @@ public class Teleop extends LinearOpMode{
                 hanging = true;
             } else if (gamepad1.y) {
                 driver.turnInPlace(planeTarget, true, 1.0);
+            } else if (gamepad1.right_bumper){
+                driver.drive((gamepad1.left_stick_x/2)+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y/2, gamepad1.right_stick_x/2, superMegaDrive);
             } else {
                 driver.drive(gamepad1.left_stick_x+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             }

@@ -27,6 +27,7 @@ public class Auto extends LinearOpMode {
         driver.resetIMUHeading();
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
+        driver.localizer.setEstimatePos(135, 34, -90);
 
 
         timer = new ElapsedTime();
@@ -56,7 +57,7 @@ public class Auto extends LinearOpMode {
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(35);
+            driver.setSlidesDepositTarget(32);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);
@@ -79,7 +80,7 @@ public class Auto extends LinearOpMode {
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
                     //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
-                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, General.SpikePosition.LEFT, allianceLocation);
+                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, General.SpikePosition.CENTER, allianceLocation);
                     break;
                 case APPROACH_1:
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
@@ -127,7 +128,7 @@ public class Auto extends LinearOpMode {
                 case APPROACH_2:
                     result = driver.runAutoPath(trajectories.get(2).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
-                        if (timer.time() > 3) {
+                        if (driver.getCurrentPos().getY() > 85) {
                             //driver.setSlidesTarget(4);
                             driver.setWeaponsState(General.WeaponsState.EXTEND);
                         }

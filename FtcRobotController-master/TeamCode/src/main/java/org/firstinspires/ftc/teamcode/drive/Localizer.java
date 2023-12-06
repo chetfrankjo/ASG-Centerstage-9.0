@@ -48,6 +48,7 @@ public class Localizer {
         //Calculate Angle
         dtheta = (leftChange - rightChange) / (robotEncoderWheelDistance);
         angle = ((angle + dtheta));
+        double heading = angle-Math.toRadians(startAngleOffset);
 
         //Get the components of the motion
         rawHorizontalChange = encoders[2] - prevencoders[2];
@@ -55,13 +56,14 @@ public class Localizer {
 
         double p = ((rightChange + leftChange) / 2);
         double n = horizontalChange;
-        deltaX = (p*Math.sin(angle) + n*Math.cos(angle));
-        deltaY = (p*Math.cos(angle) - n*Math.sin(angle)); // was negative
+        deltaX = (p*Math.sin(heading) + n*Math.cos(heading));
+        deltaY = (p*Math.cos(heading) - n*Math.sin(heading)); // was negative
 
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, -((y/COUNTS_PER_INCH)+startYOffset), Math.toDegrees(-angle)+startAngleOffset);
+        //angle = Math.toDegrees(-angle)+startAngleOffset;
+        robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, -((y/COUNTS_PER_INCH)+startYOffset), Math.toDegrees(-heading));
         //robotpos = new Pose2d((x/COUNTS_PER_INCH), (y/COUNTS_PER_INCH), Math.toDegrees(angle));
 
         for (int i=0; i<prevencoders.length; i++) {
@@ -97,7 +99,7 @@ public class Localizer {
     public void setEstimatePos(double x, double y, double angle) {
 
         startXOffset += x - robotpos.getX();
-        startYOffset += y - robotpos.getY();
+        startYOffset += -y - robotpos.getY();
         startAngleOffset += angle - robotpos.getHeading(); // was = now +=
 
         /*startXOffset = x;

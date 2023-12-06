@@ -31,8 +31,36 @@ public class Constants {
                 case RED_SOUTH:
                     switch (spikePosition) {
                         case LEFT:
+                            paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(113, 34, 0).addPoint(107, 29, 0).build());
+                            paths.add(new Trajectory(107, 29, 0.6, 10).addPoint(115, 32, 180).build());
+                            paths.add(new Trajectory(115, 32, 0.4, 13).addPoint(80, 32, 0).addPoint(80, 85, 0).addPoint(101, 96, 0).addPoint(101, 108, 0).build());
+                            paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(90, 115, 0.4, 8, 0).addPoint(90, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
+                                    paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 123, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(93, 115, 0.4, 8, 0).addPoint(93, 104, 180).addPoint(125, 104, -90).build());
+                                    paths.add(new Trajectory(125, 104, 0.3, 20).addPoint(125, 126, 0).build());
+                                    break;
+                            }
                             break;
                         case CENTER:
+                            paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(107, 35, 0).build());
+                            paths.add(new Trajectory(107, 34, 0.6, 10).addPoint(120, 25, 180).build());
+                            paths.add(new Trajectory(120, 25, 0.4, 13).addPoint(77, 25, 0).addPoint(77, 85, 0).addPoint(103, 96, 0).addPoint(103, 108, 0).build());
+                            paths.add(new Trajectory(103, 108, 0.4, 10).addPoint(103, 108, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(103, 115, 0.4, 8, 0).addPoint(103, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
+                                    paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 123, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(103, 115, 0.4, 8, 0).addPoint(103, 104, 180).addPoint(125, 104, -90).build());
+                                    paths.add(new Trajectory(125, 104, 0.3, 20).addPoint(125, 126, 0).build());
+                                    break;
+                            }
                             break;
                         case RIGHT:
                             break;
@@ -41,25 +69,68 @@ public class Constants {
                 case RED_NORTH:
                     switch (spikePosition) {
                         case LEFT:
-                            paths.add(new Trajectory(0, 0,0.25, 12, 0.2).addPoint(0, 23, 0).addPoint(-3, 28, 0).build());
-                            paths.add(new Trajectory(-3, 27, 0.6, 5).addPoint(0, 18, 180).build());
-                            paths.add(new Trajectory(0, 18, 0.4, 13).addPoint(0, 30, 0).addPoint(12, 34, 0).addPoint(28, 34, 0).build());
-                            paths.add(new Trajectory(28, 34, 0.4, 10).addPointSpeed(28, 43, 90, 0.4).build());
+                            paths.add(new Trajectory(135, 84, 0.25, 12, 0.2).addPoint(113, 84, 0).addPoint(107, 80, 0).build());
+                            paths.add(new Trajectory(107, 80, 0.6, 5).addPoint(120, 88, 180).build());
+                            paths.add(new Trajectory(120, 88, 0.4, 13).addPoint(105, 88, 0).addPoint(101, 96, 0).addPoint(101, 112, 0).build());
+                            paths.add(new Trajectory(101, 112, 0.4, 10).addPoint(93, 112, 90).build());
                             switch (parkLocation) {
                                 case LEFT:
-                                    paths.add(new Trajectory(31, 43, 0.4, 8, 0).addPoint(20, 43, 180).addPointSpeed(20, 59, 90, 0.3).build());
-                                    paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                                    paths.add(new Trajectory(93, 115, 0.4, 8, 0).addPoint(93, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
+                                    paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 126, 0).build());
                                     break;
                                 case RIGHT:
-                                    paths.add(new Trajectory(31, 41, 0.4, 10).addPoint(20, 44, 180).addPoint(20, 8, -90).build());
-                                    paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
+                                    paths.add(new Trajectory(93, 115, 0.4, 8, 0).addPoint(93, 104, 180).addPoint(125, 104, -90).build());
+                                    paths.add(new Trajectory(125, 104, 0.3, 20).addPoint(125, 126, 0).build());
                                     break;
                             }
                             break;
                         case CENTER:
-                            
+
+                            paths.add(new Trajectory(135, 84, 0.5, 15).addPoint(108, 84, 0).build());
+                            paths.add(new Trajectory(108, 84, 0.6, 5).addPoint(115, 84, 180).build());
+                            paths.add(new Trajectory(115, 84, 0.4, 15).addPoint(101, 84, 0).addPoint(101, 95, 0).build());
+                            paths.add(new Trajectory(101, 95, 0.4, 8).addPoint(101, 109, 0).build()); // dud point
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(101, 109, 0.4, 8, 0).addPoint(101, 104, 180).addPointSpeed(77, 104, 90, 0.3).build());
+                                    paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 126, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(101, 109, 0.4, 8, 0).addPoint(101, 104, 180).addPoint(125, 104, -90).build());
+                                    paths.add(new Trajectory(125, 104, 0.3, 20).addPoint(125, 126, 0).build());
+                                    break;
+                            }
+
+
+                            paths.add(new Trajectory(0, 0,0.5, 15).addPoint(0, 27, 0).build());
+                            paths.add(new Trajectory(0, 27, 0.6, 5).addPoint(0, 22, 180).build());
+                            paths.add(new Trajectory(0, 10, 0.4, 15).addPoint(0, 34, 0).addPoint(25, 34, 0).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(25, 34, 0.4, 10).addPoint(20, 34, 180).addPoint(20, 59, 90).build());
+                                    paths.add(new Trajectory(20, 59, 0.3, 20).addPoint(42, 59, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(25, 34, 0.4, 10).addPoint(20, 34, 180).addPoint(20, 8, -90).build());
+                                    paths.add(new Trajectory(20, 8, 0.3, 20).addPoint(42, 8, 0).build());
+                                    break;
+                            }
                             break;
                         case RIGHT:
+                            paths.add(new Trajectory(135, 84, 0.25, 12, 0.2).addPoint(113, 84, 0).addPoint(107, 89, 0).build());
+                            paths.add(new Trajectory(107, 88, 0.6, 5).addPoint(125, 88, 180).build());
+                            paths.add(new Trajectory(125, 88, 0.4, 13).addPoint(110, 88, 0).addPoint(105, 96, 0).addPoint(105, 112, 0).build());
+                            paths.add(new Trajectory(105, 112, 0.4, 10).addPoint(110, 112, -90).build());
+                            switch (parkLocation) {
+                                case LEFT:
+                                    paths.add(new Trajectory(110, 115, 0.4, 8, 0).addPoint(110, 104, 180).addPointSpeed(78, 104, 90, 0.3).build());
+                                    paths.add(new Trajectory(78, 104, 0.3, 20).addPoint(78, 126, 0).build());
+                                    break;
+                                case RIGHT:
+                                    paths.add(new Trajectory(110, 115, 0.4, 8, 0).addPoint(110, 104, 180).addPoint(125, 104, -90).build());
+                                    paths.add(new Trajectory(125, 104, 0.3, 20).addPoint(125, 126, 0).build());
+                                    break;
+                            }
                             break;
                     }
                     break;
@@ -91,7 +162,7 @@ public class Constants {
 
 
 
-            switch (spikePosition) {
+            /*switch (spikePosition) {
 
                 case LEFT:
                     switch (allianceLocation) {
@@ -292,6 +363,8 @@ public class Constants {
                     break;
 
             }
+
+             */
 
         return paths;
         }
