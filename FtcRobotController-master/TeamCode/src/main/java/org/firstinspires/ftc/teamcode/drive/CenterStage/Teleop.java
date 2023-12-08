@@ -28,6 +28,7 @@ public class Teleop extends LinearOpMode{
         driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
+        driver.updateClaw(false);
         Reader r = new Reader();
         String info = r.readFile("Alliance");
 
@@ -50,6 +51,7 @@ public class Teleop extends LinearOpMode{
                 break;
         }
         driver.setSlidesDisable(false);
+        driver.setClawMode(General.ClawMode.IDLE);
 
         ElapsedTime hangtime = new ElapsedTime();
 
@@ -110,10 +112,15 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad2.left_trigger > 0.7 && !tl) {
                 // generic toggle for left claw
+
                 tl=true;
+                if (driver.getSlidesLength() > 6) {
+                    driver.setClawLRaw(0.6);
+                } else {
+                    driver.setClawLPos(false);
+                }
 
-
-                switch (driver.getClawMode()) {
+                /*switch (driver.getClawMode()) {
 
                     case GRAB_L:
                         driver.setClawMode(General.ClawMode.RELEASE_BOTH);
@@ -147,6 +154,8 @@ public class Teleop extends LinearOpMode{
                         break;
                 }
 
+                 */
+
 
 
             }
@@ -155,10 +164,14 @@ public class Teleop extends LinearOpMode{
             }
 
             if (gamepad2.right_trigger > 0.7 && !tr) {
-                // generic toggle for left claw
                 tr = true;
+                if (driver.getSlidesLength() > 6) {
+                    driver.setCLawRRaw(0.4);
+                } else {
+                    driver.setClawRPos(false);
+                }
 
-                switch (driver.getClawMode()) {
+                /*switch (driver.getClawMode()) {
 
                     case GRAB_L:
                         //driver.setWeaponsState(General.WeaponsState.INTAKING);
@@ -194,6 +207,8 @@ public class Teleop extends LinearOpMode{
                         break;
                 }
 
+                 */
+
 
 
             }
@@ -205,7 +220,8 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad2.left_bumper && !bl) { //grabbing
                 bl = true;
-                switch (driver.getClawMode()) {
+                driver.setClawLPos(true);
+                /*switch (driver.getClawMode()) {
                     case GRAB_L:
                         //driver.setClawMode(General.ClawMode.GRAB_BOTH);
                         break;
@@ -235,6 +251,8 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
+
+                 */
             }
             if (!gamepad2.left_bumper) {
                 bl = false;
@@ -242,7 +260,8 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad2.right_bumper && !br) { // deposit, priming, intaking
                 br = true;
-
+                driver.setClawRPos(true);
+                /*
                 switch (driver.getClawMode()) {
                     case GRAB_L:
                         // means that r is open, close it
@@ -273,6 +292,8 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
+
+                 */
             }
             if (!gamepad2.right_bumper) {
                 br = false;
@@ -316,15 +337,55 @@ public class Teleop extends LinearOpMode{
              */
 
             if (gamepad2.y) {
-                //driver.setClawLiftPos(1);
-                driver.setClawMode(General.ClawMode.PRIMED);
+                driver.setClawLiftPos(true);
+                /*
+                switch (driver.getClawMode()) {
+
+                    case GRAB_L:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        driver.update();
+                        driver.setClawMode(General.ClawMode.GRAB_L);
+                        break;
+                    case GRAB_R:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        driver.update();
+                        driver.setClawMode(General.ClawMode.GRAB_R);
+                        break;
+                    case GRAB_BOTH:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        break;
+                    case RELEASE_L:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        driver.update();
+                        driver.setClawMode(General.ClawMode.RELEASE_L);
+                        break;
+                    case RELEASE_R:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        driver.update();
+                        driver.setClawMode(General.ClawMode.RELEASE_R);
+                        break;
+                    case RELEASE_BOTH:
+                        driver.setClawMode(General.ClawMode.PRIMED);
+                        driver.update();
+                        driver.setClawMode(General.ClawMode.RELEASE_BOTH);
+                        break;
+                    case PRIMED:
+                        break;
+                    case INTAKING:
+                        break;
+                    case IDLE:
+                        break;
+                }
+
+                 */
             }
             if (gamepad2.x) {
                 driver.setWeaponsState(General.WeaponsState.EXTEND);
             }
             if (gamepad2.a) {
-                driver.setClawLiftPos(0.6);
-                switch (driver.getClawMode()) {
+                driver.setClawLiftPos(false);
+
+                /*switch (driver.getClawMode()) {
 
                     case GRAB_L:
 
@@ -359,6 +420,8 @@ public class Teleop extends LinearOpMode{
                     case IDLE:
                         break;
                 }
+
+                 */
                 //driver.setClawMode(General.ClawMode.INTAKING);
             }
 
@@ -366,12 +429,7 @@ public class Teleop extends LinearOpMode{
 
 
 
-            if (gamepad1.a) {
-                driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);
-            }
-            if (gamepad1.b) {
-                driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
+
 
             if (gamepad1.back) {
                 driver.storePlane();
@@ -460,8 +518,8 @@ public class Teleop extends LinearOpMode{
                 hanging = true;
             } else if (gamepad1.y) {
                 driver.turnInPlace(planeTarget, true, 1.0);
-            } else if (gamepad1.right_bumper){
-                driver.drive((gamepad1.left_stick_x/2)+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y/2, gamepad1.right_stick_x/2, superMegaDrive);
+            } else if (gamepad1.right_trigger > 0.7){
+                driver.drive((gamepad1.left_stick_x/3)+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y/3, gamepad1.right_stick_x/3, superMegaDrive);
             } else {
                 driver.drive(gamepad1.left_stick_x+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             }

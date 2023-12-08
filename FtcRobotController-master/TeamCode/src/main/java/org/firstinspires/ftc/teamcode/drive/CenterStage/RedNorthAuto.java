@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
+import org.firstinspires.ftc.teamcode.drive.AutoStorage;
 import org.firstinspires.ftc.teamcode.drive.Constants;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
@@ -29,7 +30,7 @@ public class RedNorthAuto extends LinearOpMode {
         timer = new ElapsedTime();
         timer.reset();
 
-        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.LEFT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.LEFT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
         waitForStart();
 
         while (opModeIsActive()) {

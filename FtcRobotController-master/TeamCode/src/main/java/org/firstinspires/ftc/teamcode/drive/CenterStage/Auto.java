@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
+import org.firstinspires.ftc.teamcode.drive.AutoStorage;
 import org.firstinspires.ftc.teamcode.drive.Constants;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
@@ -27,13 +28,13 @@ public class Auto extends LinearOpMode {
         driver.resetIMUHeading();
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-        driver.localizer.setEstimatePos(135, 34, -90);
+        driver.localizer.setEstimatePos(9, 84, 90);
 
 
         timer = new ElapsedTime();
         timer.reset();
 
-        ArrayList<Trajectory> trajectories = Constants.AutoPaths.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
         allianceLocation = driver.loadAlliancePreset();
         parkLocation = driver.loadParkPreset();
 
@@ -52,7 +53,7 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
         telemetry.update();
-        driver.setClawLiftPos(0.6);
+        driver.setClawLiftPos(false);
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
@@ -80,7 +81,7 @@ public class Auto extends LinearOpMode {
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
                     //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
-                    trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, General.SpikePosition.CENTER, allianceLocation);
+                    trajectories = AutoStorage.generateAutoPaths(parkLocation, General.SpikePosition.LEFT, allianceLocation);
                     break;
                 case APPROACH_1:
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
