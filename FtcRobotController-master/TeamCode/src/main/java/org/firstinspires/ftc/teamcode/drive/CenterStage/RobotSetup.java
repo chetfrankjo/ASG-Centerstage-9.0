@@ -85,7 +85,7 @@ public class RobotSetup extends LinearOpMode {
         advance = false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
-            telemetry.addLine("SELECT DESIRED PARK LOCATION (Left or Right - use DPAD)");
+            telemetry.addLine("SELECT DESIRED PARK LOCATION (Left or Right - use DPAD)\nUP FOR CENTER PARK (no movement)");
             telemetry.update();
             if (gamepad1.dpad_left) {
                 parkLocation = General.ParkLocation.LEFT;
@@ -100,6 +100,15 @@ public class RobotSetup extends LinearOpMode {
                 parkLocation = General.ParkLocation.RIGHT;
                 Logger a = new Logger("park",false);
                 String l = "right";
+                a.addData(l);
+                a.update();
+                a.close();
+                advance=true;
+            }
+            if (gamepad1.dpad_up) {
+                parkLocation = General.ParkLocation.CENTER;
+                Logger a = new Logger("park",false);
+                String l = "center";
                 a.addData(l);
                 a.update();
                 a.close();

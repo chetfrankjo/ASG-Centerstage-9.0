@@ -30,7 +30,7 @@ public class General {
     }
 
     public enum AUTO_RED_NORTH_1 {
-        VISION, APPROACH_1, SPIKE, BACKUP, APPROACH_2, PARK_1, PARK2
+        VISION, APPROACH_1, SPIKE, BACKUP, APPROACH_2, APPROACH_3, PARK_1, PARK2
     }
 
     public enum AllianceLocation {
@@ -38,7 +38,7 @@ public class General {
     }
 
     public enum ParkLocation {
-        LEFT, RIGHT, NONE
+        LEFT, RIGHT, CENTER, NONE
     }
 
 

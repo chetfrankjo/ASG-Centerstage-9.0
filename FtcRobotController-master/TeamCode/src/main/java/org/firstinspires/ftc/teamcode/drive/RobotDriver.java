@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
@@ -98,6 +100,7 @@ public class RobotDriver {
     PDP_LeftCam pipelineLeft;
     PDP_DualCamera pipelineRight;
     ThreeZonePropDetectionPipeline propPipeline;
+    boolean updateClaw = true;
 
     final FtcDashboard dashboard;
     PIDFCoefficients slidesPIDConstants = AssemblyConstants.slidesPIDConstants;
@@ -187,7 +190,7 @@ public class RobotDriver {
             PropDetectionCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
                 @Override
                 public void onOpened() {
-                    PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
+                    PropDetectionCamera.startStreaming(640, 360, OpenCvCameraRotation.UPSIDE_DOWN);
                     cameraReady = true;
                 }
 
@@ -223,7 +226,7 @@ public class RobotDriver {
 
         //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
-        //builder.setCameraResolution(new Size(640, 480));
+        //builder.setCameraResolution(new Size(640, 360));
 
         // Set and enable the processor.
         //builder.addProcessor(aprilTag);
@@ -255,7 +258,9 @@ public class RobotDriver {
         updateCamera();             // Updates current requested camera operation (if any)
         updateDriveMotors();        // Updates drive motor power
         updateAutomation();
-        updateClaw();
+        if (updateClaw) {
+            updateClaw();
+        }
         updateSlides();
 
         TelemetryPacket packet = new TelemetryPacket();
@@ -371,6 +376,9 @@ public class RobotDriver {
             case "right":
                 location = ParkLocation.RIGHT;
                 break;
+            case "center":
+                location = ParkLocation.CENTER;
+                break;
         }
         return location;
     }
@@ -428,7 +436,6 @@ public class RobotDriver {
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
-            //propLocation = propPipeline.getAnalysis(); //get the estimate
             propLocation = propPipeline.getAnalysis();
 
         } else if (cameraMode == CameraMode.APRILTAG) {
@@ -631,21 +638,43 @@ public class RobotDriver {
                 break;
             case INTAKING:
                 // lift down, both claws open
-                clawLift.setPosition(0.55);
+                clawLift.setPosition(0.6);
                 clawL.setPosition(0.7);
                 clawR.setPosition(0.3);
             case IDLE:
                 break;
         }
     }
-    public void setCLawLPos(double pos) {
+    public void setClawLPos(boolean closed) {
+        if (closed) {
+            clawL.setPosition(0.5);
+        } else {
+            clawL.setPosition(0.7);
+        }
+    }
+    public void setClawRPos(boolean closed) {
+        if (closed) {
+            clawR.setPosition(0.5);
+        } else {
+            clawR.setPosition(0.3);
+        }
+    }
+    public void setClawLRaw(double pos) {
         clawL.setPosition(pos);
     }
-    public void setCLawRPos(double pos) {
+    public void setCLawRRaw(double pos) {
         clawR.setPosition(pos);
     }
-    public void setClawLiftPos(double pos) {
-        clawLift.setPosition(pos);
+    public void setClawLiftPos(boolean up) {
+        if (up) {
+            clawLift.setPosition(1);
+        } else {
+            clawLift.setPosition(0.6);
+        }
+
+    }
+    public void updateClaw(boolean update) {
+        updateClaw = update;
     }
     public double getClawLPos() {
         return clawL.getPosition();
