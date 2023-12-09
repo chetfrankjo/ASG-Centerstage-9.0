@@ -26,9 +26,9 @@ public class Auto extends LinearOpMode {
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.storeAll();
         driver.resetIMUHeading();
-        driver.setWeaponsState(General.WeaponsState.HOLDING);
+        driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-        driver.localizer.setEstimatePos(9, 84, 90);
+        driver.resetSlidesEncoder();
 
 
         timer = new ElapsedTime();
@@ -52,6 +52,26 @@ public class Auto extends LinearOpMode {
         } else {
             telemetry.addData("Park Location", parkLocation.toString());
         }
+
+
+        switch (allianceLocation) {
+
+            case RED_SOUTH:
+                driver.localizer.setEstimatePos(135, 34, -90);
+                break;
+            case RED_NORTH:
+                driver.localizer.setEstimatePos(135, 84, -90);
+                break;
+            case BLUE_SOUTH:
+                driver.localizer.setEstimatePos(9, 34, 90);
+                break;
+            case BLUE_NORTH:
+                driver.localizer.setEstimatePos(9, 84, 90);
+                break;
+        }
+
+
+
         telemetry.update();
         driver.setClawLiftPos(false);
         waitForStart();
@@ -69,8 +89,11 @@ public class Auto extends LinearOpMode {
 
                 case VISION:
                     timer.reset();
-
+                    driver.setClawMode(General.ClawMode.GRAB_BOTH);
                     while (timer.time() < 3 && opModeIsActive()) {
+                        if (timer.time()>0.5) {
+                            driver.setSlidesTarget(12);
+                        }
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
@@ -81,9 +104,10 @@ public class Auto extends LinearOpMode {
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
                     //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
-                    trajectories = AutoStorage.generateAutoPaths(parkLocation, General.SpikePosition.LEFT, allianceLocation);
+                    trajectories = AutoStorage.generateAutoPaths(parkLocation, position, allianceLocation);
                     break;
                 case APPROACH_1:
+                    driver.setSlidesTarget(0);
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
                     telemetry.addLine("Running Approach 1");
                     //telemetry.update();
@@ -159,17 +183,30 @@ public class Auto extends LinearOpMode {
                         // release pixel
                         driver.update();
                     }
+                    timer.reset();
                     autoMode = General.AUTO_RED_NORTH_1.PARK_1;
                 case PARK_1:
-                    telemetry.addData("x", driver.getCurrentPos().getX());
-                    telemetry.addData("y", driver.getCurrentPos().getY());
-                    telemetry.addData("head", driver.getCurrentPos().getHeading());
-                    telemetry.update();
-                    driver.setClawMode(General.ClawMode.GRAB_BOTH);
-                    result = driver.runAutoPath(trajectories.get(4).path);
-                    //driver.storePancake();
-                    if (result) {
-                        autoMode = General.AUTO_RED_NORTH_1.PARK2;
+                    if (parkLocation != General.ParkLocation.CENTER) {
+
+
+                        telemetry.addData("x", driver.getCurrentPos().getX());
+                        telemetry.addData("y", driver.getCurrentPos().getY());
+                        telemetry.addData("head", driver.getCurrentPos().getHeading());
+                        telemetry.update();
+                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        result = driver.runAutoPath(trajectories.get(4).path);
+                        //driver.storePancake();
+                        if (result) {
+                            autoMode = General.AUTO_RED_NORTH_1.PARK2;
+                        }
+                    } else {
+                        if (timer.time() > 1) {
+                            driver.setSlidesTarget(0);
+                            driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                            driver.drive(0,0,0,false);
+                        } else {
+                            driver.drive(0, -0.2, 0, false);
+                        }
                     }
                     break;
                 case PARK2:

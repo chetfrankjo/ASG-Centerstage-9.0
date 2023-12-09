@@ -38,7 +38,7 @@ public class General {
     }
 
     public enum ParkLocation {
-        LEFT, RIGHT, NONE
+        LEFT, RIGHT, CENTER, NONE
     }
 
 

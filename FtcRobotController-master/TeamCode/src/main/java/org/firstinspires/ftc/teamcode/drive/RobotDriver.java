@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
@@ -224,7 +226,7 @@ public class RobotDriver {
 
         //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
-        //builder.setCameraResolution(new Size(640, 480));
+        //builder.setCameraResolution(new Size(640, 360));
 
         // Set and enable the processor.
         //builder.addProcessor(aprilTag);
@@ -374,6 +376,9 @@ public class RobotDriver {
             case "right":
                 location = ParkLocation.RIGHT;
                 break;
+            case "center":
+                location = ParkLocation.CENTER;
+                break;
         }
         return location;
     }
@@ -431,7 +436,6 @@ public class RobotDriver {
                 //cameraReady = false;
                 //cameraMode = CameraMode.IDLE;
             }
-            //propLocation = propPipeline.getAnalysis(); //get the estimate
             propLocation = propPipeline.getAnalysis();
 
         } else if (cameraMode == CameraMode.APRILTAG) {
