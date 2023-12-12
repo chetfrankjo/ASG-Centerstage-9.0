@@ -367,7 +367,7 @@ public class RobotDriver {
     }
     public ParkLocation loadParkPreset() {
         Reader r = new Reader();
-        String info = r.readFile("Park");
+        String info = r.readFile("park");
         ParkLocation location=ParkLocation.NONE;
         switch (info) {
             case "left":
@@ -381,6 +381,10 @@ public class RobotDriver {
                 break;
         }
         return location;
+    }
+    public double loadTimerPreset() {
+        Reader r = new Reader();
+        return Double.parseDouble(r.readFile("timer"));
     }
 
 

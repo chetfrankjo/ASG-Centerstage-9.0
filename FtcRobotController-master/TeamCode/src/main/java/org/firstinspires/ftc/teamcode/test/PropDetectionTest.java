@@ -36,7 +36,7 @@ public class PropDetectionTest extends LinearOpMode
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.BLUE_SOUTH);
+        pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.RED_NORTH);
         webcam.setPipeline(pipeline);
 
 

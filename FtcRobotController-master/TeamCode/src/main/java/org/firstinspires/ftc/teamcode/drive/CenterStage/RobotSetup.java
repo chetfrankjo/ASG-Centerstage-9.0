@@ -24,6 +24,7 @@ public class RobotSetup extends LinearOpMode {
             "                   |________|";
 
     boolean advance = false;
+    double timerOffset = 0;
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
     @Override
@@ -89,7 +90,7 @@ public class RobotSetup extends LinearOpMode {
             telemetry.update();
             if (gamepad1.dpad_left) {
                 parkLocation = General.ParkLocation.LEFT;
-                Logger a = new Logger("Park",false);
+                Logger a = new Logger("park",false);
                 String l = "left";
                 a.addData(l);
                 a.update();
@@ -117,11 +118,38 @@ public class RobotSetup extends LinearOpMode {
 
             //TODO: choose auto path
         }
+        advance=false;
+        telemetry.clearAll();
+        while (!advance && opModeInInit()) {
+            telemetry.addData("Added Timer", timerOffset);
+            telemetry.addLine("Press START to advance");
+            telemetry.update();
+            if (gamepad1.dpad_up) {
+                timerOffset+=1;
+                while (gamepad1.dpad_up) {}
+            }
+            if (gamepad1.dpad_down) {
+                if (timerOffset>0) {
+                    timerOffset-=1;
+                }
+                while (gamepad1.dpad_down) {}
+            }
+            if (gamepad1.start) {
+                while (gamepad1.start) {}
+                advance=true;
+            }
+        }
+        Logger a = new Logger("timer", false);
+        String l = String.valueOf(timerOffset);
+        a.addData(l);
+        a.update();
+        a.close();
         telemetry.clearAll();
         while (opModeInInit()) {
             telemetry.addLine("PRESS START TO CONFIRM SETTINGS:\n");
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
+            telemetry.addData("Timer Offset", timerOffset);
             telemetry.addData("Auto Path", "default");
             telemetry.update();
         }
