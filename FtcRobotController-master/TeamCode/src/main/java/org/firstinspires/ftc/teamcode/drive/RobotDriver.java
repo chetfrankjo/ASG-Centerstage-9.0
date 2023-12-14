@@ -636,13 +636,13 @@ public class RobotDriver {
                 break;
             case PRIMED:
                 // ensure both claws are grabbed, and lift the thingy
-                clawLift.setPosition(1);
+                clawLift.setPosition(.96);
                 clawL.setPosition(0.5);
                 clawR.setPosition(0.5);
                 break;
             case INTAKING:
                 // lift down, both claws open
-                clawLift.setPosition(0.6);
+                clawLift.setPosition(0.54);
                 clawL.setPosition(0.7);
                 clawR.setPosition(0.3);
             case IDLE:
@@ -671,9 +671,9 @@ public class RobotDriver {
     }
     public void setClawLiftPos(boolean up) {
         if (up) {
-            clawLift.setPosition(1);
+            clawLift.setPosition(.96);
         } else {
-            clawLift.setPosition(0.65);
+            clawLift.setPosition(0.54);
         }
 
     }
