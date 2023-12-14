@@ -79,7 +79,7 @@ public class Auto extends LinearOpMode {
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(32);
+            driver.setSlidesDepositTarget(28);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);

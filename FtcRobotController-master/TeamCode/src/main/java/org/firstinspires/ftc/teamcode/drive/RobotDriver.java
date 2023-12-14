@@ -673,7 +673,7 @@ public class RobotDriver {
         if (up) {
             clawLift.setPosition(1);
         } else {
-            clawLift.setPosition(0.6);
+            clawLift.setPosition(0.65);
         }
 
     }
