@@ -507,13 +507,13 @@ public class Teleop extends LinearOpMode{
                 driver.resetSlidesEncoder();
             }
 
-            if (hanging && !gamepad1.dpad_down) {
+            if (hanging && gamepad1.left_trigger<0.7) {
                 driver.drive(0, 0.2, 0, false);
                 driver.setClawLiftPos(true);
                 if (hangtime.time() > 0.6) {
                     hanging = false;
                 }
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad1.left_trigger>=0.7) {
                 driver.drive(gamepad1.left_stick_x/2, -0.4, gamepad1.right_stick_x, false);
                 hangtime.reset();
                 hanging = true;
