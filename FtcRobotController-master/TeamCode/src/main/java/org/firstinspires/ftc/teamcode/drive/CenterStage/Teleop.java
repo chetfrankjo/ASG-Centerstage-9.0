@@ -514,7 +514,7 @@ public class Teleop extends LinearOpMode{
                     hanging = false;
                 }
             } else if (gamepad1.left_trigger>=0.7) {
-                driver.drive(gamepad1.left_stick_x/2, -0.4, gamepad1.right_stick_x, false);
+                driver.drive(gamepad1.left_stick_x/2, -0.5, gamepad1.right_stick_x, false);
                 hangtime.reset();
                 hanging = true;
             } else if (gamepad1.y) {
