@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.test;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -23,7 +24,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline;
 
-
+@Disabled
 @Config
 @TeleOp(group="c")
 public class RightCameraTest extends LinearOpMode
