@@ -386,6 +386,22 @@ public class RobotDriver {
         Reader r = new Reader();
         return Double.parseDouble(r.readFile("timer"));
     }
+    public AutoMode loadAutoMode() {
+        Reader r = new Reader();
+        String info = r.readFile("AutoMode");
+        AutoMode mode = AutoMode.STANDARD;
+        switch (info) {
+            case "park":
+                mode = AutoMode.PARK;
+            case "standard":
+                mode = AutoMode.STANDARD;
+            case "cycle_1":
+                mode = AutoMode.CYCLE_1;
+            case "cycle_2":
+                mode = AutoMode.CYCLE_2;
+        }
+        return mode;
+    }
 
 
     public Pose2d getCurrentPos() {

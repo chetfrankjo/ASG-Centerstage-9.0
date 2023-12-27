@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.AutoStorage;
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 import java.util.ArrayList;
 
 @Autonomous(group = "a")
-public class Auto extends LinearOpMode {
+public class CycleAuto extends LinearOpMode {
     General.AutoState autoState = General.AutoState.VISION;
     General.SpikePosition position = General.SpikePosition.LEFT;
     General.AllianceLocation allianceLocation;
@@ -21,8 +22,23 @@ public class Auto extends LinearOpMode {
     General.AutoMode autoMode = General.AutoMode.STANDARD;
     ElapsedTime timer;
     double timerOffset;
+    ArrayList<Trajectory> paths = new ArrayList<>();
+
+
+
+
+
     @Override
     public void runOpMode() throws InterruptedException {
+        paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(117, 34, 0).addPoint(110, 29, 0).build());
+        paths.add(new Trajectory(110, 29, 0.6, 10).addPoint(115, 33, 180).build());
+        paths.add(new Trajectory(115, 33, 0.5, 15).addPoint(77, 33, 0).addPoint(77, 85, 0).addPoint(101, 96, -90).addPoint(101, 108, 0).build());
+        paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build());
+        paths.add(new Trajectory(96, 115, 0.5, 10).addPoint(96, 100, 180).addPoint(73, 100, 90).addPoint(73, 50, 180).addPoint(73, 15, 180).build()); // cycle intake/approach
+        paths.add(new Trajectory(73, 20, 0.6, 10).addPoint(73, 40, 0).addPoint(73, 95, 0).addPoint(101, 95, -90).addPoint(101, 108, 0).build()); // cycle backdrop apprach
+        paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build()); //cycle backdrop go to perfect position
+        paths.add(new Trajectory(95, 115, 0.4, 8, 0).addPoint(95, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
+        paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 115, 0).build());
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.storeAll();
@@ -35,7 +51,7 @@ public class Auto extends LinearOpMode {
         timer = new ElapsedTime();
         timer.reset();
 
-        ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = paths;
         allianceLocation = driver.loadAlliancePreset();
         parkLocation = driver.loadParkPreset();
 
@@ -55,7 +71,7 @@ public class Auto extends LinearOpMode {
         }
 
 
-        switch (allianceLocation) {
+        /*switch (allianceLocation) {
 
             case RED_SOUTH:
                 driver.localizer.setEstimatePos(135, 34, -90);
@@ -71,8 +87,10 @@ public class Auto extends LinearOpMode {
                 break;
         }
 
+         */
 
 
+        driver.localizer.setEstimatePos(135, 34, -90);
         telemetry.update();
         driver.setClawLiftPos(false);
         waitForStart();
@@ -105,7 +123,7 @@ public class Auto extends LinearOpMode {
                     driver.setCameraMode(General.CameraMode.IDLE);
                     autoState = General.AutoState.PURPLE_APPROACH;
                     //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
-                    trajectories = AutoStorage.generateAutoPaths(parkLocation, position, allianceLocation);
+                    trajectories = paths;
                     break;
                 case PURPLE_APPROACH:
                     driver.setSlidesTarget(0);
@@ -119,22 +137,8 @@ public class Auto extends LinearOpMode {
                         while (timer.time() < 1 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
                             //driver.followCurve(trajectories.get(0).path);
-                            switch (allianceLocation) {
-                                case RED_SOUTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_R);
-                                    break;
-                                case RED_NORTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_L);
-                                    break;
-                                case BLUE_SOUTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_L);
-                                    break;
-                                case BLUE_NORTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_R);
-                                    break;
-                                case NONE:
-                                    break;
-                            }
+                            driver.setClawMode(General.ClawMode.RELEASE_R);
+
 
                             // release pixel
                             driver.update();
@@ -142,6 +146,8 @@ public class Auto extends LinearOpMode {
 
                         autoState = General.AutoState.BACKUP;
                     }
+                    break;
+                case SPIKE:
                     break;
                 case BACKUP:
                     driver.setWeaponsState(General.WeaponsState.PRIMED);
@@ -185,7 +191,60 @@ public class Auto extends LinearOpMode {
                         driver.update();
                     }
                     timer.reset();
+                    autoState = General.AutoState.CYCLE_INTAKE;
+                case CYCLE_INTAKE:
+                    result = driver.runAutoPath(trajectories.get(4).path);
+                    if (driver.getCurrentPos().getY() < 50) {
+
+                    } else {
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                    }
+                    if (result) {
+                        timer.reset();
+                        while (timer.time() < 3 && opModeIsActive()) {
+                            //grab pixel
+                            driver.setWeaponsState(General.WeaponsState.PRIMED);
+                            driver.followCurve(trajectories.get(4).path);
+                            driver.update();
+                        }
+
+                        autoState = General.AutoState.CYCLE_APPROACH;
+                        timer.reset();
+                    }
+                    driver.update();
+                    break;
+                case CYCLE_APPROACH:
+                    result = driver.runAutoPath(trajectories.get(5).path);
+                    if (result) {
+                        autoState = General.AutoState.CYCLE_APPROACH_2;
+                        timer.reset();
+                    }
+                    if (driver.getCurrentPos().getY() > 85) {
+                        //driver.setSlidesTarget(4);
+                        driver.setWeaponsState(General.WeaponsState.EXTEND);
+                    }
+                    driver.update();
+                    break;
+                case CYCLE_APPROACH_2:
+                    timer.reset();
+                    while (timer.time() < 0.8 && opModeIsActive()) {
+                        driver.followCurve(trajectories.get(6).path);
+                        //driver.drive(0, 0.2, 0, false);
+                        driver.update();
+                    }
+                    while (timer.time() < 2 && opModeIsActive()) {
+                        driver.drive(0, 0.2, 0, false);
+                        driver.update();
+                    }
+                    while (timer.time() < 3.5 && opModeIsActive()) {
+                        driver.drive(0, 0, 0, false);
+                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                        // release pixel
+                        driver.update();
+                    }
+                    timer.reset();
                     autoState = General.AutoState.PARK_1;
+                    break;
                 case PARK_1:
                     if (parkLocation != General.ParkLocation.CENTER) {
 

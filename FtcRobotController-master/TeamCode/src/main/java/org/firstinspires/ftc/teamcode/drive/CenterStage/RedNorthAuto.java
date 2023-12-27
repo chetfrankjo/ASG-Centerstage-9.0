@@ -4,13 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.AutoStorage;
-import org.firstinspires.ftc.teamcode.drive.Constants;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ import java.util.ArrayList;
 @Disabled
 @Autonomous(group = "b")
 public class RedNorthAuto extends LinearOpMode {
-    General.AUTO_RED_NORTH_1 autoMode = General.AUTO_RED_NORTH_1.VISION;
+    General.AutoState autoMode = General.AutoState.VISION;
     ElapsedTime timer;
     General.SpikePosition position = General.SpikePosition.LEFT;
     @Override
@@ -50,9 +48,9 @@ public class RedNorthAuto extends LinearOpMode {
                         position = driver.propLocation;
                     }
                     driver.setCameraMode(General.CameraMode.IDLE);
-                    autoMode = General.AUTO_RED_NORTH_1.APPROACH_1;
+                    autoMode = General.AutoState.PURPLE_APPROACH;
                     break;
-                case APPROACH_1:
+                case PURPLE_APPROACH:
                      boolean result = driver.runAutoPath(trajectories.get(0).path);
                      telemetry.addLine("Running Approach 1");
                      //telemetry.update();
@@ -65,13 +63,13 @@ public class RedNorthAuto extends LinearOpMode {
                              // release pixel
                              driver.update();
                          }
-                         autoMode = General.AUTO_RED_NORTH_1.BACKUP;
+                         autoMode = General.AutoState.BACKUP;
                      }
                      break;
                 case BACKUP:
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (result) {
-                        autoMode = General.AUTO_RED_NORTH_1.APPROACH_2;
+                        autoMode = General.AutoState.APPROACH_2;
                     }
                     break;
                 case APPROACH_2:
@@ -84,13 +82,13 @@ public class RedNorthAuto extends LinearOpMode {
                             // release pixel
                             driver.update();
                         }
-                        autoMode = General.AUTO_RED_NORTH_1.PARK_1;
+                        autoMode = General.AutoState.PARK_1;
                     }
                     break;
                 case PARK_1:
                     result = driver.runAutoPath(trajectories.get(3).path);
                     if (result) {
-                        autoMode = General.AUTO_RED_NORTH_1.PARK2;
+                        autoMode = General.AutoState.PARK2;
                     }
                     break;
                 case PARK2:
