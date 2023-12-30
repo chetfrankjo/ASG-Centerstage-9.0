@@ -44,7 +44,7 @@ public class SlidesTuner extends LinearOpMode {
 
             loops++;
 
-            /*long currentTime = System.nanoTime();
+            long currentTime = System.nanoTime();
             if (loops == 1){
                 lastLoopTime = currentTime;
             }
@@ -60,9 +60,8 @@ public class SlidesTuner extends LinearOpMode {
 
             previousSlidesError = error;
 
-             */
 
-            double power = (slidesTarget-slidesLength) * pc;
+
 
             sl.setPower(power);
             sr.setPower(power);

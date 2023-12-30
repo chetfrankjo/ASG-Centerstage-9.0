@@ -90,7 +90,7 @@ public class Auto extends LinearOpMode {
 
                 case VISION:
                     timer.reset();
-                    driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                    driver.setClawMode(General.ClawMode.BOTH);
                     while (timer.time() < 3+timerOffset && opModeIsActive()) {
                         if (timer.time()>0.5) {
                             driver.setSlidesTarget(12);
@@ -121,16 +121,16 @@ public class Auto extends LinearOpMode {
                             //driver.followCurve(trajectories.get(0).path);
                             switch (allianceLocation) {
                                 case RED_SOUTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_R);
+                                    driver.setClawMode(General.ClawMode.LEFT);
                                     break;
                                 case RED_NORTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_L);
+                                    driver.setClawMode(General.ClawMode.RIGHT);
                                     break;
                                 case BLUE_SOUTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_L);
+                                    driver.setClawMode(General.ClawMode.RIGHT);
                                     break;
                                 case BLUE_NORTH:
-                                    driver.setClawMode(General.ClawMode.RELEASE_R);
+                                    driver.setClawMode(General.ClawMode.LEFT);
                                     break;
                                 case NONE:
                                     break;
@@ -194,7 +194,7 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("y", driver.getCurrentPos().getY());
                         telemetry.addData("head", driver.getCurrentPos().getHeading());
                         telemetry.update();
-                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        driver.setClawMode(General.ClawMode.BOTH);
                         result = driver.runAutoPath(trajectories.get(4).path);
                         //driver.storePancake();
                         if (result) {

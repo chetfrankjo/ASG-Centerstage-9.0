@@ -30,15 +30,17 @@ public class CycleAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(117, 34, 0).addPoint(110, 29, 0).build());
-        paths.add(new Trajectory(110, 29, 0.6, 10).addPoint(115, 33, 180).build());
-        paths.add(new Trajectory(115, 33, 0.5, 15).addPoint(77, 33, 0).addPoint(77, 85, 0).addPoint(101, 96, -90).addPoint(101, 108, 0).build());
-        paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build());
+        paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(107, 34, 90).build());
+        paths.add(new Trajectory(107, 34, 0.25, 16).addPoint(107, 14, 180).build());
+        paths.add(new Trajectory(107, 14, 0.5, 10).addPoint(107, 18, 0).addPoint(77, 18, 90).addPoint(77, 96, 0).addPoint(101, 96, -90).addPoint(101, 108, 0).build());
+        /*paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build());
         paths.add(new Trajectory(96, 115, 0.5, 10).addPoint(96, 100, 180).addPoint(73, 100, 90).addPoint(73, 50, 180).addPoint(73, 15, 180).build()); // cycle intake/approach
         paths.add(new Trajectory(73, 20, 0.6, 10).addPoint(73, 40, 0).addPoint(73, 95, 0).addPoint(101, 95, -90).addPoint(101, 108, 0).build()); // cycle backdrop apprach
         paths.add(new Trajectory(101, 108, 0.4, 10).addPoint(96, 108, 90).build()); //cycle backdrop go to perfect position
         paths.add(new Trajectory(95, 115, 0.4, 8, 0).addPoint(95, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
         paths.add(new Trajectory(76, 104, 0.3, 20).addPoint(76, 115, 0).build());
+
+         */
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
         driver.storeAll();
@@ -90,7 +92,8 @@ public class CycleAuto extends LinearOpMode {
          */
 
 
-        driver.localizer.setEstimatePos(135, 34, -90);
+        driver.localizer.setEstimatePos(135, 34, 0);
+        driver.setWeaponsState(General.WeaponsState.HOLDING);
         telemetry.update();
         driver.setClawLiftPos(false);
         waitForStart();
@@ -108,7 +111,7 @@ public class CycleAuto extends LinearOpMode {
 
                 case VISION:
                     timer.reset();
-                    driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                    driver.setClawMode(General.ClawMode.BOTH);
                     while (timer.time() < 3+timerOffset && opModeIsActive()) {
                         if (timer.time()>0.5) {
                             driver.setSlidesTarget(12);
@@ -134,16 +137,16 @@ public class CycleAuto extends LinearOpMode {
                         // the path is ready to move on
                         timer.reset();
 
-                        while (timer.time() < 1 && opModeIsActive()) {
+                        while (timer.time() < 0.3 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
                             //driver.followCurve(trajectories.get(0).path);
-                            driver.setClawMode(General.ClawMode.RELEASE_R);
+                            driver.setClawMode(General.ClawMode.LEFT);
 
 
                             // release pixel
                             driver.update();
                         }
-
+                        timer.reset();
                         autoState = General.AutoState.BACKUP;
                     }
                     break;
@@ -154,6 +157,14 @@ public class CycleAuto extends LinearOpMode {
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (result) {
                         timer.reset();
+                        driver.setWeaponsState(General.WeaponsState.INTAKING);
+                        while (timer.time() < 1 && opModeIsActive()) {
+                            driver.followCurve(trajectories.get(1).path);
+                            driver.update();
+                        }
+                        driver.setWeaponsState(General.WeaponsState.HOLDING);
+                        driver.update();
+                        //while (opModeIsActive()) {driver.drive(0, 0, 0, false);}
                         autoState = General.AutoState.APPROACH_2;
                     }
                     break;
@@ -170,7 +181,8 @@ public class CycleAuto extends LinearOpMode {
                     }
                     if (result) {
                         //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
-                        autoState = General.AutoState.APPROACH_3;
+                        driver.drive(0, 0, 0, false);
+                        //autoState = General.AutoState.APPROACH_3;
                     }
                     break;
                 case APPROACH_3:
@@ -253,7 +265,7 @@ public class CycleAuto extends LinearOpMode {
                         telemetry.addData("y", driver.getCurrentPos().getY());
                         telemetry.addData("head", driver.getCurrentPos().getHeading());
                         telemetry.update();
-                        driver.setClawMode(General.ClawMode.GRAB_BOTH);
+                        driver.setClawMode(General.ClawMode.BOTH);
                         result = driver.runAutoPath(trajectories.get(4).path);
                         //driver.storePancake();
                         if (result) {

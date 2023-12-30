@@ -96,6 +96,7 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_left) {}
                 advance=true;
             }
             if (gamepad1.dpad_right) {
@@ -105,6 +106,7 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_right) {}
                 advance=true;
             }
             if (gamepad1.dpad_up) {
@@ -114,104 +116,21 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_up) {}
                 advance=true;
             }
-
-            //TODO: choose auto path
         }
-        advance=false;
-        telemetry.clearAll();
-        while (!advance && opModeInInit()) {
-            telemetry.addLine("ENTER AUTO Mode");
-            telemetry.addLine("                   PARK    --V   ");
-            telemetry.addLine("--------------------.-'         _         '-..+   ");
-            telemetry.addLine("                        |      _    ( Y )    _    |    ");
-            telemetry.addLine("CYCLE1 ->   |    ( X )    _    ( B )  |  <-- STANDARD ");
-            telemetry.addLine("            ___      '.            ( A )          /|   ");
-            telemetry.addLine("        .'        '.           '-._____.-'    .' ");
-            telemetry.addLine("      |              |                  ^              | ");
-            telemetry.addLine("        '.___.' '.                     |              | ");
-            telemetry.addLine("                          '.        CYCLE2     /  ");
-            telemetry.addLine("                              |.                    .");
-            telemetry.addLine("                                |________|");
-
-            telemetry.update();
-            if (gamepad1.a) {
-                autoMode = General.AutoMode.CYCLE_2;
-                Logger a = new Logger("AutoMode",false);
-                String l = "cycle_2";
-                a.addData(l);
-                a.update();
-                a.close();
-                advance=true;
-            }
-            if (gamepad1.b) {
-                autoMode = General.AutoMode.STANDARD;
-                Logger a = new Logger("AutoMode",false);
-                String l = "standard";
-                a.addData(l);
-                a.update();
-                a.close();
-                advance=true;
-            }
-            if (gamepad1.x) {
-                autoMode = General.AutoMode.CYCLE_1;
-                Logger a = new Logger("AutoMode",false);
-                String l = "cycle_1";
-                a.addData(l);
-                a.update();
-                a.close();
-                advance=true;
-            }
-            if (gamepad1.y) {
-                autoMode = General.AutoMode.PARK;
-                Logger a = new Logger("AutoMode",false);
-                String l = "park";
-                a.addData(l);
-                a.update();
-                a.close();
-                advance=true;
-            }
-
-        }
-
 
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
             telemetry.addData("Added Timer", timerOffset);
             telemetry.addLine("Press START to advance");
-            switch (autoMode) {
-                case STANDARD:
-                    if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                        telemetry.addLine("\nYour selected auto takes approximately 11 seconds");
-                    } else {
-                        telemetry.addLine("\nYour selected auto takes approximately 15 seconds");
-                    }
-                    break;
-                case CYCLE_1:
-                    if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                        telemetry.addLine("\nYour selected auto takes approximately 11 seconds");
-                    } else {
-                        telemetry.addLine("\nYour selected auto takes approximately 15 seconds");
-                    }
-                    break;
-                case CYCLE_2:
-                    if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                        telemetry.addLine("\nYour selected auto takes approximately 11 seconds");
-                    } else {
-                        telemetry.addLine("\nYour selected auto takes approximately 15 seconds");
-                    }
-                    break;
-                case PARK:
-                    if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                        telemetry.addLine("\nYour selected auto takes approximately 2 seconds");
-                    } else {
-                        telemetry.addLine("\nYour selected auto takes approximately 5 seconds");
-                    }
-                    break;
+            if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
+                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: None");
+            } else {
+                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: 28 Seconds");
             }
-
 
             telemetry.update();
             if (gamepad1.dpad_up) {
@@ -239,7 +158,6 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addLine("PRESS START TO CONFIRM SETTINGS:\n");
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
-            telemetry.addData("Auto Path", autoMode.toString());
             telemetry.addData("Timer Offset", timerOffset);
             telemetry.update();
         }

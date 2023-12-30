@@ -21,12 +21,21 @@ public class General {
         LOAD, PRIME, DEPOSIT, MANUAL
     }
 
+
     public enum ClawMode {
-        GRAB_L, GRAB_R, GRAB_BOTH, RELEASE_L, RELEASE_R, RELEASE_BOTH, PRIMED, INTAKING, IDLE
+        OPEN, LEFT, RIGHT, BOTH, PRIMED, IDLE, INTAKING
     }
 
     public enum WeaponsState {
-        INTAKING, HOLDING, PRIMED, EXTEND, DEPOSIT, IDLE
+        INTAKING, HOLDING, PRIMED, EXTEND, DEPOSIT, IDLE, MANUAL
+    }
+
+    public enum FlipperState {
+        STORED, READY, IDLE
+    }
+
+    public enum PixelState {
+        NONE, LEFT, RIGHT, BOTH
     }
 
     public enum AutoState {
