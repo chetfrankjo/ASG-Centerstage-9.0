@@ -21,16 +21,25 @@ public class General {
         LOAD, PRIME, DEPOSIT, MANUAL
     }
 
+
     public enum ClawMode {
-        GRAB_L, GRAB_R, GRAB_BOTH, RELEASE_L, RELEASE_R, RELEASE_BOTH, PRIMED, INTAKING, IDLE
+        OPEN, LEFT, RIGHT, BOTH, PRIMED, IDLE, INTAKING
     }
 
     public enum WeaponsState {
-        INTAKING, HOLDING, PRIMED, EXTEND, DEPOSIT, IDLE
+        INTAKING, HOLDING, PRIMED, EXTEND, DEPOSIT, IDLE, MANUAL
     }
 
-    public enum AUTO_RED_NORTH_1 {
-        VISION, APPROACH_1, SPIKE, BACKUP, APPROACH_2, APPROACH_3, PARK_1, PARK2
+    public enum FlipperState {
+        STORED, READY, IDLE
+    }
+
+    public enum PixelState {
+        NONE, LEFT, RIGHT, BOTH
+    }
+
+    public enum AutoState {
+        VISION, PURPLE_APPROACH, SPIKE, BACKUP, APPROACH_2, APPROACH_3, CYCLE_INTAKE, CYCLE_APPROACH, CYCLE_APPROACH_2, PARK_1, PARK2
     }
 
     public enum AllianceLocation {
@@ -39,6 +48,10 @@ public class General {
 
     public enum ParkLocation {
         LEFT, RIGHT, CENTER, NONE
+    }
+
+    public enum AutoMode {
+        STANDARD, CYCLE_1, CYCLE_2, PARK
     }
 
 

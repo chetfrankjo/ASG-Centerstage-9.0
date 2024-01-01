@@ -35,7 +35,7 @@ public class PropDetectionTest extends LinearOpMode
     {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), cameraMonitorViewId); // PropCamR
         pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.RED_NORTH);
         webcam.setPipeline(pipeline);
 
@@ -45,7 +45,7 @@ public class PropDetectionTest extends LinearOpMode
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(640,360, OpenCvCameraRotation.UPSIDE_DOWN);
+                webcam.startStreaming(1280,720, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override

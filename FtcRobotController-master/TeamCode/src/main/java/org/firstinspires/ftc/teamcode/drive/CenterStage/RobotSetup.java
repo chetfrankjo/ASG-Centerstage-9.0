@@ -27,6 +27,7 @@ public class RobotSetup extends LinearOpMode {
     double timerOffset = 0;
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
+    General.AutoMode autoMode;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -95,6 +96,7 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_left) {}
                 advance=true;
             }
             if (gamepad1.dpad_right) {
@@ -104,6 +106,7 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_right) {}
                 advance=true;
             }
             if (gamepad1.dpad_up) {
@@ -113,16 +116,22 @@ public class RobotSetup extends LinearOpMode {
                 a.addData(l);
                 a.update();
                 a.close();
+                while (gamepad1.dpad_up) {}
                 advance=true;
             }
-
-            //TODO: choose auto path
         }
+
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
             telemetry.addData("Added Timer", timerOffset);
             telemetry.addLine("Press START to advance");
+            if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
+                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: None");
+            } else {
+                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: 28 Seconds");
+            }
+
             telemetry.update();
             if (gamepad1.dpad_up) {
                 timerOffset+=1;
@@ -150,7 +159,6 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
             telemetry.addData("Timer Offset", timerOffset);
-            telemetry.addData("Auto Path", "default");
             telemetry.update();
         }
 

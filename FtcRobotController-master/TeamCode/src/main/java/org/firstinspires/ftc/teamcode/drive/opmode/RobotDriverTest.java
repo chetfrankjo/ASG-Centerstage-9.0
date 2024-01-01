@@ -29,6 +29,7 @@ public class RobotDriverTest extends LinearOpMode {
         Pose2d currentPos;
         driver.setLocalizationMode(General.LocalMode.ODOMETRY);
         driver.resetIMUHeading();
+        driver.setIntakeMode(General.IntakeMode.LOCK);
         driver.update();
 
         waitForStart();
@@ -46,6 +47,19 @@ public class RobotDriverTest extends LinearOpMode {
             }
             currentPos = driver.getCurrentPos();
 
+            if (gamepad2.a) {
+                driver.setWeaponsState(General.WeaponsState.INTAKING);
+            }
+            if (gamepad2.b) {
+                driver.setWeaponsState(General.WeaponsState.HOLDING);
+            }
+            if (gamepad2.x) {
+                driver.setWeaponsState(General.WeaponsState.PRIMED);
+            }
+            if (gamepad2.y) {
+                driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+            }
+
             double heading = currentPos.getHeading();
             double deltaHeading = heading - lastHeading;
             headingAccum += Angle.normDelta(deltaHeading);
@@ -60,8 +74,6 @@ public class RobotDriverTest extends LinearOpMode {
             telemetry.addData("Global Y", currentPos.getY());
             telemetry.addData("Global Heading", currentPos.getHeading());
             driver.pullIMUHeading();
-            telemetry.addData("dist left", driver.getdistLeft());
-            telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
             telemetry.addData("accum", headingAccum);
             telemetry.addData("loop speed", driver.loopSpeed);

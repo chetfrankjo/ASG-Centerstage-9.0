@@ -28,6 +28,7 @@ public class Teleop extends LinearOpMode{
         driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
+        //driver.resetFlipperEncoder();
         driver.updateClaw(false);
         Reader r = new Reader();
         String info = r.readFile("Alliance");
@@ -525,10 +526,7 @@ public class Teleop extends LinearOpMode{
                 driver.drive(gamepad1.left_stick_x+(gamepad2.left_stick_x/3), -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
             }
 
-            telemetry.addData("dist left", driver.getdistLeft());
-            telemetry.addData("dist right", driver.getdistRight());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
-            telemetry.addData("dist", driver.getdistRight());
             telemetry.addData("Claw State", driver.getClawMode().toString());
             telemetry.addData("slides target", driver.getSlidesTarget());
             telemetry.addData("slides deposit target", driver.slidesDepositTarget);

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -18,6 +19,7 @@ public class StoreRobot extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
+            telemetry.addLine("DPAD_UP - RESET ENCODERS");
             telemetry.addLine("Left Bumper/Trigger - Load/Launch Plane");
             telemetry.addLine("Right Bumper/Trigger - Load/Launch Hand");
             telemetry.addLine("A/B - Load/Launch Pancake");
@@ -35,12 +37,11 @@ public class StoreRobot extends LinearOpMode {
             if (gamepad1.right_trigger > 0.7) {
                 driver.launchHang();
             }
-            if (gamepad1.b) {
-                driver.dumpPancake();
+            if (gamepad1.dpad_up) {
+                driver.resetFlipperEncoder();
+                driver.resetSlidesEncoder();
             }
-            if (gamepad1.a) {
-                driver.storePancake();
-            }
+
 
         }
     }
