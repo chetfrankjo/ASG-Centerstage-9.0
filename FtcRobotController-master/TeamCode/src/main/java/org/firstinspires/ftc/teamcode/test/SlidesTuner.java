@@ -26,7 +26,7 @@ public class SlidesTuner extends LinearOpMode {
 
         DcMotorEx sl = hardwareMap.get(DcMotorEx.class, "slidesL");
         DcMotorEx sr = hardwareMap.get(DcMotorEx.class, "slidesR");
-        DcMotorEx enc = hardwareMap.get(DcMotorEx.class, "fr");
+        DcMotorEx enc = hardwareMap.get(DcMotorEx.class, "bl");
         enc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         enc.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -63,8 +63,8 @@ public class SlidesTuner extends LinearOpMode {
 
 
 
-            sl.setPower(power);
-            sr.setPower(power);
+            sl.setPower(-power);
+            sr.setPower(-power);
 
             telemetry.addData("pos", slidesLength);
             telemetry.addData("target", slidesTarget);

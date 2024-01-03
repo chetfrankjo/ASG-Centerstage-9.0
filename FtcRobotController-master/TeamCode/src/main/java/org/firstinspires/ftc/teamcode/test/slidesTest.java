@@ -12,12 +12,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 @Config
 @TeleOp
 public class slidesTest extends LinearOpMode {
-    public static double cons = 1;
+    public static double cons = 104.54545454545454545454545454545;
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotorEx sl = hardwareMap.get(DcMotorEx.class, "slidesL");
         DcMotorEx sr = hardwareMap.get(DcMotorEx.class, "slidesR");
-        DcMotorEx enc = hardwareMap.get(DcMotorEx.class, "fr");
+        DcMotorEx enc = hardwareMap.get(DcMotorEx.class, "bl");
+        enc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        enc.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         sl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

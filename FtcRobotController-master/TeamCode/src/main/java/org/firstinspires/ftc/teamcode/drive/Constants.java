@@ -15,11 +15,12 @@ public class Constants {
 
 
     public static class AssemblyConstants {
-        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.12, 0.08, 0, 0.05);
-        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
+        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.23, 0.004, 0, 0);
+        //public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.007, 0, 0.0005, -0.09);
+        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.0085, 0.0005, 0.0005, -0.14);
         public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
 
-        public static final double slideTickToInch = -29.16666666666667;
+        public static final double slideTickToInch = 104.54545454545454545454545454545;
         public static final double gantryAngleToInch = 0.00;
         public static final double flipperTickToAngle = 0;
 
@@ -32,7 +33,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444; //13.37 //
+        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889; //13.37 //
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = 6.22;
 

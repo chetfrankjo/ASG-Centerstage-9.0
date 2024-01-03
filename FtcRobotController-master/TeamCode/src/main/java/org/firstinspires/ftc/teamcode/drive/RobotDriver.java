@@ -12,10 +12,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -63,6 +66,9 @@ public class RobotDriver {
     private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
+    private ColorSensor colorLeft;
+    private RevColorSensorV3 colorRight;
+    private AnalogInput fsr;
     //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
     public Localizer localizer;
@@ -74,7 +80,7 @@ public class RobotDriver {
     private double slidesLength, touchVal, imuheading, gantryPos;
     double slidesTarget, slidesPower, intakePower, flipperTarget, flipperPower, flipperAngle;
     static double frp=0, flp=0, brp=0, blp=0;
-    public boolean useIMU = false, slidesDisable;
+    public boolean useIMU = false, slidesDisable, flipperDisable;
     final double slideTickToInch = AssemblyConstants.slideTickToInch;
     public int loops = 0;
     long lastLoopTime = System.nanoTime();
@@ -89,7 +95,7 @@ public class RobotDriver {
     private LocalMode localizationMode;
     double slidesI, previousSlidesError, flipperI, previousFlipperError;
     private boolean waitingForDepsoit = false;
-    ElapsedTime tagTimer, depositTimer;
+    ElapsedTime tagTimer, depositTimer, clawTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
@@ -108,7 +114,7 @@ public class RobotDriver {
 
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
-
+    private boolean invertClaw = false;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -149,7 +155,7 @@ public class RobotDriver {
         slidesR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slides = Arrays.asList(slidesL, slidesR);
-        leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "fr");
+        leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "bl");
 
         flipper = hardwareMap.get(DcMotorEx.class, "flipper");
         flipper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -170,6 +176,10 @@ public class RobotDriver {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        colorLeft = hardwareMap.get(ColorSensor.class, "colorLeft");
+        colorRight = hardwareMap.get(RevColorSensorV3.class, "colorRight");
+
+        fsr = hardwareMap.analogInput.get("fsr");
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -195,8 +205,6 @@ public class RobotDriver {
         PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), cameraMonitorViewId);
         propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
         PropCameraR.setPipeline(propPipeline);
-
-
 
 
         if (prepAutoCamera) {
@@ -261,6 +269,7 @@ public class RobotDriver {
         dashboard = FtcDashboard.getInstance();
         tagTimer = new ElapsedTime();
         depositTimer = new ElapsedTime();
+        clawTimer = new ElapsedTime();
     }
 
 
@@ -277,11 +286,11 @@ public class RobotDriver {
         updateDriveMotors();        // Updates drive motor power
         updateAutomation();
         updateIntake();
-        //updateFlipper();
+        updateFlipper();
         if (updateClaw) {
-            //updateClaw();
+            updateClaw();
         }
-        //updateSlides();
+        updateSlides();
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -330,16 +339,19 @@ public class RobotDriver {
 
     public void updateAutomation() {
         switch (weaponsState) {
-            case PRIMED: // flipped over, no slides
+            /*case PRIMED: // flipped over, no slides
                 slidesTarget = 0;//slidesPrimeTarget
                 clawMode = ClawMode.PRIMED;
                 weaponsState = WeaponsState.IDLE;
                 flipperState = FlipperState.READY;
                 intakeMode = IntakeMode.LOCK;
                 break;
+
+             */
             case EXTEND: // slides out, flipped over, ready to deposit
                 slidesTarget = slidesDepositTarget;
-                clawMode=ClawMode.PRIMED;
+                clawMode=ClawMode.BOTH;
+                setClawLiftPos(true);
                 weaponsState=WeaponsState.IDLE;
                 flipperState = FlipperState.READY;
                 intakeMode = IntakeMode.LOCK;
@@ -354,13 +366,29 @@ public class RobotDriver {
                 break;
             case INTAKING: // rollers on, ready to grab
                 slidesTarget = 0;
-                clawMode = ClawMode.INTAKING;
+                setClawLiftPos(false);
+                if (getRightHasPixel()) {
+                    if (getLeftHasPixel()) {
+                        clawMode = ClawMode.BOTH;
+                    } else {
+                        clawMode = ClawMode.RIGHT;
+                    }
+                } else {
+                    if (getLeftHasPixel()) {
+                        clawMode = ClawMode.LEFT;
+                    } else {
+                        clawMode = ClawMode.OPEN;
+                    }
+                }
+                //clawMode = ClawMode.INTAKING;
                 weaponsState = WeaponsState.IDLE;
                 flipperState = FlipperState.STORED;
                 intakeMode = IntakeMode.INTAKE;
                 break;
             case HOLDING: // grab, invert rollers to spit out extras
                 clawMode = ClawMode.BOTH;
+                setClawLiftPos(false);
+                slidesTarget = 0;
                 weaponsState = WeaponsState.IDLE;
                 flipperState = FlipperState.STORED;
                 intakeMode = IntakeMode.LOCK;
@@ -370,14 +398,19 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (depositTimer.time() > 1.2 && waitingForDepsoit) {
+                if (depositTimer.time()>0.6 && waitingForDepsoit) {
+                    setClawLiftPos(false);
+                }
+                if (depositTimer.time() > 0.8 && waitingForDepsoit) {
                     waitingForDepsoit=false;
-                    weaponsState = WeaponsState.INTAKING;
+                    weaponsState = WeaponsState.HOLDING;
+
                 }
                 break;
                 //do nothing, as all parameters are now set
         }
     }
+    public WeaponsState getWeaponsState() {return weaponsState;}
 
     public AllianceLocation loadAlliancePreset() {
         Reader r = new Reader();
@@ -432,7 +465,7 @@ public class RobotDriver {
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
-        flipperAngle = flipper.getCurrentPosition()*AssemblyConstants.flipperTickToAngle;
+        flipperAngle = flipper.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -512,6 +545,7 @@ public class RobotDriver {
     public void setLocalizationMode(LocalMode mode) {localizationMode = mode;}
 
     public void setSlidesDisable(boolean disable) {slidesDisable = disable;}
+    public boolean getSlidesDisable() {return slidesDisable;}
     public double getSlidesLength() {
         return slidesLength;
     }
@@ -536,7 +570,7 @@ public class RobotDriver {
                 double d = AssemblyConstants.slidesPIDConstants.d * (error - previousSlidesError) / loopSpeed;
                 double power = (p + slidesI + d + (Math.signum(error) * AssemblyConstants.slidesPIDConstants.f));
                 for (DcMotorEx slide : slides) {
-                    slide.setPower(power);
+                    slide.setPower(-power);
                 }
 
                 previousSlidesError = error;
@@ -595,9 +629,12 @@ public class RobotDriver {
                 break;
         }
     }
+    public IntakeMode getIntakeMode() {return intakeMode;}
 
-
-    public void setDepositFlipper(FlipperState state) {flipperState = state;}
+    public void setFlipperDisable(boolean b) {flipperDisable=b;}
+    public boolean getFlipperDisable() {return flipperDisable;}
+    public void setFlipperState(FlipperState state) {flipperState = state;}
+    public void setFlipperPower(double power) {flipperPower=power;}
     public FlipperState getFlipperState() {return flipperState;}
     public void updateFlipper() {
         switch (flipperState) {
@@ -605,19 +642,33 @@ public class RobotDriver {
                 flipperTarget = 0;
                 break;
             case READY:
-                flipperTarget = 180;
+                flipperTarget = 360;
                 break;
             case IDLE:
 
                 break;
         }
-        double error = (flipperTarget - flipperAngle);
-        double p = AssemblyConstants.flipperPIDConstants.p * error;
-        flipperI += AssemblyConstants.flipperPIDConstants.i * error * loopSpeed;
-        double d = AssemblyConstants.flipperPIDConstants.d * (error - previousFlipperError) / loopSpeed;
-        double power = (p + flipperI + d + (Math.signum(error) * AssemblyConstants.flipperPIDConstants.f));
-        previousFlipperError = error;
-        flipper.setPower(power);
+        if (flipperPower==0) {
+            if (!flipperDisable) {
+                double error = (flipperTarget - flipperAngle);
+                double p = AssemblyConstants.flipperPIDConstants.p * error;
+                flipperI += AssemblyConstants.flipperPIDConstants.i * error * loopSpeed;
+                double d = AssemblyConstants.flipperPIDConstants.d * (error - previousFlipperError) / loopSpeed;
+                double power;
+                if (flipperAngle > 180) {
+                    power = (p + flipperI + d + AssemblyConstants.flipperPIDConstants.f);
+                } else {
+                    power = (p + flipperI + d);
+                }
+                previousFlipperError = error;
+                flipper.setPower(-power);
+            } else {
+                flipper.setPower(0);
+            }
+        } else {
+            flipper.setPower(flipperPower);
+            flipperTarget=flipperAngle;
+        }
 
     }
     public void resetFlipperEncoder() {
@@ -636,31 +687,39 @@ public class RobotDriver {
         switch (clawMode) {
             case LEFT:
                 clawL.setPosition(0.5);
+                clawR.setPosition(0.73);
                 break;
             case RIGHT:
                 clawR.setPosition(0.5);
+                clawL.setPosition(0.27);
                 break;
             case BOTH:
                 clawL.setPosition(0.5);
                 clawR.setPosition(0.5);
                 break;
             case OPEN:
-                clawL.setPosition(0.7);
-                clawR.setPosition(0.3);
+                clawL.setPosition(0.27);
+                clawR.setPosition(0.73);
                 break;
-            case PRIMED:
+            /*case PRIMED:
                 // ensure both claws are grabbed, and lift the thingy
-                clawLift.setPosition(.96);
+                clawLift.setPosition(0.65);
                 clawL.setPosition(0.5);
                 clawR.setPosition(0.5);
                 break;
             case INTAKING:
                 // lift down, both claws open
-                clawLift.setPosition(0.54);
+                clawLift.setPosition(0.06);
                 clawL.setPosition(0.7);
                 clawR.setPosition(0.3);
             case IDLE:
                 break;
+
+             */
+        }
+        if (clawTimer.time()>0.3 && invertClaw) {
+            invertClaw = false;
+            clawLift.setPosition(0.65);
         }
     }
     public void setClawLPos(boolean closed) {
@@ -685,9 +744,12 @@ public class RobotDriver {
     }
     public void setClawLiftPos(boolean up) {
         if (up) {
-            clawLift.setPosition(.96);
+            clawLift.setPosition(0);
+            clawTimer.reset();
+            invertClaw = true;
+            //clawLift.setPosition(0.65);
         } else {
-            clawLift.setPosition(0.54);
+            clawLift.setPosition(0.06);
         }
 
     }
@@ -728,6 +790,27 @@ public class RobotDriver {
     public void storeAll() {
         storePlane();
         storeHang();
+    }
+
+
+    public int[] getLeftColor() {
+        return new int[] {colorLeft.red(), colorLeft.green(), colorLeft.blue()};
+    }
+    public int[] getRightColor() {
+        return new int[] {colorRight.red(), colorRight.green(), colorRight.blue()};
+    }
+    public boolean getLeftHasPixel() {
+        return (colorLeft.red()+colorLeft.green()+colorLeft.blue() > 600);
+    }
+    public boolean getRightHasPixel() {
+        return (colorRight.red()+colorRight.green()+colorRight.blue() > 600);
+    }
+
+    public double getFSRVoltage() {
+        return fsr.getVoltage();
+    }
+    public boolean getFSRPressed() {
+        return (fsr.getVoltage() > 2);
     }
 
     //1 Set internal transfer servos/motor power

@@ -203,7 +203,7 @@ public class Auto extends LinearOpMode {
                     } else {
                         if (timer.time() > 1) {
                             driver.setSlidesTarget(0);
-                            driver.setClawMode(General.ClawMode.PRIMED);
+                            //driver.setClawMode(General.ClawMode.OPEN);
                             driver.drive(0,0,0,false);
                         } else {
                             driver.drive(0, -0.2, 0, false);

@@ -25,10 +25,13 @@ public class RobotDriverTest extends LinearOpMode {
         //driver.setSlidesZeroPower(FLOAT);
         //driver.setTurretZeroPower(FLOAT);
         //driver.setv4barZeroPower(FLOAT);
+        driver.resetFlipperEncoder();
+        driver.resetSlidesEncoder();
         driver.localizer.setEstimatePos(0, 0, 0);
         Pose2d currentPos;
         driver.setLocalizationMode(General.LocalMode.ODOMETRY);
         driver.resetIMUHeading();
+        driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setIntakeMode(General.IntakeMode.LOCK);
         driver.update();
 
@@ -37,7 +40,7 @@ public class RobotDriverTest extends LinearOpMode {
             driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, fieldCentric);
 
 
-            if (gamepad1.a) {
+            /*if (gamepad1.a) {
                 if (!fieldCentric) {
                     fieldCentric = true;
                 } else {
@@ -45,6 +48,8 @@ public class RobotDriverTest extends LinearOpMode {
                 }
                 while (gamepad1.a) {}
             }
+
+             */
             currentPos = driver.getCurrentPos();
 
             if (gamepad2.a) {
@@ -54,7 +59,7 @@ public class RobotDriverTest extends LinearOpMode {
                 driver.setWeaponsState(General.WeaponsState.HOLDING);
             }
             if (gamepad2.x) {
-                driver.setWeaponsState(General.WeaponsState.PRIMED);
+                driver.setWeaponsState(General.WeaponsState.EXTEND);
             }
             if (gamepad2.y) {
                 driver.setWeaponsState(General.WeaponsState.DEPOSIT);
@@ -69,6 +74,10 @@ public class RobotDriverTest extends LinearOpMode {
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+            telemetry.addData("fsr", driver.getFSRVoltage());
+            telemetry.addData("touchpad", gamepad2.touchpad_finger_1_x);
+            telemetry.addData("color left", driver.getLeftColor().toString());
+            telemetry.addData("color right", driver.getRightColor().toString());
             telemetry.addData("-----", "----");
             telemetry.addData("Global X", currentPos.getX());
             telemetry.addData("Global Y", currentPos.getY());
