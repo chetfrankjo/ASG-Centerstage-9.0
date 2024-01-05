@@ -110,7 +110,7 @@ public class Teleop extends LinearOpMode{
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
-            driver.setFlipperPower(gamepad2.left_stick_y); // manual flipper
+            driver.setFlipperPower(gamepad2.left_stick_y/4); // manual flipper
 
             if (gamepad2.left_trigger > 0.7 && !tl) { // open left claw
                 tl=true;
@@ -119,7 +119,7 @@ public class Teleop extends LinearOpMode{
                         break;
                     case LEFT:
                         driver.setClawMode(General.ClawMode.OPEN);
-                        if (driver.getClawLiftPos()>=0.64) { // if you are in a deposit position, do a full deposit
+                        if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -128,7 +128,7 @@ public class Teleop extends LinearOpMode{
                         break;
                     case BOTH:
                         driver.setClawMode(General.ClawMode.RIGHT);
-                        if (!driver.getRightHasPixel() && driver.getClawLiftPos()>=0.64&&allowAutoIntake) { // if right doesnt have a pixel, then you are doing a full deposit
+                        if (!driver.getRightHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if right doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -148,14 +148,14 @@ public class Teleop extends LinearOpMode{
                         break;
                     case RIGHT:
                         driver.setClawMode(General.ClawMode.OPEN);
-                        if (driver.getClawLiftPos()>=0.64) { // if you are in a deposit position, do a full deposit
+                        if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
                     case BOTH:
                         driver.setClawMode(General.ClawMode.LEFT);
-                        if (!driver.getLeftHasPixel() && driver.getClawLiftPos()>=0.64&&allowAutoIntake) { // if left doesnt have a pixel, then you are doing a full deposit
+                        if (!driver.getLeftHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if left doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -232,7 +232,7 @@ public class Teleop extends LinearOpMode{
                 driver.setIntakeMode(General.IntakeMode.LOCK);
             }
 
-            if (gamepad2.b) { // start intaking
+            if (gamepad2.a) { // start intaking
                 driver.setWeaponsState(General.WeaponsState.INTAKING);
             }
             if (driver.getCurrentPos().getY() < 50 && allowAutoIntake && !autoIntaking) { // when near the pickup zone, start the intake automatically
@@ -285,7 +285,7 @@ public class Teleop extends LinearOpMode{
                     outtake = true;
                 }
             }
-            if (allowAutoDeposit && driver.getClawLiftPos()>=0.64) { // if you are depositing, drop the pixels if the FSR touches the backdrop
+            if (allowAutoDeposit && driver.getClawLiftPos()>=0.9) { // if you are depositing, drop the pixels if the FSR touches the backdrop
                 if (driver.getFSRPressed()) { // nest this in here to decrease loop times
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     driver.setSlidesDepositTarget(driver.getSlidesLength());
@@ -305,22 +305,24 @@ public class Teleop extends LinearOpMode{
 
 
 
-            if (gamepad2.touchpad_finger_1_x < 0) { // enable/disable auto intake
+            if (gamepad2.touchpad_finger_1_x < 0 && gamepad2.touchpad_finger_1) { // enable/disable auto intake
                 if (allowAutoIntake) {
                     allowAutoIntake = false;
                 } else {
                     allowAutoIntake = true;
                 }
+                gamepad2.rumble(1, 0, 200);
                 while (gamepad2.touchpad_finger_1) {}
-            } else if (gamepad2.touchpad_finger_1_x > 0) { // enable/disable auto grab (color sensors)
+            } else if (gamepad2.touchpad_finger_1_x > 0 && gamepad2.touchpad_finger_1) { // enable/disable auto grab (color sensors)
                 if (allowAutoHolding) {
                     allowAutoHolding = false;
                 } else {
                     allowAutoHolding = true;
                 }
+                gamepad2.rumble(0, 1, 200);
                 while (gamepad2.touchpad_finger_1) {}
             }
-            if (gamepad2.a) { // enable/disable auto deposit (FSR)
+            if (gamepad2.b) { // enable/disable auto deposit (FSR)
                 if (allowAutoDeposit) {
                     allowAutoDeposit = false;
                     gamepad2.setLedColor(255, 0, 0, -1);
@@ -328,7 +330,7 @@ public class Teleop extends LinearOpMode{
                     allowAutoDeposit = true;
                     gamepad2.setLedColor(0, 255, 0, -1);
                 }
-                while (gamepad2.a) {}
+                while (gamepad2.b) {}
             }
             /*if (gamepad1.touchpad && !g1lt) { // toggle robot front
                 g1lt = true;

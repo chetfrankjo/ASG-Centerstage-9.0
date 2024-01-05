@@ -17,7 +17,7 @@ public class Constants {
     public static class AssemblyConstants {
         public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.23, 0.004, 0, 0);
         //public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.007, 0, 0.0005, -0.09);
-        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.0085, 0.0005, 0.0005, -0.14);
+        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.005, 0, 0, -0.14);
         public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
 
         public static final double slideTickToInch = 104.54545454545454545454545454545;

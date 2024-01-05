@@ -33,7 +33,7 @@ public class flipperTuner extends LinearOpMode {
         while (opModeIsActive()) {
             loops++;
 
-            flipperAngle = flipper.getCurrentPosition();
+            flipperAngle = -flipper.getCurrentPosition();
 
 
             long currentTime = System.nanoTime();
@@ -60,7 +60,7 @@ public class flipperTuner extends LinearOpMode {
 
 
 
-            flipper.setPower(-power);
+            flipper.setPower(power);
 
             telemetry.addData("pos", flipperAngle);
             telemetry.addData("target", target);

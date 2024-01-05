@@ -465,7 +465,7 @@ public class RobotDriver {
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
-        flipperAngle = flipper.getCurrentPosition();
+        flipperAngle = -flipper.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -580,7 +580,7 @@ public class RobotDriver {
                 }
             }
         } else {
-            if ((slidesLength <= 0 && slidesPower > 0) || (slidesLength > 0)) {
+            if ((slidesLength <= 0 && slidesPower < 0) || (slidesLength > 0)) {
                 for (DcMotorEx slide : slides) {
                     slide.setPower(slidesPower);
                 }
@@ -642,7 +642,7 @@ public class RobotDriver {
                 flipperTarget = 0;
                 break;
             case READY:
-                flipperTarget = 360;
+                flipperTarget = 300;
                 break;
             case IDLE:
 
@@ -650,7 +650,7 @@ public class RobotDriver {
         }
         if (flipperPower==0) {
             if (!flipperDisable) {
-                double error = (flipperTarget - flipperAngle);
+                /*double error = (flipperTarget - flipperAngle);
                 double p = AssemblyConstants.flipperPIDConstants.p * error;
                 flipperI += AssemblyConstants.flipperPIDConstants.i * error * loopSpeed;
                 double d = AssemblyConstants.flipperPIDConstants.d * (error - previousFlipperError) / loopSpeed;
@@ -661,13 +661,31 @@ public class RobotDriver {
                     power = (p + flipperI + d);
                 }
                 previousFlipperError = error;
-                flipper.setPower(-power);
+                flipper.setPower(power);
+
+                 */
+
+                if (flipperTarget==300) {
+                    if (flipperAngle < 180) {
+                        flipper.setPower(0.75);
+                    } else {
+                        flipper.setPower(0);
+                    }
+                } else {
+                    if (flipperAngle > 180) {
+                        flipper.setPower(-0.75);
+                    } else {
+                        flipper.setPower(0);
+                    }
+                }
+
             } else {
                 flipper.setPower(0);
             }
         } else {
-            flipper.setPower(flipperPower);
+            flipper.setPower(-flipperPower);
             flipperTarget=flipperAngle;
+            flipperState = FlipperState.IDLE;
         }
 
     }
@@ -717,10 +735,10 @@ public class RobotDriver {
 
              */
         }
-        if (clawTimer.time()>0.3 && invertClaw) {
-            invertClaw = false;
-            clawLift.setPosition(0.65);
-        }
+        //if (clawTimer.time()>0.3 && invertClaw) {
+            //invertClaw = false;
+            //clawLift.setPosition(0.65);
+        //}
     }
     public void setClawLPos(boolean closed) {
         if (closed) {
@@ -744,12 +762,12 @@ public class RobotDriver {
     }
     public void setClawLiftPos(boolean up) {
         if (up) {
-            clawLift.setPosition(0);
-            clawTimer.reset();
-            invertClaw = true;
-            //clawLift.setPosition(0.65);
+            //clawLift.setPosition(0);
+            //clawTimer.reset();
+            //invertClaw = true;
+            clawLift.setPosition(0.96);
         } else {
-            clawLift.setPosition(0.06);
+            clawLift.setPosition(0.28);
         }
 
     }
