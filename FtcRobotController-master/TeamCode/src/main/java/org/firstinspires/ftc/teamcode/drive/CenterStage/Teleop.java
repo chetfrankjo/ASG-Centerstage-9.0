@@ -179,7 +179,7 @@ public class Teleop extends LinearOpMode{
                     case RIGHT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            //driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            driver.setWeaponsState(General.WeaponsState.HOLDING);
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -202,7 +202,7 @@ public class Teleop extends LinearOpMode{
                     case LEFT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            //driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            driver.setWeaponsState(General.WeaponsState.HOLDING);
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -372,7 +372,7 @@ public class Teleop extends LinearOpMode{
                 }
                 while (gamepad2.back) {}
             }
-            
+
              */
             if (gamepad2.back) {
                 driver.resetFlipperEncoder();
