@@ -74,6 +74,7 @@ public class RobotDriverTest extends LinearOpMode {
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+            telemetry.addData("current", driver.getIntakeCurrent());
             telemetry.addData("fsr", driver.getFSRVoltage());
             telemetry.addData("touchpad", gamepad2.touchpad_finger_1_x);
             telemetry.addData("color left", driver.getLeftColor().toString());

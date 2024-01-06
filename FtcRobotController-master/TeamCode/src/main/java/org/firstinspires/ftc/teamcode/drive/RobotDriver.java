@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
@@ -467,7 +468,7 @@ public class RobotDriver {
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
-        flipperAngle = -flipper.getCurrentPosition();
+        flipperAngle = flipper.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -621,7 +622,7 @@ public class RobotDriver {
                 intake.setPower(0);
                 break;
             case INTAKE:
-                intake.setPower(0.8);
+                intake.setPower(1.0);
                 break;
             case OUTTAKE:
                 intake.setPower(-1.0);
@@ -632,6 +633,7 @@ public class RobotDriver {
         }
     }
     public IntakeMode getIntakeMode() {return intakeMode;}
+    public double getIntakeCurrent() {return intake.getCurrent(CurrentUnit.AMPS);}
 
     public void setFlipperDisable(boolean b) {flipperDisable=b;}
     public boolean getFlipperDisable() {return flipperDisable;}
@@ -727,7 +729,7 @@ public class RobotDriver {
                 clawL.setPosition(0.27);
                 clawR.setPosition(0.73);
                 break;
-            /*case PRIMED:
+            /*case PRIMED:  
                 // ensure both claws are grabbed, and lift the thingy
                 clawLift.setPosition(0.65);
                 clawL.setPosition(0.5);
