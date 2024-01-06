@@ -364,13 +364,18 @@ public class Teleop extends LinearOpMode{
             if (gamepad1.back) {
                 driver.resetSlidesEncoder();
             }
-            if (gamepad2.back) {
+            /*if (gamepad2.back) {
                 if (driver.getFlipperDisable()) {
                     driver.setFlipperDisable(false);
                 } else {
                     driver.setFlipperDisable(true);
                 }
                 while (gamepad2.back) {}
+            }
+            
+             */
+            if (gamepad2.back) {
+                driver.resetFlipperEncoder();
             }
             if (gamepad2.start) {
                 if (driver.getSlidesDisable()) {
