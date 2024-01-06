@@ -670,13 +670,13 @@ public class RobotDriver {
 
                 if (flipperTarget==300) {
                     if (flipperAngle < 180) {
-                        flipper.setPower(0.75);
+                        flipper.setPower(-0.75);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
                     if (flipperAngle > 180) {
-                        flipper.setPower(-0.75);
+                        flipper.setPower(0.75);
                     } else {
                         flipper.setPower(0);
                     }
@@ -686,7 +686,7 @@ public class RobotDriver {
                 flipper.setPower(0);
             }
         } else {
-            flipper.setPower(flipperPower);
+            flipper.setPower(-flipperPower);
             //flipperTarget=flipperAngle;
             if (flipperPower < 0) {
                 flipperTarget = 0;
