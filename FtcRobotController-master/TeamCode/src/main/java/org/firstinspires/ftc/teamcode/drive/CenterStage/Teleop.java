@@ -19,8 +19,8 @@ public class Teleop extends LinearOpMode{
     boolean superMegaDrive = false;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
     boolean redAlliance = false;
-    boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false;
-    ElapsedTime outtakeTimer;
+    boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false;
+    ElapsedTime outtakeTimer, waitForDepositClawTimer;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -106,6 +106,7 @@ public class Teleop extends LinearOpMode{
 
         ElapsedTime hangtime = new ElapsedTime();
         outtakeTimer = new ElapsedTime();
+        waitForDepositClawTimer = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
@@ -122,6 +123,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.OPEN);
                         if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            waitForDepositToOpenClaw = true;
                             driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -132,6 +134,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.RIGHT);
                         if (!driver.getRightHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if right doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            waitForDepositToOpenClaw = true;
                             driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -154,6 +157,7 @@ public class Teleop extends LinearOpMode{
                         if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                             driver.setClawMode(General.ClawMode.OPEN);
+                            waitForDepositToOpenClaw = true;
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
@@ -161,6 +165,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.LEFT);
                         if (!driver.getLeftHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if left doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            waitForDepositToOpenClaw = true;
                             driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
@@ -223,6 +228,16 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad2.y) { // extend+flip for depositing
                 driver.setWeaponsState(General.WeaponsState.EXTEND);
+            }
+
+            if (waitForDepositToOpenClaw) {
+                waitForDepositClawTimer.reset();
+                waitForDepositToOpenClaw = false;
+                waitingForTimer = true;
+            }
+            if (waitingForTimer && waitForDepositClawTimer.time()> 0.9) {
+                waitingForTimer = false;
+                driver.setClawMode(General.ClawMode.OPEN);
             }
 
             //if (gamepad2.dpad_down) { // grab both claws, stop intake, start temporary outtake
