@@ -3,10 +3,13 @@ package org.firstinspires.ftc.teamcode.test;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode.drive.Constants;
 @Config
 @TeleOp
 public class flipperTuner extends LinearOpMode {
@@ -30,7 +33,7 @@ public class flipperTuner extends LinearOpMode {
         while (opModeIsActive()) {
             loops++;
 
-            flipperAngle = flipper.getCurrentPosition() * 0;
+            flipperAngle = -flipper.getCurrentPosition();
 
 
             long currentTime = System.nanoTime();
@@ -44,7 +47,12 @@ public class flipperTuner extends LinearOpMode {
             double p = pc * error;
             flipperI +=ic * error * loopSpeed;
             double d = dc * (error- previousFlipperError) / loopSpeed;
-            double power = (p+ flipperI +d + (Math.signum(error)*fc));
+            double power;
+            if (flipperAngle > 180) {
+                power = (p+ flipperI +d + fc);
+            } else {
+                power = (p + flipperI + d);
+            }
 
 
             previousFlipperError = error;

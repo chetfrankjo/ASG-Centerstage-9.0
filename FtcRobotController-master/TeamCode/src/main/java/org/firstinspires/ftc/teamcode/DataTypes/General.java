@@ -23,7 +23,7 @@ public class General {
 
 
     public enum ClawMode {
-        OPEN, LEFT, RIGHT, BOTH, PRIMED, IDLE, INTAKING
+        OPEN, LEFT, RIGHT, BOTH//, PRIMED, IDLE, INTAKING
     }
 
     public enum WeaponsState {

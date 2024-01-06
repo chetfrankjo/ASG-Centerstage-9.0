@@ -148,6 +148,10 @@ public class RobotSetup extends LinearOpMode {
                 advance=true;
             }
         }
+        advance=false;
+        telemetry.clearAll();
+
+
         Logger a = new Logger("timer", false);
         String l = String.valueOf(timerOffset);
         a.addData(l);
