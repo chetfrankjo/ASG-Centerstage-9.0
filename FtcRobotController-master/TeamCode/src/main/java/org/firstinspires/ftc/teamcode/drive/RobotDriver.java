@@ -717,14 +717,14 @@ public class RobotDriver {
                 break;
             case RIGHT:
                 clawR.setPosition(0.5);
-                clawL.setPosition(0.27);
+                clawL.setPosition(0.3);
                 break;
             case BOTH:
                 clawL.setPosition(0.5);
                 clawR.setPosition(0.5);
                 break;
             case OPEN:
-                clawL.setPosition(0.27);
+                clawL.setPosition(0.3);
                 clawR.setPosition(0.73);
                 break;
             /*case PRIMED:
