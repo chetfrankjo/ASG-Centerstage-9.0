@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
 @Autonomous(group = "b")
@@ -13,6 +14,8 @@ public class ParkAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotDriver driver = new RobotDriver(hardwareMap, false);
+        driver.setPurpleRelease(true);
+        driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.update();
         ElapsedTime timer = new ElapsedTime();
         waitForStart();
@@ -20,7 +23,7 @@ public class ParkAuto extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (timer.time() < 2) {
-                driver.drive(0, -0.3, 0, false);
+                driver.drive(0, 0.3, 0, false);
             } else {
                 driver.drive(0, 0, 0, false);
             }
