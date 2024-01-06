@@ -122,6 +122,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.OPEN);
                         if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
@@ -131,6 +132,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.RIGHT);
                         if (!driver.getRightHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if right doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
@@ -151,6 +153,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.OPEN);
                         if (driver.getClawLiftPos()>=0.9) { // if you are in a deposit position, do a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
@@ -158,6 +161,7 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.LEFT);
                         if (!driver.getLeftHasPixel() && driver.getClawLiftPos()>=0.9&&allowAutoIntake) { // if left doesnt have a pixel, then you are doing a full deposit
                             driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                            driver.setClawMode(General.ClawMode.OPEN);
                             driver.setSlidesDepositTarget(driver.getSlidesLength());
                         }
                         break;
