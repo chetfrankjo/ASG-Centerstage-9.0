@@ -19,8 +19,8 @@ public class Teleop extends LinearOpMode{
     boolean superMegaDrive = false;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
     boolean redAlliance = false;
-    boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false;
-    ElapsedTime outtakeTimer, waitForDepositClawTimer;
+    boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false;
+    ElapsedTime outtakeTimer, waitForDepositClawTimer, waitToStopIntakeTimer;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -107,6 +107,7 @@ public class Teleop extends LinearOpMode{
         ElapsedTime hangtime = new ElapsedTime();
         outtakeTimer = new ElapsedTime();
         waitForDepositClawTimer = new ElapsedTime();
+        waitToStopIntakeTimer = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
             driver.update();
@@ -189,6 +190,9 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
                             driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            driver.setIntakeMode(General.IntakeMode.INTAKE);
+                            waitToStopIntake = true;
+                            waitToStopIntakeTimer.reset();
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -212,6 +216,9 @@ public class Teleop extends LinearOpMode{
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
                             driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            driver.setIntakeMode(General.IntakeMode.INTAKE);
+                            waitToStopIntake = true;
+                            waitToStopIntakeTimer.reset();
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -225,6 +232,13 @@ public class Teleop extends LinearOpMode{
             if (!gamepad2.right_bumper) {
                 br = false;
             }
+
+
+            if (waitToStopIntake && waitToStopIntakeTimer.time() > 0.25) {
+                waitToStopIntake = false;
+                driver.setIntakeMode(General.IntakeMode.LOCK);
+            }
+
 
             if (gamepad2.y) { // extend+flip for depositing
                 driver.setWeaponsState(General.WeaponsState.EXTEND);
