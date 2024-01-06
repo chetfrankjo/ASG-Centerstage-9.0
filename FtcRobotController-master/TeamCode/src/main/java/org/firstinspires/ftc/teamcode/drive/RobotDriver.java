@@ -63,7 +63,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     private ColorSensor colorLeft;
@@ -180,6 +180,8 @@ public class RobotDriver {
         colorRight = hardwareMap.get(RevColorSensorV3.class, "colorRight");
 
         fsr = hardwareMap.analogInput.get("fsr");
+
+        purpleRelease = hardwareMap.get(Servo.class, "purple");
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -619,7 +621,7 @@ public class RobotDriver {
                 intake.setPower(0);
                 break;
             case INTAKE:
-                intake.setPower(1.0);
+                intake.setPower(0.8);
                 break;
             case OUTTAKE:
                 intake.setPower(-1.0);
@@ -635,6 +637,7 @@ public class RobotDriver {
     public boolean getFlipperDisable() {return flipperDisable;}
     public void setFlipperState(FlipperState state) {flipperState = state;}
     public void setFlipperPower(double power) {flipperPower=power;}
+    public double getFLipperPos() {return flipperAngle;}
     public FlipperState getFlipperState() {return flipperState;}
     public void updateFlipper() {
         switch (flipperState) {
@@ -683,8 +686,13 @@ public class RobotDriver {
                 flipper.setPower(0);
             }
         } else {
-            flipper.setPower(-flipperPower);
-            flipperTarget=flipperAngle;
+            flipper.setPower(flipperPower);
+            //flipperTarget=flipperAngle;
+            if (flipperPower < 0) {
+                flipperTarget = 0;
+            } else {
+                flipperTarget = 300;
+            }
             flipperState = FlipperState.IDLE;
         }
 
@@ -802,6 +810,14 @@ public class RobotDriver {
     }
     public void storePlane() {
         launcher.setPosition(-1);
+    }
+
+    public void setPurpleRelease(boolean val) {
+        if (val) {
+            purpleRelease.setPosition(1);
+        } else {
+            purpleRelease.setPosition(0.72);
+        }
     }
 
 

@@ -27,6 +27,7 @@ public class Teleop extends LinearOpMode{
         RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
+        driver.setPurpleRelease(true);
         driver.resetSlidesEncoder();
         driver.resetFlipperEncoder();
         //driver.updateClaw(false);
@@ -110,7 +111,7 @@ public class Teleop extends LinearOpMode{
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
-            driver.setFlipperPower(gamepad2.left_stick_y/4); // manual flipper
+            driver.setFlipperPower(-gamepad2.left_stick_y/8); // manual flipper
 
             if (gamepad2.left_trigger > 0.7 && !tl) { // open left claw
                 tl=true;
@@ -178,7 +179,7 @@ public class Teleop extends LinearOpMode{
                     case RIGHT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            //driver.setWeaponsState(General.WeaponsState.HOLDING);
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -201,7 +202,7 @@ public class Teleop extends LinearOpMode{
                     case LEFT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            driver.setWeaponsState(General.WeaponsState.HOLDING);
+                            //driver.setWeaponsState(General.WeaponsState.HOLDING);
                             outtakeTimer.reset();
                             outtake = true;
                         }
@@ -220,11 +221,11 @@ public class Teleop extends LinearOpMode{
                 driver.setWeaponsState(General.WeaponsState.EXTEND);
             }
 
-            if (gamepad2.dpad_down) { // grab both claws, stop intake, start temporary outtake
-                driver.setWeaponsState(General.WeaponsState.HOLDING);
-                outtakeTimer.reset();
-                outtake = true;
-            }
+            //if (gamepad2.dpad_down) { // grab both claws, stop intake, start temporary outtake
+                //driver.setWeaponsState(General.WeaponsState.HOLDING);
+                //outtakeTimer.reset();
+                //outtake = true;
+            //}
 
             if (gamepad2.x) { // manual outtake
                 driver.setIntakeMode(General.IntakeMode.OUTTAKE);
@@ -233,7 +234,20 @@ public class Teleop extends LinearOpMode{
             }
 
             if (gamepad2.a) { // start intaking
-                driver.setWeaponsState(General.WeaponsState.INTAKING);
+                //driver.setWeaponsState(General.WeaponsState.INTAKING);
+                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                //driver.setSlidesTarget(0);
+                //driver.setFlipperState(General.FlipperState.STORED);
+                //driver.setClawLiftPos(false);
+            }
+            if (gamepad2.b) {
+                driver.setIntakeMode(General.IntakeMode.LOCK);
+            }
+            if (gamepad2.dpad_up) {
+                driver.setClawLiftPos(true);
+            }
+            if (gamepad2.dpad_down) {
+                driver.setClawLiftPos(false);
             }
             if (driver.getCurrentPos().getY() < 50 && allowAutoIntake && !autoIntaking) { // when near the pickup zone, start the intake automatically
                 if (redAlliance) {
@@ -322,7 +336,7 @@ public class Teleop extends LinearOpMode{
                 gamepad2.rumble(0, 1, 200);
                 while (gamepad2.touchpad_finger_1) {}
             }
-            if (gamepad2.b) { // enable/disable auto deposit (FSR)
+            if (gamepad2.ps) { // enable/disable auto deposit (FSR)
                 if (allowAutoDeposit) {
                     allowAutoDeposit = false;
                     gamepad2.setLedColor(255, 0, 0, -1);
@@ -330,7 +344,7 @@ public class Teleop extends LinearOpMode{
                     allowAutoDeposit = true;
                     gamepad2.setLedColor(0, 255, 0, -1);
                 }
-                while (gamepad2.b) {}
+                while (gamepad2.ps) {}
             }
             /*if (gamepad1.touchpad && !g1lt) { // toggle robot front
                 g1lt = true;
@@ -444,6 +458,7 @@ public class Teleop extends LinearOpMode{
                 }
             }
             telemetry.addData("current pos", driver.getCurrentPos().toString());
+            telemetry.addData("flipper pos", driver.getFLipperPos());
             telemetry.addData("IMU Heading", driver.getIMUHeading());
             telemetry.addData("claw lift pos", driver.getClawLiftPos());
             telemetry.addData("weapons state", driver.getWeaponsState());
