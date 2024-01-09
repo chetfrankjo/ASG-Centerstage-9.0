@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
@@ -66,8 +67,8 @@ public class RobotDriver {
     private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
-    private ColorSensor colorLeft;
-    private RevColorSensorV3 colorRight;
+    private RevColorSensorV3 colorLeft;
+    private ColorSensor colorRight;
     private AnalogInput fsr;
     //private ContinousAnalogAxon gantyEncoder;
     public int[] encoders;
@@ -95,7 +96,7 @@ public class RobotDriver {
     private LocalMode localizationMode;
     double slidesI, previousSlidesError, flipperI, previousFlipperError;
     private boolean waitingForDepsoit = false;
-    ElapsedTime tagTimer, depositTimer, clawTimer;
+    ElapsedTime tagTimer, depositTimer, clawTimer, flipperTimer;
     public SpikePosition propLocation;
     IntakeMode intakeMode = IntakeMode.LOCK;
     PlungerMode plungerMode = PlungerMode.LOAD;
@@ -108,6 +109,8 @@ public class RobotDriver {
     PDP_DualCamera pipelineRight;
     ThreeZonePropDetectionPipeline propPipeline;
     boolean updateClaw = true;
+    boolean openClawForPostDeposit = false;
+    boolean isFlipperOut = false;
 
     final FtcDashboard dashboard;
 
@@ -115,6 +118,7 @@ public class RobotDriver {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
     private boolean invertClaw = false;
+    private double previousFlipperTarget;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -176,8 +180,8 @@ public class RobotDriver {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        colorLeft = hardwareMap.get(ColorSensor.class, "colorLeft");
-        colorRight = hardwareMap.get(RevColorSensorV3.class, "colorRight");
+        colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+        colorRight = hardwareMap.get(ColorSensor.class, "colorRight");
 
         fsr = hardwareMap.analogInput.get("fsr");
 
@@ -263,15 +267,20 @@ public class RobotDriver {
         //visionPortal = builder.build();
 
 
-        allHubs = hardwareMap.getAll(LynxModule.class);
-        for (LynxModule module : allHubs) {
+        //allHubs = hardwareMap.getAll(LynxModule.class);
+        /*for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+        }*/
+        LynxModule controlHub = hardwareMap.get(LynxModule.class, "Control Hub");
+        controlHub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        LynxModule expansionHub = hardwareMap.get(LynxModule.class, "Expansion Hub 2");
+        //expansionHub.setBulkCachingMode();
 
         dashboard = FtcDashboard.getInstance();
         tagTimer = new ElapsedTime();
         depositTimer = new ElapsedTime();
         clawTimer = new ElapsedTime();
+        flipperTimer = new ElapsedTime();
     }
 
 
@@ -286,13 +295,13 @@ public class RobotDriver {
         updateEstimate();           // Updates localization data and motor encoders
         updateCamera();             // Updates current requested camera operation (if any)
         updateDriveMotors();        // Updates drive motor power
-        updateAutomation();
-        updateIntake();
-        updateFlipper();
+        updateAutomation();         // Updates quick commands
+        updateIntake();             // Updates intake controls
+        updateFlipper();            // Updates flipper controls
         if (updateClaw) {
-            updateClaw();
+            updateClaw();           // Updates claw controls
         }
-        updateSlides();
+        updateSlides();             // Updates slides controls
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -388,7 +397,12 @@ public class RobotDriver {
                 intakeMode = IntakeMode.INTAKE;
                 break;
             case HOLDING: // grab, invert rollers to spit out extras
-                clawMode = ClawMode.BOTH;
+                if (openClawForPostDeposit) {
+                    clawMode = ClawMode.OPEN;
+                    openClawForPostDeposit = false;
+                } else {
+                    clawMode = ClawMode.BOTH;
+                }
                 setClawLiftPos(false);
                 slidesTarget = 0;
                 weaponsState = WeaponsState.IDLE;
@@ -406,7 +420,8 @@ public class RobotDriver {
                 if (depositTimer.time() > 0.8 && waitingForDepsoit) {
                     waitingForDepsoit=false;
                     weaponsState = WeaponsState.HOLDING;
-
+                    clawMode = ClawMode.OPEN;
+                    openClawForPostDeposit = true;
                 }
                 break;
                 //do nothing, as all parameters are now set
@@ -621,7 +636,7 @@ public class RobotDriver {
                 intake.setPower(0);
                 break;
             case INTAKE:
-                intake.setPower(0.8);
+                intake.setPower(1.0);
                 break;
             case OUTTAKE:
                 intake.setPower(-1.0);
@@ -632,6 +647,7 @@ public class RobotDriver {
         }
     }
     public IntakeMode getIntakeMode() {return intakeMode;}
+    public double getIntakeCurrent() {return intake.getCurrent(CurrentUnit.AMPS);}
 
     public void setFlipperDisable(boolean b) {flipperDisable=b;}
     public boolean getFlipperDisable() {return flipperDisable;}
@@ -651,6 +667,10 @@ public class RobotDriver {
 
                 break;
         }
+        if (previousFlipperTarget != flipperTarget) {
+            // you have changed states
+            flipperTimer.reset();
+        }
         if (flipperPower==0) {
             if (!flipperDisable) {
                 /*double error = (flipperTarget - flipperAngle);
@@ -669,14 +689,14 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperAngle < 180) {
-                        flipper.setPower(-0.75);
+                    if (flipperTimer.time() < 0.6) { //(flipperAngle < 180)
+                        flipper.setPower(-0.65);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperAngle > 180) {
-                        flipper.setPower(0.75);
+                    if (flipperTimer.time() < 0.6) { // flipperAngle > 180
+                        flipper.setPower(0.65);
                     } else {
                         flipper.setPower(0);
                     }
@@ -685,14 +705,17 @@ public class RobotDriver {
             } else {
                 flipper.setPower(0);
             }
+            previousFlipperTarget = flipperTarget;
         } else {
             flipper.setPower(-flipperPower);
             //flipperTarget=flipperAngle;
-            if (flipperPower < 0) {
+            /*if (flipperPower < 0) {
                 flipperTarget = 0;
             } else {
                 flipperTarget = 300;
             }
+
+             */
             flipperState = FlipperState.IDLE;
         }
 
@@ -709,25 +732,26 @@ public class RobotDriver {
     public ClawMode getClawMode() {
         return clawMode;
     }
-    public void updateClaw() {
+    public void updateClaw() { // updates claw positoins
         switch (clawMode) {
             case LEFT:
-                clawL.setPosition(0.5);
-                clawR.setPosition(0.7);
+                clawL.setPosition(1.0);
+                clawR.setPosition(0.67);
                 break;
             case RIGHT:
-                clawR.setPosition(0.5);
-                clawL.setPosition(0.36);
+                clawR.setPosition(0.52);
+                clawL.setPosition(0.83);
+
                 break;
             case BOTH:
-                clawL.setPosition(0.5);
-                clawR.setPosition(0.5);
+                clawL.setPosition(1.0);
+                clawR.setPosition(0.52);
                 break;
             case OPEN:
-                clawL.setPosition(0.36);
-                clawR.setPosition(0.7);
+                clawL.setPosition(0.83);
+                clawR.setPosition(0.67);
                 break;
-            /*case PRIMED:
+            /*case PRIMED:  
                 // ensure both claws are grabbed, and lift the thingy
                 clawLift.setPosition(0.65);
                 clawL.setPosition(0.5);
@@ -773,9 +797,9 @@ public class RobotDriver {
             //clawLift.setPosition(0);
             //clawTimer.reset();
             //invertClaw = true;
-            clawLift.setPosition(0.96);
+            clawLift.setPosition(0.22);
         } else {
-            clawLift.setPosition(0.28);
+            clawLift.setPosition(0.7875);
         }
 
     }
@@ -828,16 +852,47 @@ public class RobotDriver {
 
 
     public int[] getLeftColor() {
-        return new int[] {colorLeft.red(), colorLeft.green(), colorLeft.blue()};
+        //return new int[] {colorLeft.red(), colorLeft.green(), colorLeft.blue()};
+        //return new int[] {0, 0, 0};
+        int argb = colorLeft.argb();
+        int rgb[] = new int[] {
+                (argb >> 16) & 0xff, //red
+                (argb >>  8) & 0xff, //green
+                (argb      ) & 0xff  //blue
+        };
+        return rgb;
     }
     public int[] getRightColor() {
-        return new int[] {colorRight.red(), colorRight.green(), colorRight.blue()};
+        //return new int[] {colorRight.red(), colorRight.green(), colorRight.blue()};
+        //return new int[] {0, 0, 0};
+        int argb = colorRight.argb();
+        int rgb[] = new int[] {
+                (argb >> 16) & 0xff, //red
+                (argb >>  8) & 0xff, //green
+                (argb      ) & 0xff  //blue
+        };
+        return rgb;
     }
     public boolean getLeftHasPixel() {
-        return (colorLeft.red()+colorLeft.green()+colorLeft.blue() > 600);
+        //colorLeft.argb();
+        //return (colorLeft.red()+colorLeft.green()+colorLeft.blue() > 600);
+        int argb = colorLeft.argb();
+        int rgb[] = new int[] {
+                (argb >> 16) & 0xff, //red
+                (argb >>  8) & 0xff, //green
+                (argb      ) & 0xff  //blue
+        };
+        return (rgb[0]+','+rgb[1]+','+rgb[2] > 93);
     }
     public boolean getRightHasPixel() {
-        return (colorRight.red()+colorRight.green()+colorRight.blue() > 600);
+        //return (colorRight.red()+colorRight.green()+colorRight.blue() > 600);
+        int argb = colorRight.argb();
+        int rgb[] = new int[] {
+                (argb >> 16) & 0xff, //red
+                (argb >>  8) & 0xff, //green
+                (argb      ) & 0xff  //blue
+        };
+        return (rgb[0]+','+rgb[1]+','+rgb[2] > 100);
     }
 
     public double getFSRVoltage() {
