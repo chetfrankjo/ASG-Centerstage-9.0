@@ -19,7 +19,6 @@ public class Teleop extends LinearOpMode{
     boolean superMegaDrive = false;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
     boolean redAlliance = false;
-
     boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false;
     ElapsedTime outtakeTimer, waitForDepositClawTimer, waitToStopIntakeTimer;
     @Override
