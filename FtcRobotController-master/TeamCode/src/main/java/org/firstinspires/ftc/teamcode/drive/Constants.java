@@ -33,7 +33,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889; //13.37 //
+        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889*1.02; //13.37 //
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = 6.22;
 
@@ -62,11 +62,11 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(100, 180);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(300, 170);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(480, 170);
-        public static final int REGION_WIDTH = 30;
-        public static final int REGION_HEIGHT = 30;
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0, 200);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(610, 130);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(1120, 250);
+        public static final int REGION_WIDTH = 80;
+        public static final int REGION_HEIGHT = 80;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};
     }
 

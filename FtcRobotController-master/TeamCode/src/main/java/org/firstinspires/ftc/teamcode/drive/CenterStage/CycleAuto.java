@@ -26,16 +26,13 @@ public class CycleAuto extends LinearOpMode {
     ArrayList<Trajectory> paths = new ArrayList<>();
 
 
-
-
-
     @Override
     public void runOpMode() throws InterruptedException {
-        paths.add(new Trajectory(135, 34, 0.25, 12, 0.2).addPoint(100, 32, 90).build());
-        paths.add(new Trajectory(100, 32, 0.25, 10).addPoint(107, 28, -90-29.74).addPoint(107, 16, 180).build());
-        paths.add(new Trajectory(107, 13, 0.5, 12).addPoint(107, 18, 0).addPoint(80, 18, 90).addPoint(80, 96, 0).addPoint(101, 96, -90).addPoint(101, 120, 0).build());
-        paths.add(new Trajectory(101, 120, 0.4, 12).addPoint(100, 120, 90).build());
-        paths.add(new Trajectory(96, 115, 0.5, 12).addPoint(96, 100, 180).addPoint(77, 100, 90).addPoint(77, 50, 180).addPoint(85, 14, 180).build()); // cycle intake/approach
+        paths.add(new Trajectory(135, 34, 1.0, 12, 0.2).addPoint(99, 30, 90+6.52+2).build());
+        paths.add(new Trajectory(100, 30, 0.25, 17).addPoint(107, 24, -90-40.6).addPoint(107, 16, 180).build());
+        paths.add(new Trajectory(107, 13, 0.7, 16).addPoint(107, 18, 0).addPoint(80, 18, 90).addPoint(80, 104, 0).addPoint(100, 104, -90).addPoint(100, 120, 0).build());
+        paths.add(new Trajectory(100, 120, 0.4, 6).addPoint(100, 123, 0).build());
+        paths.add(new Trajectory(100, 123, 0.5, 12).addPoint(100, 100, 180).addPoint(80, 100, 90).addPoint(80, 50, 180).addPoint(85, 14, 180).build()); // cycle intake/approach
         paths.add(new Trajectory(85, 20, 0.6, 12).addPoint(73, 40, 0).addPoint(73, 95, 0).addPoint(101, 95, -90).addPoint(101, 108, 0).build()); // cycle backdrop apprach
         paths.add(new Trajectory(101, 108, 0.4, 12).addPoint(96, 108, 90).build()); //cycle backdrop go to perfect position
         paths.add(new Trajectory(95, 115, 0.4, 8, 0).addPoint(95, 104, 180).addPointSpeed(76, 104, 90, 0.3).build());
@@ -122,7 +119,7 @@ public class CycleAuto extends LinearOpMode {
 
             driver.setSlidesDepositTarget(12);
             driver.update();
-            telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
+            telemetry.addData("CurrentPos", driver.getCurrentPos().getHeading());
             telemetry.addData("Spike Position", position);
             telemetry.update();
 
@@ -175,7 +172,7 @@ public class CycleAuto extends LinearOpMode {
                     driver.setClawMode(General.ClawMode.RIGHT);
                     result = driver.runAutoPath(trajectories.get(1).path);
                     telemetry.addData("current pos", driver.getCurrentPos().toString());
-                    telemetry.update();
+                    //telemetry.update();
                     if (result) {
                         timer.reset();
                         driver.setWeaponsState(General.WeaponsState.INTAKING);
@@ -184,7 +181,7 @@ public class CycleAuto extends LinearOpMode {
                             driver.setClawMode(General.ClawMode.RIGHT);
                             driver.update();
                         }
-                        while ((timer.time() < 2.2 && !driver.getLeftHasPixel()) && opModeIsActive()) {
+                        while ((timer.time() < 2 && !driver.getLeftHasPixel()) && opModeIsActive()) {
                             //driver.followCurve(trajectories.get(1).path); //TODO: Drive forwards slowly?
                             driver.drive(0, 0.1, 0, false);
                             driver.update();
@@ -194,6 +191,12 @@ public class CycleAuto extends LinearOpMode {
                             driver.setClawMode(General.ClawMode.BOTH);
                             driver.update();
                         }
+                        /*while (timer.time() < 4 && opModeIsActive()) {
+                            driver.setIntakePower(-0.70);
+                            driver.update();
+                        }
+
+                         */
                         driver.setWeaponsState(General.WeaponsState.HOLDING);
                         driver.update();
                         driver.setIntakeMode(General.IntakeMode.INTAKE);
@@ -203,10 +206,10 @@ public class CycleAuto extends LinearOpMode {
                     break;
                 case APPROACH_2:
                     result = driver.runAutoPath(trajectories.get(2).path);
-                    if (driver.getCurrentPos().getY() > 85 && driver.getClawLiftPos()<0.9) {
+                    if (driver.getCurrentPos().getY() > 85 && driver.getClawLiftPos()> 0.2) {
                         //driver.setSlidesTarget(4);
                         driver.setWeaponsState(General.WeaponsState.EXTEND);
-                    } else if (driver.getCurrentPos().getY() < 30 && driver.getCurrentPos().getY() > 20) {
+                    } else if (driver.getCurrentPos().getY() < 30 && driver.getCurrentPos().getY() > 18) {
                         driver.setIntakePower(-0.50);
                     } else if (driver.getCurrentPos().getY() >= 30) {
                         driver.setIntakeMode(General.IntakeMode.LOCK);
@@ -214,10 +217,14 @@ public class CycleAuto extends LinearOpMode {
                     if (result) {
                         //driver.drive(0, 0, 0, false);
                         timer.reset();
-                        while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
-                            driver.drive(0, 0.2, 0, false);
+                        /*while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
+                            driver.drive(0, 0, 0, false);
                             driver.update();
+                            telemetry.addData("cur pos", driver.getCurrentPos().toString());
+                            telemetry.update();
                         }
+
+                         */
                         autoState = General.AutoState.APPROACH_3;
                     }
                     break;
@@ -228,20 +235,30 @@ public class CycleAuto extends LinearOpMode {
                         //driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }
-                    while (timer.time() < 2 && opModeIsActive()) {
-                        //driver.drive(0, 0.2, 0, false);
-                        driver.update();
-                    }
-                    driver.setWeaponsState(General.WeaponsState.DEPOSIT);
-                    while (timer.time() < 3.5 && opModeIsActive()) {
+                    //driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                    driver.setClawMode(General.ClawMode.LEFT);
+                    while (timer.time() < 1 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
                         //TODO: Drop one pixel at a time
                         //driver.setClawMode();
+                        //driver.turnInPlace(0, false, 1);
 
                         driver.update();
                     }
+                    while (timer.time() < 1.5 && opModeIsActive()) {
+                        driver.drive(0.2, 0, 0, false);
+                        driver.update();
+                    }
+                    driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                    while (timer.time() < 2.5 && opModeIsActive()) {
+                        driver.drive(0, 0, 0, false);
+                        driver.update();
+                    }
                     timer.reset();
-                    while (opModeIsActive()) {driver.drive(0, 0, 0, false);}
+                    while (opModeIsActive()) {
+                        driver.drive(0, 0, 0, false);
+                        driver.update();
+                    }
                     autoState = General.AutoState.CYCLE_INTAKE;
                     //autoState = General.AutoState.PARK_1;
                     break;
@@ -261,7 +278,7 @@ public class CycleAuto extends LinearOpMode {
                         driver.setWeaponsState(General.WeaponsState.HOLDING);
                         autoState = General.AutoState.CYCLE_APPROACH;
                         timer.reset();
-                        while (opModeIsActive()) {driver.drive(0, 0, 0, false);}
+                        //while (opModeIsActive()) {driver.drive(0, 0, 0, false);}
                     }
 
                     driver.update();

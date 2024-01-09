@@ -70,15 +70,18 @@ public class RobotDriverTest extends LinearOpMode {
             headingAccum += Angle.normDelta(deltaHeading);
             lastHeading = heading;
             //double[] systemCoordinates = driver.getAssemblyCoordinate();
-
+            int[] leftColor = driver.getLeftColor();
+            int[] rightColor = driver.getRightColor();
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+            telemetry.addData("left has pixel?", driver.getLeftHasPixel());
+            telemetry.addData("right has pixel?", driver.getRightHasPixel());
             telemetry.addData("current", driver.getIntakeCurrent());
             telemetry.addData("fsr", driver.getFSRVoltage());
             telemetry.addData("touchpad", gamepad2.touchpad_finger_1_x);
-            telemetry.addData("color left", driver.getLeftColor().toString());
-            telemetry.addData("color right", driver.getRightColor().toString());
+            telemetry.addData("color left", leftColor[0] + ',' + leftColor[1] + ',' + leftColor[2]);
+            telemetry.addData("color right", rightColor[0]+rightColor[1]+rightColor[2]);
             telemetry.addData("-----", "----");
             telemetry.addData("Global X", currentPos.getX());
             telemetry.addData("Global Y", currentPos.getY());
