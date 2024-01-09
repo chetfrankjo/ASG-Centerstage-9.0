@@ -27,6 +27,11 @@ public class Constants {
         public static final double defaultSlideLength = 0;
 
 
+        public static final double LEFT_CLAW_CLOSED_POS = 1.0;
+        public static final double LEFT_CLAW_OPEN_POS = 0.83;
+        public static final double RIGHT_CLAW_CLOSED_POS = 0.52;
+        public static final double RIGHT_CLAW_OPEN_POS = 0.67;
+
     }
 
     public static final class DriveConstants {

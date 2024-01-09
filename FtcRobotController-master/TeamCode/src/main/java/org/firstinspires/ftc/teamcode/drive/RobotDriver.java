@@ -735,21 +735,20 @@ public class RobotDriver {
     public void updateClaw() { // updates claw positoins
         switch (clawMode) {
             case LEFT:
-                clawL.setPosition(1.0);
-                clawR.setPosition(0.67);
+                clawL.setPosition(AssemblyConstants.LEFT_CLAW_CLOSED_POS); //CLOSED (left)
+                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
                 break;
             case RIGHT:
-                clawR.setPosition(0.52);
-                clawL.setPosition(0.83);
-
+                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_CLOSED_POS); //CLOSED (right)
+                clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (left)
                 break;
             case BOTH:
-                clawL.setPosition(1.0);
-                clawR.setPosition(0.52);
+                clawL.setPosition(AssemblyConstants.LEFT_CLAW_CLOSED_POS); // CLOSED (left)
+                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_CLOSED_POS); // CLOSED (right)
                 break;
             case OPEN:
-                clawL.setPosition(0.83);
-                clawR.setPosition(0.67);
+                clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (LEFT)
+                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
                 break;
             /*case PRIMED:  
                 // ensure both claws are grabbed, and lift the thingy
