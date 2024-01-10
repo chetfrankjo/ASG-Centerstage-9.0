@@ -107,10 +107,12 @@ public class RobotDriver {
     OpenCvCamera PropCameraL, PropCameraR, cameraOfInterest;
     PDP_LeftCam pipelineLeft;
     PDP_DualCamera pipelineRight;
+    Pose2d aprilTagPosition;
     ThreeZonePropDetectionPipeline propPipeline;
     boolean updateClaw = true;
     boolean openClawForPostDeposit = false;
     boolean isFlipperOut = false;
+    private int tagOfInterest = 0;
 
     final FtcDashboard dashboard;
 
@@ -237,7 +239,7 @@ public class RobotDriver {
             cameraMode = CameraMode.PROP;
         }
 
-        aprilTag = new AprilTagProcessor.Builder()
+        //aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
@@ -252,13 +254,12 @@ public class RobotDriver {
 
                 // ... these parameters are fx, fy, cx, cy.
 
-                .build();
+                //.build();
 
-        VisionPortal.Builder builder = new VisionPortal.Builder();
+        //VisionPortal.Builder builder = new VisionPortal.Builder();
 
-        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-
-        //builder.setCameraResolution(new Size(640, 360));
+        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
+        //builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
         //builder.addProcessor(aprilTag);
@@ -527,13 +528,14 @@ public class RobotDriver {
             if (getCameraEstimate || localizationMode == LocalMode.APRILTAG) {
                 Pose2d result = getAprilTagEstimate();
                 if (result != null) { // We got a result
-                    localizer.resetPosWithEstimate(result); // apply the new estimate to odometry and shut down the camera
-                    currentPos = result;
+                    //localizer.resetPosWithEstimate(result); // apply the new estimate to odometry and shut down the camera
+                    //currentPos = result;
+                    aprilTagPosition = result;
                     getCameraEstimate = false;
                     if (localizationMode != LocalMode.APRILTAG) { // Stop streaming unless if we are constantly getting localization data
-                        visionPortal.setProcessorEnabled(aprilTag, false);
-                        visionPortal.stopStreaming();
-                        cameraMode = CameraMode.IDLE;
+                        //visionPortal.setProcessorEnabled(aprilTag, false);
+                        //visionPortal.stopStreaming();
+                        //cameraMode = CameraMode.IDLE;
                     }
                 } else {
                     //continue looping until we have an estimate
@@ -554,6 +556,15 @@ public class RobotDriver {
             }
         }
 
+    }
+    public void stopStreamingVP() {
+        visionPortal.setProcessorEnabled(aprilTag, false);
+        visionPortal.stopStreaming();
+        cameraMode = CameraMode.IDLE;
+    }
+
+    public Pose2d getAprilTagPosition() {
+        return aprilTagPosition;
     }
 
 
@@ -766,10 +777,10 @@ public class RobotDriver {
 
              */
         }
-        //if (clawTimer.time()>0.3 && invertClaw) {
-            //invertClaw = false;
-            //clawLift.setPosition(0.65);
-        //}
+        if (clawTimer.time()>0.1 && invertClaw) {
+            invertClaw = false;
+            clawLift.setPosition(0.22);
+        }
     }
     public void setClawLPos(boolean closed) {
         if (closed) {
@@ -793,10 +804,10 @@ public class RobotDriver {
     }
     public void setClawLiftPos(boolean up) {
         if (up) {
-            //clawLift.setPosition(0);
-            //clawTimer.reset();
-            //invertClaw = true;
-            clawLift.setPosition(0.22);
+            //clawLift.setPosition(0.9);
+            clawTimer.reset();
+            invertClaw = true;
+            //clawLift.setPosition(0.22);
         } else {
             clawLift.setPosition(0.7875);
         }
@@ -1040,29 +1051,29 @@ public class RobotDriver {
     public Pose2d getAprilTagEstimate() {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        double head = pullIMUHeading(); // We don't have time to wait for the IMU to update in the next loop, so pull a reading right now
+        //double head = pullIMUHeading(); // We don't have time to wait for the IMU to update in the next loop, so pull a reading right now
         // offset the camera estimation based off of where the camera is on the robot
-        Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
-                CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
-                head
-                );
+        //Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
+                //CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
+                //head
+                //);
         Pose2d tagEstimate = null;
 
         // Step through the list of detections
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
-
-                for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
-                    if (i==detection.id) {
-                        Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
-                        if (tagEstimate == null) {
-                            //TODO: Update these field positions
-                            tagEstimate = new Pose2d(detection.ftcPose.x + offset.getX(), offset.getY() - detection.ftcPose.y, head);
-                        } else { // if multiple tags are detected, take the average of the estimates
-                            tagEstimate = new Pose2d((tagEstimate.getX()+detection.ftcPose.x+offset.getX())/2, (offset.getY()-tagEstimate.getY()+detection.ftcPose.y)/2, head);
-                        }
+                if (detection.id==5) {
+                    //Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
+                    tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.bearing);
+                }
+                /*for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
+                    if (detection.id==5) {
+                        //Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
+                        tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, head);
                     }
                 }
+
+                 */
 
             } else {
                 // unknown tag ID
@@ -1071,8 +1082,12 @@ public class RobotDriver {
         if (tagEstimate == null) {
             return null;
         } else {
-            return new Pose2d(tagEstimate.getX() - offsetPose.getX(), tagEstimate.getY() - offsetPose.getY(), head);
+            //return new Pose2d(tagEstimate.getX() - offsetPose.getX(), tagEstimate.getY() - offsetPose.getY(), head);
+            return tagEstimate;
         }
+    }
+    public void setTagOfInterest(int tag) {
+        tagOfInterest = tag;
     }
 
 
