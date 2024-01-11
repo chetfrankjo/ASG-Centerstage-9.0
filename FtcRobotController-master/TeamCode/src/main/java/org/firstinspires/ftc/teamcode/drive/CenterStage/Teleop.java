@@ -4,14 +4,10 @@ package org.firstinspires.ftc.teamcode.drive.CenterStage;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
-import org.firstinspires.ftc.teamcode.drive.Reader;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
-
-import java.util.Arrays;
 
 @TeleOp(group = "a")
 public class Teleop extends LinearOpMode{
@@ -19,8 +15,9 @@ public class Teleop extends LinearOpMode{
     boolean superMegaDrive = false;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
     boolean redAlliance = false;
-    boolean allowAutoIntake = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false;
-    ElapsedTime outtakeTimer, waitForDepositClawTimer, waitToStopIntakeTimer;
+    boolean allowSmartDeposit = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false, intakingWhileExtending, hasTouchedBoard = false;
+    ElapsedTime outtakeTimer, waitForDepositClawTimer, waitToStopIntakeTimer, intakeWhileExtendingTimer;
+    int leftColorLoops = 0, rightColorLoops = 0;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -104,19 +101,21 @@ public class Teleop extends LinearOpMode{
 
         driver.setSlidesDisable(false);
         //driver.setClawMode(General.ClawMode.IDLE);
-
+        driver.update();
         ElapsedTime hangtime = new ElapsedTime();
         outtakeTimer = new ElapsedTime();
         waitForDepositClawTimer = new ElapsedTime();
         waitToStopIntakeTimer = new ElapsedTime();
+        intakeWhileExtendingTimer = new ElapsedTime();
         waitForStart();
+        driver.setClawMode(General.ClawMode.OPEN);
         while (opModeIsActive()) {
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
             driver.setFlipperPower(-gamepad2.left_stick_y/2); // manual flipper
 
-            if (gamepad2.left_trigger > 0.7 && !tl) { // open left claw
+            if (gamepad2.left_trigger > 0.2 && !tl) { // open left claw
                 tl=true;
                 switch (driver.getClawMode()) {
                     case OPEN:
@@ -134,7 +133,7 @@ public class Teleop extends LinearOpMode{
                         break;
                     case BOTH:
                         driver.setClawMode(General.ClawMode.RIGHT);
-                        if (driver.getClawLiftPos()<0.3&&allowAutoIntake) { // if right doesnt have a pixel, then you are doing a full deposit
+                        if (driver.getClawLiftPos()<0.3&& allowSmartDeposit) { // if right doesnt have a pixel, then you are doing a full deposit
                             if (!driver.getRightHasPixel()) { // nest this in here to conserve loop times
                                 driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                                 driver.setSlidesDepositTarget(driver.getSlidesLength());
@@ -144,11 +143,11 @@ public class Teleop extends LinearOpMode{
                         break;
                 }
             }
-            if (gamepad2.left_trigger <= 0.7) {
+            if (gamepad2.left_trigger <= 0.2) {
                 tl = false;
             }
 
-            if (gamepad2.right_trigger > 0.7 && !tr) { // open right claw
+            if (gamepad2.right_trigger > 0.2 && !tr) { // open right claw
                 tr = true;
                 switch (driver.getClawMode()) {
                     case OPEN:
@@ -166,7 +165,7 @@ public class Teleop extends LinearOpMode{
                         break;
                     case BOTH:
                         driver.setClawMode(General.ClawMode.LEFT);
-                        if (driver.getClawLiftPos()<0.3&&allowAutoIntake) { // if left doesnt have a pixel, then you are doing a full deposit
+                        if (driver.getClawLiftPos()<0.3&& allowSmartDeposit) { // if left doesnt have a pixel, then you are doing a full deposit
                             if (!driver.getLeftHasPixel()) {
                                 driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                                 driver.setSlidesDepositTarget(driver.getSlidesLength());
@@ -176,7 +175,7 @@ public class Teleop extends LinearOpMode{
                         break;
                 }
             }
-            if (gamepad2.right_trigger <= 0.7) {
+            if (gamepad2.right_trigger <= 0.2) {
                 tr = false;
             }
 
@@ -192,12 +191,21 @@ public class Teleop extends LinearOpMode{
                     case RIGHT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            driver.setWeaponsState(General.WeaponsState.HOLDING);
-                            driver.setIntakeMode(General.IntakeMode.INTAKE);
-                            waitToStopIntake = true;
-                            waitToStopIntakeTimer.reset();
-                            outtakeTimer.reset();
-                            outtake = true;
+                            if (driver.getRightHasPixel() && driver.getLeftHasPixel()) {
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                //driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                waitToStopIntake = true;
+                                waitToStopIntakeTimer.reset();
+                                outtakeTimer.reset();
+                                outtake = true;
+                            } else {
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                waitToStopIntake = true;
+                                waitToStopIntakeTimer.reset();
+                                outtakeTimer.reset();
+                                outtake = true;
+                            }
                         }
                         break;
                     case BOTH:
@@ -218,12 +226,21 @@ public class Teleop extends LinearOpMode{
                     case LEFT:
                         driver.setClawMode(General.ClawMode.BOTH);
                         if (driver.getIntakeMode() == General.IntakeMode.INTAKE) { // if you are intaking and both claws are grabbed, stop intaking
-                            driver.setWeaponsState(General.WeaponsState.HOLDING);
-                            driver.setIntakeMode(General.IntakeMode.INTAKE);
-                            waitToStopIntake = true;
-                            waitToStopIntakeTimer.reset();
-                            outtakeTimer.reset();
-                            outtake = true;
+                            if (driver.getLeftHasPixel() && driver.getRightHasPixel()) {
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                //driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                waitToStopIntake = true;
+                                waitToStopIntakeTimer.reset();
+                                outtakeTimer.reset();
+                                outtake = true;
+                            } else {
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                waitToStopIntake = true;
+                                waitToStopIntakeTimer.reset();
+                                outtakeTimer.reset();
+                                outtake = true;
+                            }
                         }
                         break;
                     case RIGHT:
@@ -237,17 +254,31 @@ public class Teleop extends LinearOpMode{
             }
 
 
-            if (waitToStopIntake && waitToStopIntakeTimer.time() > 0.25) {
+            if (waitToStopIntake && waitToStopIntakeTimer.time() > 0.25) { // extra intake movement
                 waitToStopIntake = false;
                 driver.setIntakeMode(General.IntakeMode.LOCK);
             }
 
 
             if (gamepad2.y) { // extend+flip for depositing
-                driver.setWeaponsState(General.WeaponsState.EXTEND);
+                //driver.setWeaponsState(General.WeaponsState.EXTEND);
+                intakingWhileExtending = true;
+                intakeWhileExtendingTimer.reset();
+                //driver.setIntakeMode(General.IntakeMode.INTAKE);
+            }
+            if (intakingWhileExtending && intakeWhileExtendingTimer.time()< 0.5) {
+                if (intakeWhileExtendingTimer.time()>0.1&&intakeWhileExtendingTimer.time()<0.2) {
+                    driver.setWeaponsState(General.WeaponsState.EXTEND);
+                }
+                driver.setIntakePower(0.5);
+            } else {
+                if (intakingWhileExtending) {
+                    driver.setIntakeMode(General.IntakeMode.LOCK);
+                }
+                intakingWhileExtending = false;
             }
 
-            if (waitForDepositToOpenClaw) {
+            if (waitForDepositToOpenClaw) { // waits to open the claw after depositing
                 waitForDepositClawTimer.reset();
                 waitForDepositToOpenClaw = false;
                 waitingForTimer = true;
@@ -264,28 +295,29 @@ public class Teleop extends LinearOpMode{
             //}
 
             if (gamepad2.x) { // manual outtake
-                driver.setIntakeMode(General.IntakeMode.OUTTAKE);
-            } else if (!gamepad2.x && driver.getIntakeMode()== General.IntakeMode.OUTTAKE && !outtake) {
+                //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
+                driver.setIntakePower(-0.5);
+            } else if (!gamepad2.x && driver.getIntakeMode()== General.IntakeMode.MANUAL && !outtake) {
                 driver.setIntakeMode(General.IntakeMode.LOCK);
             }
 
             if (gamepad2.a) { // start intaking
                 //driver.setWeaponsState(General.WeaponsState.INTAKING);
-                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                driver.setIntakeMode(General.IntakeMode.INTAKE); // this does nothing to the claw. If you set the weapons state to intaking, it will only open the claw that dosent have a pixel
                 //driver.setSlidesTarget(0);
                 //driver.setFlipperState(General.FlipperState.STORED);
                 //driver.setClawLiftPos(false);
             }
-            if (gamepad2.b) {
+            if (gamepad2.b) { // stop intake
                 driver.setIntakeMode(General.IntakeMode.LOCK);
             }
-            if (gamepad2.dpad_up) {
+            if (gamepad2.dpad_up) { // lift wrist
                 driver.setClawLiftPos(true);
             }
-            if (gamepad2.dpad_down) {
+            if (gamepad2.dpad_down) { // lower wrist
                 driver.setClawLiftPos(false);
             }
-            if (driver.getCurrentPos().getY() < 50 && allowAutoIntake && !autoIntaking) { // when near the pickup zone, start the intake automatically
+            if (driver.getCurrentPos().getY() < 50 && allowSmartDeposit && !autoIntaking) { // when near the pickup zone, start the intake automatically
                 if (redAlliance) {
                     if (driver.getCurrentPos().getX() < 72) {
                         autoIntaking = true;
@@ -301,49 +333,82 @@ public class Teleop extends LinearOpMode{
                 autoIntaking = false;
             }
             if (driver.getIntakeMode() == General.IntakeMode.INTAKE && allowAutoHolding) { // when color sensor sees pixel, grab it
-                if (driver.getLeftHasPixel()) { // conserving loop time
+                boolean leftHasPixel = driver.getLeftHasPixel();
+                boolean rightHasPixel = driver.getRightHasPixel();
+                if (leftHasPixel) { // conserving loop time
                     switch (driver.getClawMode()) {
                         case OPEN:
-                            driver.setClawMode(General.ClawMode.LEFT);
+                            if (leftColorLoops > 22) {
+                                driver.setClawMode(General.ClawMode.LEFT);
+                                leftColorLoops = 0;
+                            }
                             break;
                         case LEFT:
                             break;
                         case RIGHT:
-                            driver.setClawMode(General.ClawMode.BOTH);
+                            if (leftColorLoops > 22) {
+                                driver.setClawMode(General.ClawMode.BOTH);
+                                leftColorLoops = 0;
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                leftColorLoops = 0;
+                                rightColorLoops = 0;
+                                outtakeTimer.reset();
+                                outtake = true;
+                            }
                             break;
                         case BOTH:
                             break;
                     }
+                    leftColorLoops++;
                 }
-                if (driver.getRightHasPixel()) {
+                if (rightHasPixel) {
                     switch (driver.getClawMode()) {
                         case OPEN:
-                            driver.setClawMode(General.ClawMode.RIGHT);
+                            if (rightColorLoops > 22) {
+                                driver.setClawMode(General.ClawMode.RIGHT);
+                                rightColorLoops = 0;
+                            }
                             break;
                         case LEFT:
-                            driver.setClawMode(General.ClawMode.BOTH);
+                            if (rightColorLoops > 22) {
+                                driver.setClawMode(General.ClawMode.BOTH);
+                                rightColorLoops = 0;
+                                driver.setWeaponsState(General.WeaponsState.HOLDING);
+                                leftColorLoops = 0;
+                                rightColorLoops = 0;
+                                outtakeTimer.reset();
+                                outtake = true;
+                            }
                             break;
                         case RIGHT:
                             break;
                         case BOTH:
                             break;
                     }
+                    rightColorLoops++;
                 }
-                if (driver.getRightHasPixel() && driver.getLeftHasPixel()) { // if both claws see pixels, stop intaking
+                /*if (leftHasPixel && rightHasPixel) { // if both claws see pixels, stop intaking
                     driver.setWeaponsState(General.WeaponsState.HOLDING);
+                    leftColorLoops = 0;
+                    rightColorLoops = 0;
                     outtakeTimer.reset();
                     outtake = true;
                 }
+
+                 */
             }
-            if (allowAutoDeposit && driver.getClawLiftPos()>=0.9) { // if you are depositing, drop the pixels if the FSR touches the backdrop
+            if (allowAutoDeposit && driver.getClawLiftPos()< 0.3) { // if you are depositing, drop the pixels if the FSR touches the backdrop
                 if (driver.getFSRPressed()) { // nest this in here to decrease loop times
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     driver.setSlidesDepositTarget(driver.getSlidesLength());
                 }
             }
             if (outtake) { // outtake for a set amount of time
-                if (outtakeTimer.time()<0.5) {
-                    //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
+                if (outtakeTimer.time()<1) {
+                    if (outtakeTimer.time()>0.2) {
+                        //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
+                        driver.setIntakePower(-0.5);
+                    }
                 } else {
                     driver.setIntakeMode(General.IntakeMode.LOCK);
                     outtake = false;
@@ -351,36 +416,32 @@ public class Teleop extends LinearOpMode{
             }
 
 
-
-
-
-
             if (gamepad2.touchpad_finger_1_x < 0 && gamepad2.touchpad_finger_1) { // enable/disable auto intake
-                if (allowAutoIntake) {
-                    allowAutoIntake = false;
+                if (allowSmartDeposit) {
+                    allowSmartDeposit = false;
                 } else {
-                    allowAutoIntake = true;
+                    allowSmartDeposit = true;
                 }
                 gamepad2.rumble(1, 0, 200);
                 while (gamepad2.touchpad_finger_1) {}
             } else if (gamepad2.touchpad_finger_1_x > 0 && gamepad2.touchpad_finger_1) { // enable/disable auto grab (color sensors)
                 if (allowAutoHolding) {
                     allowAutoHolding = false;
+                    gamepad2.setLedColor(255, 0, 0, -1);
                 } else {
                     allowAutoHolding = true;
+                    gamepad2.setLedColor(0, 255, 0, -1);
                 }
                 gamepad2.rumble(0, 1, 200);
                 while (gamepad2.touchpad_finger_1) {}
             }
             if (gamepad2.ps) { // enable/disable auto deposit (FSR)
-                if (allowAutoDeposit) {
-                    allowAutoDeposit = false;
-                    gamepad2.setLedColor(255, 0, 0, -1);
-                } else {
-                    allowAutoDeposit = true;
-                    gamepad2.setLedColor(0, 255, 0, -1);
-                }
-                while (gamepad2.ps) {}
+
+                allowAutoDeposit = true;
+
+                //while (gamepad2.ps) {}
+            } else {
+                allowAutoDeposit = false;
             }
             /*if (gamepad1.touchpad && !g1lt) { // toggle robot front
                 g1lt = true;
@@ -475,13 +536,13 @@ public class Teleop extends LinearOpMode{
             }
 
 
-            if (hanging && gamepad1.left_trigger<0.7) {
+            if (hanging && gamepad1.dpad_down) {
                 //driver.drive(0, 0.2, 0, false);
-                driver.setClawLiftPos(true);
+                //driver.setClawLiftPos(true);
                 if (hangtime.time() > 0.6) {
                     hanging = false;
                 }
-            } else if (gamepad1.left_trigger>=0.7) {
+            } else if (gamepad1.dpad_down) {
                 driver.drive(gamepad1.left_stick_x/2, -0.5, gamepad1.right_stick_x, false);
                 hangtime.reset();
                 hanging = true;
@@ -491,6 +552,13 @@ public class Teleop extends LinearOpMode{
                 } else {
                     driver.drive((gamepad1.left_stick_x / 3), -gamepad1.left_stick_y / 3, gamepad1.right_stick_x / 3, superMegaDrive);
                 }
+            } else if (gamepad1.left_trigger > 0.7 && allowAutoDeposit) {
+                if (!driver.getFSRPressed() && !hasTouchedBoard) {
+                    driver.drive(gamepad1.left_stick_x / 2, 0.3, gamepad1.right_stick_x, false);
+                } else {
+                    hasTouchedBoard = true;
+                    driver.drive(gamepad1.left_stick_x / 2, -0.3, gamepad1.right_stick_x, false);
+                }
             } else {
                 if (intakeFront) {
                     driver.drive(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
@@ -498,6 +566,11 @@ public class Teleop extends LinearOpMode{
                     driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
                 }
             }
+            if (gamepad1.left_trigger <= 0.7) {
+                hasTouchedBoard = false;
+            }
+            telemetry.addData("left loops", leftColorLoops);
+            telemetry.addData("right loops", rightColorLoops);
             telemetry.addData("current pos", driver.getCurrentPos().toString());
             telemetry.addData("flipper pos", driver.getFLipperPos());
             telemetry.addData("IMU Heading", driver.getIMUHeading());

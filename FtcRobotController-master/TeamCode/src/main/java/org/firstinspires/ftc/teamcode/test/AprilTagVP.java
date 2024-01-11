@@ -50,7 +50,7 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@Disabled
+
 @TeleOp(name = "Concept: AprilTag", group = "Concept")
 public class AprilTagVP extends LinearOpMode {
 
@@ -130,13 +130,13 @@ public class AprilTagVP extends LinearOpMode {
 
         // Set the camera (webcam vs. built-in RC phone camera).
         if (USE_WEBCAM) {
-            builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+            builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
         } else {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }
 
         // Choose a camera resolution. Not all cameras support all resolutions.
-        builder.setCameraResolution(new Size(1280, 720));
+        builder.setCameraResolution(new Size(640, 480));
 
         // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
         //builder.enableCameraMonitoring(true);
@@ -174,9 +174,13 @@ public class AprilTagVP extends LinearOpMode {
             if (detection.metadata != null) {
                 telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
                 telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addLine(String.format("PRY  (deg)", detection.rawPose.R));
+                telemetry.addData("yaw", detection.rawPose.y);
+                telemetry.addData("other yaw", detection.rawPose.R);
+                telemetry.addData("more other year", detection.rawPose.x);
+                telemetry.addData("more more other yaw", detection.rawPose.z);
                 telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
                 telemetry.addData("field position", detection.metadata.fieldPosition.toString());
+                //detection.metadata.fi
 
             } else {
                 telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
