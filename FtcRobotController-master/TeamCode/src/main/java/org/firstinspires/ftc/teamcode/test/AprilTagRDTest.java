@@ -27,7 +27,6 @@ public class AprilTagRDTest extends LinearOpMode {
             if (gamepad1.b) {
                 update = false;
             }
-            driver.update();
             if (update) {
                 //driver.getCameraEstimate();
             }

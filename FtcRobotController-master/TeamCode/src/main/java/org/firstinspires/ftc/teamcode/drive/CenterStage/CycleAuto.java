@@ -180,18 +180,20 @@ public class CycleAuto extends LinearOpMode {
         }
 
          */
-        while (!isStarted() && !isStopRequested()) { // TODO: try with no camera, try just !opModeIsActive or just !isStarted
+        /*while (!isStarted() && !isStopRequested()) { // TODO: try with no camera, try just !opModeIsActive or just !isStarted
             driver.setCameraMode(General.CameraMode.PROP);
             driver.getCameraEstimate();
             driver.update();
             position = driver.propLocation;
             sleep(50);
         }
-        //waitForStart();
+
+         */
+        waitForStart();
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(12);
+            driver.setSlidesDepositTarget(11);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().getHeading());
             telemetry.addData("Spike Position", position);
@@ -202,7 +204,7 @@ public class CycleAuto extends LinearOpMode {
                 case VISION: // Read camera, no movement
                     timer.reset();
                     driver.setClawMode(General.ClawMode.BOTH);
-                    while (timer.time() < 1.5+timerOffset && opModeIsActive()) { // Read camera for set amount of time
+                    while (timer.time() < 2.5+timerOffset && opModeIsActive()) { // Read camera for set amount of time
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
@@ -271,7 +273,7 @@ public class CycleAuto extends LinearOpMode {
                         driver.setWeaponsState(General.WeaponsState.EXTEND);
                         didthething = true;
                     } else if (driver.getCurrentPos().getY() < 30 && driver.getCurrentPos().getY() > 18) {
-                        driver.setIntakePower(-0.60);
+                        driver.setIntakePower(-0.80);
                     } else if (driver.getCurrentPos().getY() >= 30) {
                         driver.setIntakeMode(General.IntakeMode.LOCK);
                     }
@@ -279,56 +281,79 @@ public class CycleAuto extends LinearOpMode {
                         //driver.drive(0, 0, 0, false);
                         timer.reset();
 
-                        /*visionPortal.setProcessorEnabled(aprilTag, true);
-                        visionPortal.resumeStreaming();
-                        while (timer.time() < 1 && opModeIsActive()) {
+
+                        /*while (timer.time() < 1.5 && opModeIsActive()) {
                             driver.update();
-                            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-                            Pose2d pos = new Pose2d();
-                            for (AprilTagDetection detection : currentDetections) {
-                                if (detection.metadata != null) {
-                                    if (detection.id == 5) {
-                                        pos = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z);
-                                    }
+                            Pose2d pos = driver.getAprilTagPosition();
+                            driver.setCameraMode(General.CameraMode.APRILTAG);
+                            driver.setTagOfInterest(5);
+                            driver.getCameraEstimate();
+                            if (pos != null) {
+                                if (pos.getX() < -2 && driver.getCurrentPos().getX() > 100 && driver.getCurrentPos().getX() < 117) {
+                                    driver.drive(0.4, 0, -driver.getCurrentPos().getHeading()/20, false);
+                                } else if (pos.getX() > 2 && driver.getCurrentPos().getX() > 100 && driver.getCurrentPos().getX() < 117) {
+                                    driver.drive(-0.4, 0, -driver.getCurrentPos().getHeading()/20, false);
+                                } else {
+                                    driver.drive(0, 0, -driver.getCurrentPos().getHeading()/20, false);
                                 }
-                            }
-                            if (pos.getX() < -2) {
-                                driver.drive(0.3, 0, 0, false);
-                            } else if (pos.getX() > 2) {
-                                driver.drive(-0.3, 0, 0, false);
                             } else {
-                                driver.drive(0, 0, 0, false);
+                                driver.drive(0.2, 0, -driver.getCurrentPos().getHeading()/20, false);
                             }
                             telemetry.addData("tiemr", timer.time());
-                            telemetry.addData("pos", pos.toString());
+                            if (pos != null) {
+                                telemetry.addData("pos", pos.toString());
+                            } else {
+                                telemetry.addLine("pos is null");
+                            }
                             telemetry.update();
                         }
-                        driver.stopStreamingVP();
 
                          */
 
 
+
+
+
                         timer.reset();
                         while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
-                            driver.drive(0, 0.2, 0, false);
+                            /*Pose2d pos = driver.getAprilTagPosition();
+                            driver.setCameraMode(General.CameraMode.APRILTAG);
+                            driver.setTagOfInterest(5);
+                            driver.getCameraEstimate();
+                            if (pos != null) {
+                                if (pos.getX() < -2 && driver.getCurrentPos().getX() > 100 && driver.getCurrentPos().getX() < 117) {
+                                    driver.drive(0.4, 0.2, -driver.getCurrentPos().getHeading()/20, false);
+                                } else if (pos.getX() > 2 && driver.getCurrentPos().getX() > 100 && driver.getCurrentPos().getX() < 117) {
+                                    driver.drive(-0.4, 0.2, -driver.getCurrentPos().getHeading()/20, false);
+                                } else {
+                                    driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/20, false);
+                                }
+                            } else {
+                                driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/20, false);
+                            }
+
+                             */
+                            driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/15, false);
                             driver.update();
                             telemetry.addData("cur pos", driver.getCurrentPos().toString());
                             telemetry.update();
                         }
+                        //driver.stopStreamingVP();
 
                         autoState = General.AutoState.APPROACH_3;
                     }
                     break;
                 case APPROACH_3:
                     timer.reset();
+                    driver.setClawLiftPos(true);
                     while (timer.time() < 0.8 && opModeIsActive() && position != General.SpikePosition.CENTER) {
                         driver.followCurve(trajectories.get(3).path);
                         //driver.drive(0, 0.2, 0, false);
                         driver.update();
-                    }
+                    }//TODO: Move FSR and AprilTag stuff to here
                     timer.reset();
                     while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
-                        driver.drive(0, 0.2, 0, false);
+                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/15, false);
                         driver.update();
                         telemetry.addData("cur pos", driver.getCurrentPos().toString());
                         telemetry.update();
@@ -340,16 +365,16 @@ public class CycleAuto extends LinearOpMode {
                         driver.update();
                     }
 
-                    while (timer.time() < 1.6 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
+                    while (timer.time() < 1.2 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
                         switch (position) {
                             case LEFT:
-                                driver.drive(0.5, 0, 0, false);
+                                driver.drive(0.55, 0, 0, false);
                                 break;
                             case CENTER:
-                                driver.drive(0.5, 0, 0, false);
+                                driver.drive(-0.55, 0, 0, false);
                                 break;
                             case RIGHT:
-                                driver.drive(-0.5, 0, 0, false);
+                                driver.drive(-0.55, 0, 0, false);
                                 break;
                         }
 
@@ -357,10 +382,12 @@ public class CycleAuto extends LinearOpMode {
                     }
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     timer.reset();
-                    while (opModeIsActive()) {
+                    /*while (opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
                         driver.update();
                     }
+
+                     */
                     //autoState = General.AutoState.CYCLE_INTAKE; // TODO: Add another cycle
                     autoState = General.AutoState.PARK_1;
                     break;

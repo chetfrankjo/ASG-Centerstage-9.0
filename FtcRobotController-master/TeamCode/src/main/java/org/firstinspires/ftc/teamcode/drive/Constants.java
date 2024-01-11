@@ -27,9 +27,9 @@ public class Constants {
         public static final double defaultSlideLength = 0;
 
 
-        public static final double LEFT_CLAW_CLOSED_POS = 1.0;
-        public static final double LEFT_CLAW_OPEN_POS = 0.79;
-        public static final double RIGHT_CLAW_CLOSED_POS = 0.52;
+        public static final double LEFT_CLAW_CLOSED_POS = 0.82;
+        public static final double LEFT_CLAW_OPEN_POS = 0.605;
+        public static final double RIGHT_CLAW_CLOSED_POS = 0.495;
         public static final double RIGHT_CLAW_OPEN_POS = 0.71;
 
     }
@@ -69,7 +69,7 @@ public class Constants {
     public static final class VisionConstants {
         public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0, 200);
         public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(610, 130);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(1120, 250);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(1180, 180);
         public static final int REGION_WIDTH = 80;
         public static final int REGION_HEIGHT = 80;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};

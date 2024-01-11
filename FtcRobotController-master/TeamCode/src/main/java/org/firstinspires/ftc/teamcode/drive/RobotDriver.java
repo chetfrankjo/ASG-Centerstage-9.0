@@ -119,6 +119,7 @@ public class RobotDriver {
 
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
+
     private boolean invertClaw = false;
     private double previousFlipperTarget;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
@@ -204,13 +205,16 @@ public class RobotDriver {
 
         batterylevel = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        //int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-        PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), cameraMonitorViewId);
+        //int[] portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
+
+        PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), viewportContainerIds[0]);
         propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
         PropCameraL.setPipeline(propPipeline);
-        PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), cameraMonitorViewId);
+        PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), viewportContainerIds[0]);
         propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
         PropCameraR.setPipeline(propPipeline);
 
@@ -239,7 +243,7 @@ public class RobotDriver {
             cameraMode = CameraMode.PROP;
         }
 
-        //aprilTag = new AprilTagProcessor.Builder()
+        aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
@@ -254,19 +258,17 @@ public class RobotDriver {
 
                 // ... these parameters are fx, fy, cx, cy.
 
-                //.build();
+                .build();
 
-        //VisionPortal.Builder builder = new VisionPortal.Builder();
-
-        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
-        //builder.setCameraResolution(new Size(640, 480));
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
+        builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        //builder.addProcessor(aprilTag);
-
+        builder.addProcessor(aprilTag);
+        builder.setLiveViewContainerId(viewportContainerIds[1]);
         // Build the Vision Portal, using the above settings.
-        //visionPortal = builder.build();
-
+        visionPortal = builder.build();
 
         //allHubs = hardwareMap.getAll(LynxModule.class);
         /*for (LynxModule module : allHubs) {
