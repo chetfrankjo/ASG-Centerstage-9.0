@@ -295,8 +295,9 @@ public class Teleop extends LinearOpMode{
             //}
 
             if (gamepad2.x) { // manual outtake
-                driver.setIntakeMode(General.IntakeMode.OUTTAKE);
-            } else if (!gamepad2.x && driver.getIntakeMode()== General.IntakeMode.OUTTAKE && !outtake) {
+                //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
+                driver.setIntakePower(-0.5);
+            } else if (!gamepad2.x && driver.getIntakeMode()== General.IntakeMode.MANUAL && !outtake) {
                 driver.setIntakeMode(General.IntakeMode.LOCK);
             }
 
@@ -406,7 +407,7 @@ public class Teleop extends LinearOpMode{
                 if (outtakeTimer.time()<1) {
                     if (outtakeTimer.time()>0.2) {
                         //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
-                        driver.setIntakePower(-0.7);
+                        driver.setIntakePower(-0.5);
                     }
                 } else {
                     driver.setIntakeMode(General.IntakeMode.LOCK);

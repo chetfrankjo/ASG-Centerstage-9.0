@@ -417,10 +417,10 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (depositTimer.time()>0.6 && waitingForDepsoit) {
+                if (depositTimer.time()>0.3 && waitingForDepsoit) {
                     setClawLiftPos(false);
                 }
-                if (depositTimer.time() > 0.8 && waitingForDepsoit) {
+                if (depositTimer.time() > 0.4 && waitingForDepsoit) {
                     waitingForDepsoit=false;
                     weaponsState = WeaponsState.HOLDING;
                     clawMode = ClawMode.OPEN;
