@@ -64,7 +64,7 @@ public class CycleAuto extends LinearOpMode {
 
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
-        driver.storeAll();
+        //driver.storeAll();
         driver.resetFlipperEncoder();
         driver.resetSlidesEncoder();
         driver.resetIMUHeading();
@@ -96,7 +96,7 @@ public class CycleAuto extends LinearOpMode {
         }
 
 
-        /*switch (allianceLocation) {
+        switch (allianceLocation) {
 
             case RED_SOUTH:
                 driver.localizer.setEstimatePos(135, 34, 0);
@@ -114,7 +114,7 @@ public class CycleAuto extends LinearOpMode {
                 break;
         }
 
-         */
+
 
 
 
@@ -166,7 +166,7 @@ public class CycleAuto extends LinearOpMode {
          */
 
 
-        driver.localizer.setEstimatePos(135, 34, 0);
+        //driver.localizer.setEstimatePos(135, 34, 0);
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         telemetry.update();
         driver.setClawLiftPos(false);
@@ -193,7 +193,7 @@ public class CycleAuto extends LinearOpMode {
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(11);
+            driver.setSlidesDepositTarget(9);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().getHeading());
             telemetry.addData("Spike Position", position);
@@ -239,7 +239,11 @@ public class CycleAuto extends LinearOpMode {
                     break;
                 case BACKUP: // drive to the stack, pick one pixel up
                     //driver.setWeaponsState(General.WeaponsState.INTAKING);
-                    driver.setClawMode(General.ClawMode.RIGHT);
+                    if (allianceLocation == General.AllianceLocation.RED_NORTH | allianceLocation == General.AllianceLocation.RED_SOUTH) {
+                        driver.setClawMode(General.ClawMode.RIGHT);
+                    } else {
+                        driver.setClawMode(General.ClawMode.LEFT);
+                    }
                     result = driver.runAutoPath(trajectories.get(1).path);
                     telemetry.addData("current pos", driver.getCurrentPos().toString());
                     //telemetry.update();
@@ -248,12 +252,23 @@ public class CycleAuto extends LinearOpMode {
                         driver.setWeaponsState(General.WeaponsState.INTAKING);
                         while (driver.getIntakeCurrent() < 4 && opModeIsActive() && timer.time() < 3) { // drive forwards until you hit the stack
                             driver.drive(0, -0.2, 0, false);
-                            driver.setClawMode(General.ClawMode.RIGHT);
+                            if (allianceLocation == General.AllianceLocation.RED_NORTH | allianceLocation == General.AllianceLocation.RED_SOUTH) {
+                                driver.setClawMode(General.ClawMode.RIGHT);
+                            } else {
+                                driver.setClawMode(General.ClawMode.LEFT);
+                            }
                             driver.update();
                         }
-                        while ((timer.time() < 4 && !driver.getLeftHasPixel()) && opModeIsActive()) {
-                            driver.drive(0, 0.1, 0, false); // drive backwards slowly to take in your pixel
-                            driver.update();
+                        if (allianceLocation == General.AllianceLocation.RED_NORTH | allianceLocation == General.AllianceLocation.RED_SOUTH) {
+                            while ((timer.time() < 4 && !driver.getLeftHasPixel()) && opModeIsActive()) {
+                                driver.drive(0, 0.1, 0, false); // drive backwards slowly to take in your pixel
+                                driver.update();
+                            }
+                        } else {
+                            while ((timer.time() < 4 && !driver.getRightHasPixel()) && opModeIsActive()) {
+                                driver.drive(0, 0.1, 0, false); // drive backwards slowly to take in your pixel
+                                driver.update();
+                            }
                         }
                         timer.reset();
                         while (timer.time() < 0.5 && opModeIsActive()) { // drive more away
@@ -272,7 +287,7 @@ public class CycleAuto extends LinearOpMode {
                     if (driver.getCurrentPos().getY() > 85 && !didthething) {
                         driver.setWeaponsState(General.WeaponsState.EXTEND);
                         didthething = true;
-                    } else if (driver.getCurrentPos().getY() < 30 && driver.getCurrentPos().getY() > 18) {
+                    } else if (driver.getCurrentPos().getY() < 40 && driver.getCurrentPos().getY() > 18) {
                         driver.setIntakePower(-0.80);
                     } else if (driver.getCurrentPos().getY() >= 30) {
                         driver.setIntakeMode(General.IntakeMode.LOCK);
@@ -314,8 +329,8 @@ public class CycleAuto extends LinearOpMode {
 
 
 
-                        timer.reset();
-                        while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
+                        //timer.reset();
+                        /*while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) { //TODO: Comment this out
                             /*Pose2d pos = driver.getAprilTagPosition();
                             driver.setCameraMode(General.CameraMode.APRILTAG);
                             driver.setTagOfInterest(5);
@@ -332,12 +347,15 @@ public class CycleAuto extends LinearOpMode {
                                 driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/20, false);
                             }
 
-                             */
+
                             driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/15, false);
                             driver.update();
                             telemetry.addData("cur pos", driver.getCurrentPos().toString());
                             telemetry.update();
                         }
+
+
+                         */
                         //driver.stopStreamingVP();
 
                         autoState = General.AutoState.APPROACH_3;
@@ -346,40 +364,55 @@ public class CycleAuto extends LinearOpMode {
                 case APPROACH_3:
                     timer.reset();
                     driver.setClawLiftPos(true);
-                    while (timer.time() < 0.8 && opModeIsActive() && position != General.SpikePosition.CENTER) {
-                        driver.followCurve(trajectories.get(3).path);
+                    result = false;
+                    while (!result && opModeIsActive() && position != General.SpikePosition.CENTER) {
+                        result = driver.runAutoPath(trajectories.get(3).path);
                         //driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }//TODO: Move FSR and AprilTag stuff to here
                     timer.reset();
-                    while (opModeIsActive() && (!driver.getFSRPressed() && timer.time()<2)) {
-                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/15, false);
+                    gamepad1.setLedColor(0, 255, 0, -1);
+                    while (opModeIsActive() && !driver.getFSRPressed() && timer.time()<2) {
+                        driver.drive(0, 0.3, -driver.getCurrentPos().getHeading()/15, false);
                         driver.update();
+                        telemetry.addData("FSR", driver.getFSRPressed());
+                        telemetry.addData("fsr voltage", driver.getFSRVoltage());
                         telemetry.addData("cur pos", driver.getCurrentPos().toString());
                         telemetry.update();
                     }
-                    driver.setClawMode(General.ClawMode.LEFT); // release the yellow pixel (right claw)
+                    driver.drive(0, 0, 0, false);
+                    if (allianceLocation == General.AllianceLocation.RED_NORTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {// release the yellow pixel
+                        driver.setClawMode(General.ClawMode.LEFT);
+                        driver.update();
+                    } else {
+                        driver.setClawMode(General.ClawMode.RIGHT);
+                        driver.update();
+                    }
+
+                    timer.reset();
                     while (timer.time() < 1 && opModeIsActive()) { // wait for it to drop
                         driver.drive(0, 0, 0, false);
                         //TODO: Drop one pixel at a time
                         driver.update();
+                        gamepad1.setLedColor(255, 0, 0, -1);
                     }
-
-                    while (timer.time() < 1.2 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
+                    gamepad1.setLedColor(0, 0, 255, -1);
+                    while (timer.time() < 1.5 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
                         switch (position) {
                             case LEFT:
-                                driver.drive(0.55, 0, 0, false);
+                                driver.drive(0.7, 0.1, 0, false);
                                 break;
                             case CENTER:
-                                driver.drive(-0.55, 0, 0, false);
+                                driver.drive(-0.6, 0, 0, false);
                                 break;
                             case RIGHT:
-                                driver.drive(-0.55, 0, 0, false);
+                                driver.drive(-0.6, 0, 0, false);
                                 break;
                         }
 
                         driver.update();
                     }
+                    driver.setSlidesTarget(13);
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     timer.reset();
                     /*while (opModeIsActive()) {
@@ -455,10 +488,10 @@ public class CycleAuto extends LinearOpMode {
                             autoState = General.AutoState.PARK2;
                         }
                     } else {
-                        if (timer.time() > 1) {
+                        if (timer.time() > 0.4) {
                             driver.drive(0,0,0,false);
                         } else {
-                            driver.drive(0, -0.2, 0, false);
+                            driver.drive(0, -0.5, 0, false);
                         }
                     }
                     break;

@@ -76,24 +76,23 @@ public class Auto extends LinearOpMode {
 
 
         driver.setWeaponsState(General.WeaponsState.HOLDING);
-        telemetry.addLine("Waiting on Camera Initialization...");
-        telemetry.update();
         driver.setClawLiftPos(false);
         int loops = 0;
-        while (opModeInInit() && loops<500) {
+        /*while (opModeInInit() && loops<500) {
             driver.setCameraMode(General.CameraMode.PROP);
             driver.getCameraEstimate();
             driver.update();
             position = driver.propLocation;
             loops++;
         }
-        telemetry.addLine("Camera Initialized and Ready");
+
+         */
         telemetry.update();
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(12);
+            driver.setSlidesDepositTarget(11);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);
@@ -105,7 +104,7 @@ public class Auto extends LinearOpMode {
                 case VISION:
                     timer.reset();
                     driver.setClawMode(General.ClawMode.BOTH);
-                    while (timer.time() < 0.5+timerOffset && opModeIsActive()) {
+                    while (timer.time() < 2.5+timerOffset && opModeIsActive()) {
                         driver.setCameraMode(General.CameraMode.PROP);
                         driver.getCameraEstimate();
                         driver.update();
@@ -119,7 +118,7 @@ public class Auto extends LinearOpMode {
                     trajectories = AutoStorage.generateAutoPaths(parkLocation, position, allianceLocation);
                     break;
                 case PURPLE_APPROACH:
-                    driver.setSlidesTarget(0);
+                    //driver.setSlidesTarget(0);
                     boolean result = driver.runAutoPath(trajectories.get(0).path);
                     telemetry.addLine("Running Approach 1");
                     //telemetry.update();
@@ -130,7 +129,7 @@ public class Auto extends LinearOpMode {
                         while (timer.time() < 1 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
                             //driver.followCurve(trajectories.get(0).path);
-                            switch (allianceLocation) {
+                            /*switch (allianceLocation) {
                                 case RED_SOUTH:
                                     driver.setClawMode(General.ClawMode.LEFT);
                                     break;
@@ -147,10 +146,13 @@ public class Auto extends LinearOpMode {
                                     break;
                             }
 
+                             */
+                            driver.setIntakePower(-0.5);
+
                             // release pixel
                             driver.update();
                         }
-
+                        driver.setIntakeMode(General.IntakeMode.LOCK);
                         autoState = General.AutoState.BACKUP;
                     }
                     break;
@@ -185,9 +187,9 @@ public class Auto extends LinearOpMode {
                         //driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }
-                    while (timer.time() < 2 && opModeIsActive()) {
+                    while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) {
                         //TODO: Drive until FSR
-                        //driver.drive(0, 0.2, 0, false);
+                        driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }
                     while (timer.time() < 3.5 && opModeIsActive()) {
@@ -206,7 +208,7 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("y", driver.getCurrentPos().getY());
                         telemetry.addData("head", driver.getCurrentPos().getHeading());
                         telemetry.update();
-                        driver.setClawMode(General.ClawMode.BOTH);
+                        //driver.setClawMode(General.ClawMode.BOTH);
                         result = driver.runAutoPath(trajectories.get(4).path);
                         //driver.storePancake();
                         if (result) {
@@ -214,7 +216,7 @@ public class Auto extends LinearOpMode {
                         }
                     } else {
                         if (timer.time() > 1) {
-                            driver.setSlidesTarget(0);
+                            //driver.setSlidesTarget(0);
                             //driver.setClawMode(General.ClawMode.OPEN);
                             driver.drive(0,0,0,false);
                         } else {
