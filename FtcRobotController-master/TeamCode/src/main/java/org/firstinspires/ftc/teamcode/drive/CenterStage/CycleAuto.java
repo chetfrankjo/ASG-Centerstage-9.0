@@ -397,30 +397,28 @@ public class CycleAuto extends LinearOpMode {
                         gamepad1.setLedColor(255, 0, 0, -1);
                     }
                     gamepad1.setLedColor(0, 0, 255, -1);
+                    driver.setSlidesTarget(15);
                     while (timer.time() < 1.5 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
                         switch (position) {
                             case LEFT:
                                 driver.drive(0.7, 0.1, 0, false);
                                 break;
                             case CENTER:
-                                driver.drive(-0.6, 0, 0, false);
+                                driver.drive(0.6, 0, 0, false);
                                 break;
                             case RIGHT:
-                                driver.drive(-0.6, 0, 0, false);
+                                driver.drive(-0.7, 0.1, 0, false);
                                 break;
                         }
 
                         driver.update();
                     }
-                    driver.setSlidesTarget(13);
+
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     timer.reset();
-                    /*while (opModeIsActive()) {
-                        driver.drive(0, 0, 0, false);
-                        driver.update();
-                    }
 
-                     */
+
+
                     //autoState = General.AutoState.CYCLE_INTAKE; // TODO: Add another cycle
                     autoState = General.AutoState.PARK_1;
                     break;
