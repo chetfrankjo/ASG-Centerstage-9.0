@@ -101,6 +101,7 @@ public class Teleop extends LinearOpMode{
 
         driver.setSlidesDisable(false);
         //driver.setClawMode(General.ClawMode.IDLE);
+        driver.storeAll();
         driver.update();
         ElapsedTime hangtime = new ElapsedTime();
         outtakeTimer = new ElapsedTime();

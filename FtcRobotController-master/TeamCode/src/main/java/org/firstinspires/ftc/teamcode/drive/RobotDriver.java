@@ -838,8 +838,8 @@ public class RobotDriver {
     }
 
     public void launchHang() {
-        hangReleaseRight.setPosition(0.3);
-        hangReleaseLeft.setPosition(0.7);
+        hangReleaseRight.setPosition(0.5);
+        hangReleaseLeft.setPosition(0.5);
     }
     public void storeHang() {
         hangReleaseRight.setPosition(0);

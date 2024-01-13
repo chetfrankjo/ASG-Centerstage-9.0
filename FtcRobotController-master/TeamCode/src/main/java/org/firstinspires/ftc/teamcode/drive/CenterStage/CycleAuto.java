@@ -64,7 +64,7 @@ public class CycleAuto extends LinearOpMode {
 
 
         RobotDriver driver = new RobotDriver(hardwareMap, true);
-        //driver.storeAll();
+        driver.storeAll();
         driver.resetFlipperEncoder();
         driver.resetSlidesEncoder();
         driver.resetIMUHeading();
@@ -276,6 +276,58 @@ public class CycleAuto extends LinearOpMode {
                             driver.setClawMode(General.ClawMode.BOTH);
                             driver.update();
                         }
+                        if (allianceLocation == General.AllianceLocation.RED_NORTH | allianceLocation == General.AllianceLocation.RED_SOUTH) {
+                            if (!driver.getLeftHasPixel()) {
+                                //TODO: go back and forth - this essentially does another pass
+                                timer.reset();
+                                driver.setIntakePower(-0.5);
+                                while (opModeIsActive() && timer.time() < 1 && !driver.getLeftHasPixel()) {
+                                    driver.drive(0, -0.2, 0, false);
+                                    driver.update();
+                                }
+                                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                while (opModeIsActive() && timer.time() < 2 && !driver.getLeftHasPixel()) {
+                                    driver.drive(0, -0.4, 0, false);
+                                    driver.update();
+                                }
+                                timer.reset();
+                                while ((timer.time() < 2 && !driver.getLeftHasPixel()) && opModeIsActive()) {
+                                    driver.drive(0, 0.1, 0, false); // drive backwards slowly to take in your pixel
+                                    driver.update();
+                                }
+                                timer.reset();
+                                while (timer.time() < 0.5 && opModeIsActive()) { // drive more away
+                                    driver.drive(0, 0.25, 0, false);
+                                    driver.setClawMode(General.ClawMode.BOTH);
+                                    driver.update();
+                                }
+                            }
+                        } else {
+                            if (!driver.getRightHasPixel()) {
+                                timer.reset();
+                                driver.setIntakePower(-0.5);
+                                while (opModeIsActive() && timer.time() < 1 && !driver.getRightHasPixel()) {
+                                    driver.drive(0, -0.15, 0, false);
+                                    driver.update();
+                                }
+                                driver.setIntakeMode(General.IntakeMode.INTAKE);
+                                while (opModeIsActive() && timer.time() < 2 && !driver.getLeftHasPixel()) {
+                                    driver.drive(0, -0.4, 0, false);
+                                    driver.update();
+                                }
+                                timer.reset();
+                                while ((timer.time() < 2 && !driver.getRightHasPixel()) && opModeIsActive()) {
+                                    driver.drive(0, 0.1, 0, false); // drive backwards slowly to take in your pixel
+                                    driver.update();
+                                }
+                                timer.reset();
+                                while (timer.time() < 0.5 && opModeIsActive()) { // drive more away
+                                    driver.drive(0, 0.25, 0, false);
+                                    driver.setClawMode(General.ClawMode.BOTH);
+                                    driver.update();
+                                }
+                            }
+                        }
                         driver.setWeaponsState(General.WeaponsState.HOLDING);
                         driver.update();
                         driver.setIntakeMode(General.IntakeMode.INTAKE);
@@ -288,7 +340,7 @@ public class CycleAuto extends LinearOpMode {
                         driver.setWeaponsState(General.WeaponsState.EXTEND);
                         didthething = true;
                     } else if (driver.getCurrentPos().getY() < 40 && driver.getCurrentPos().getY() > 18) {
-                        driver.setIntakePower(-0.80);
+                        driver.setIntakePower(-0.90);
                     } else if (driver.getCurrentPos().getY() >= 30) {
                         driver.setIntakeMode(General.IntakeMode.LOCK);
                     }
@@ -398,7 +450,7 @@ public class CycleAuto extends LinearOpMode {
                     }
                     gamepad1.setLedColor(0, 0, 255, -1);
                     driver.setSlidesTarget(15);
-                    while (timer.time() < 1.5 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
+                    while (timer.time() < 1.7 && opModeIsActive()) { // drive out of the way to dump your extra pixel somewhere else
                         switch (position) {
                             case LEFT:
                                 driver.drive(0.7, 0.1, 0, false);
@@ -407,14 +459,16 @@ public class CycleAuto extends LinearOpMode {
                                 driver.drive(0.6, 0, 0, false);
                                 break;
                             case RIGHT:
-                                driver.drive(-0.7, 0.1, 0, false);
+                                driver.drive(-0.7, 0, 0, false);
                                 break;
                         }
-
+                        if (timer.time() > 1.5 && timer.time() < 1.6) {
+                            driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                        }
                         driver.update();
                     }
 
-                    driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+
                     timer.reset();
 
 
@@ -441,7 +495,7 @@ public class CycleAuto extends LinearOpMode {
                         //while (opModeIsActive()) {driver.drive(0, 0, 0, false);}
                     }
 
-                    driver.update();
+                    //driver.update();
                     break;
                 case CYCLE_APPROACH:
                     result = driver.runAutoPath(trajectories.get(5).path);
@@ -453,7 +507,7 @@ public class CycleAuto extends LinearOpMode {
                         //driver.setSlidesTarget(4);
                         driver.setWeaponsState(General.WeaponsState.EXTEND);
                     }
-                    driver.update();
+                    //driver.update();
                     break;
                 case CYCLE_APPROACH_2:
                     timer.reset();

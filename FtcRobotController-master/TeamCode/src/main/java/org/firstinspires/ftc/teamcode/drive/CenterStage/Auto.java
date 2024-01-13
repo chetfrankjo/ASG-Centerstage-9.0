@@ -21,6 +21,7 @@ public class Auto extends LinearOpMode {
     General.AutoMode autoMode = General.AutoMode.STANDARD;
     ElapsedTime timer;
     double timerOffset;
+    boolean didTheThing = false;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -92,7 +93,7 @@ public class Auto extends LinearOpMode {
         timer.reset();
         while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(11);
+            driver.setSlidesDepositTarget(10);
             driver.update();
             telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
             telemetry.addData("Spike Position", position);
@@ -126,7 +127,7 @@ public class Auto extends LinearOpMode {
                         // the path is ready to move on
                         timer.reset();
 
-                        while (timer.time() < 1 && opModeIsActive()) {
+                        while (timer.time() < 0.08 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
                             //driver.followCurve(trajectories.get(0).path);
                             /*switch (allianceLocation) {
@@ -147,7 +148,7 @@ public class Auto extends LinearOpMode {
                             }
 
                              */
-                            driver.setIntakePower(-0.5);
+                            driver.setIntakePower(-0.4);
 
                             // release pixel
                             driver.update();
@@ -172,7 +173,10 @@ public class Auto extends LinearOpMode {
                             driver.setWeaponsState(General.WeaponsState.EXTEND);
                         }
                     } else {
-                        driver.setWeaponsState(General.WeaponsState.EXTEND);
+                        if (!didTheThing) {
+                            driver.setWeaponsState(General.WeaponsState.EXTEND);
+                            didTheThing = true;
+                        }
                         //driver.setSlidesTarget(4);
                     }
                     if (result) {
@@ -192,9 +196,9 @@ public class Auto extends LinearOpMode {
                         driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }
-                    while (timer.time() < 3.5 && opModeIsActive()) {
+                    driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+                    while (timer.time() < 2.5 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
-                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                         // release pixel
                         driver.update();
                     }

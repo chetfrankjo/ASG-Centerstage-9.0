@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
-
+@Disabled
 @TeleOp
 public class AprilTagRDTest extends LinearOpMode {
 
