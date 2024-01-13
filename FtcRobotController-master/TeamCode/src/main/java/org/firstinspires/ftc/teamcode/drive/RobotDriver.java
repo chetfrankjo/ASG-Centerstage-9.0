@@ -706,13 +706,13 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.4) { //(flipperAngle < 180)
+                    if (flipperTimer.time() < 0.5) { //(flipperAngle < 180)
                         flipper.setPower(-0.65);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.4) { // flipperAngle > 180
+                    if (flipperTimer.time() < 0.5) { // flipperAngle > 180
                         flipper.setPower(0.65);
                     } else {
                         flipper.setPower(0);

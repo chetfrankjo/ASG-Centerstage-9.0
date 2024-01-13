@@ -197,18 +197,18 @@ public class AutoStorage {
                         }
                         break;
                     case CENTER:
-                        paths.add(new Trajectory(9, 84, 0.25, 12, 0.2).addPoint(47, 84, -90).build());
-                        paths.add(new Trajectory(47, 84, 0.6, 5).addPoint(47, 88, 0).build());
-                        paths.add(new Trajectory(47, 88, 0.4, 13).addPoint(34, 88, 90).addPoint(34, 96, 0).build());
-                        paths.add(new Trajectory(34, 96, 0.4, 10).addPoint(34, 112, 0).build());
+                        paths.add(new Trajectory(9, 84, 0.27, 7, 0.2).addPoint(50, 88, -90).addPoint(50, 92, 0).build());
+                        paths.add(new Trajectory(50, 92, 0.6, 5).addPoint(50, 99, 0).build());
+                        paths.add(new Trajectory(50, 99, 0.4, 13).addPoint(36, 99, 90).addPoint(36, 112, 0).build());
+                        paths.add(new Trajectory(36, 112, 0.4, 5).addPoint(36, 117, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(43, 115, 0.4, 8, 0).addPoint(43, 104, 180).addPointSpeed(18, 104, 90, 0.3).build());
+                                paths.add(new Trajectory(36, 115, 0.4, 8, 0).addPoint(36, 104, 180).addPointSpeed(18, 104, 90, 0.3).build());
                                 paths.add(new Trajectory(18, 104, 0.3, 20).addPoint(18, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(43, 115, 0.4, 8, 0).addPoint(43, 104, 180).addPoint(66, 104, -90).build());
-                                paths.add(new Trajectory(66, 104, 0.3, 20).addPoint(66, 115, 0).build());
+                                paths.add(new Trajectory(36, 115, 0.4, 8, 0).addPoint(36, 104, 180).addPoint(59, 104, -90).build());
+                                paths.add(new Trajectory(59, 104, 0.3, 20).addPoint(59, 115, 0).build());
                                 break;
                         }
                         break;
