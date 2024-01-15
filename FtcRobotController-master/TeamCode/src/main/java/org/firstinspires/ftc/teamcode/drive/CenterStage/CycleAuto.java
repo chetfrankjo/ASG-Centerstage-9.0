@@ -417,7 +417,7 @@ public class CycleAuto extends LinearOpMode {
                     timer.reset();
                     driver.setClawLiftPos(true);
                     result = false;
-                    while (!result && opModeIsActive() && position != General.SpikePosition.CENTER) {
+                    while (!result && opModeIsActive() && position != General.SpikePosition.CENTER && timer.time() < 4) {
                         result = driver.runAutoPath(trajectories.get(3).path);
                         //driver.drive(0, 0.2, 0, false);
                         driver.update();

@@ -120,7 +120,7 @@ public class RobotDriver {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
-    private boolean invertClaw = false;
+    private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
@@ -706,13 +706,13 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.5) { //(flipperAngle < 180)
+                    if (flipperTimer.time() < 0.55) { //(flipperAngle < 180)
                         flipper.setPower(-0.65);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.5) { // flipperAngle > 180
+                    if (flipperTimer.time() < 0.55) { // flipperAngle > 180
                         flipper.setPower(0.65);
                     } else {
                         flipper.setPower(0);
@@ -788,6 +788,11 @@ public class RobotDriver {
             invertClaw = false;
             clawLift.setPosition(0.22);
         }
+        if (clawTimer.time()>0.28 && invertOtherClaw) {
+            invertOtherClaw = false;
+            clawLift.setPosition(0.7875);
+        }
+
     }
     public void setClawLPos(boolean closed) {
         if (closed) {
@@ -816,7 +821,9 @@ public class RobotDriver {
             invertClaw = true;
             //clawLift.setPosition(0.22);
         } else {
-            clawLift.setPosition(0.7875);
+            clawTimer.reset();
+            invertOtherClaw = true;
+            //clawLift.setPosition(0.7875);
         }
 
     }

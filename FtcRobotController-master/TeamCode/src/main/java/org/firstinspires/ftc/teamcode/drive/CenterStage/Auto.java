@@ -148,7 +148,7 @@ public class Auto extends LinearOpMode {
                             }
 
                              */
-                            driver.setIntakePower(-0.4);
+                            driver.setIntakePower(-0.27);
 
                             // release pixel
                             driver.update();
