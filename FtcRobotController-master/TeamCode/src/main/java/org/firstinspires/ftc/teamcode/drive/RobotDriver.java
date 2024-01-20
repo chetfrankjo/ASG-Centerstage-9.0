@@ -385,7 +385,7 @@ public class RobotDriver {
             case INTAKING: // rollers on, ready to grab
                 slidesTarget = 0;
                 setClawLiftPos(false);
-                if (getRightHasPixel()) {
+                if (getRightHasPixel()) { // dont open a claw that has a pixel in it
                     if (getLeftHasPixel()) {
                         clawMode = ClawMode.BOTH;
                     } else {
@@ -398,13 +398,12 @@ public class RobotDriver {
                         clawMode = ClawMode.OPEN;
                     }
                 }
-                //clawMode = ClawMode.INTAKING;
                 weaponsState = WeaponsState.IDLE;
                 flipperState = FlipperState.STORED;
                 intakeMode = IntakeMode.INTAKE;
                 break;
             case HOLDING: // grab, invert rollers to spit out extras
-                if (openClawForPostDeposit) {
+                if (openClawForPostDeposit) { // dont grab if you just outtaked
                     clawMode = ClawMode.OPEN;
                     openClawForPostDeposit = false;
                 } else {
@@ -421,10 +420,10 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (depositTimer.time()>0.3 && waitingForDepsoit) {
+                if (depositTimer.time()>0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
                     setClawLiftPos(false);
                 }
-                if (depositTimer.time() > 0.4 && waitingForDepsoit) {
+                if (depositTimer.time() > 0.4 && waitingForDepsoit) { // waits for pixels to drop before folding up
                     waitingForDepsoit=false;
                     weaponsState = WeaponsState.HOLDING;
                     clawMode = ClawMode.OPEN;
@@ -706,14 +705,14 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.55) { //(flipperAngle < 180)
-                        flipper.setPower(-0.65);
+                    if (flipperTimer.time() < 0.25) { //(flipperAngle < 180)
+                        flipper.setPower(-1.0);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.55) { // flipperAngle > 180
-                        flipper.setPower(0.65);
+                    if (flipperTimer.time() < 0.2) { // flipperAngle > 180
+                        flipper.setPower(0.7);
                     } else {
                         flipper.setPower(0);
                     }
@@ -783,12 +782,11 @@ public class RobotDriver {
 
              */
         }
-
         if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
             clawLift.setPosition(0.22);
         }
-        if (clawTimer.time()>0.28 && invertOtherClaw) {
+        if (clawTimer.time()>0.05 && invertOtherClaw) {
             invertOtherClaw = false;
             clawLift.setPosition(0.7875);
         }
