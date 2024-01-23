@@ -38,7 +38,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889*1.02; //13.37 //
+        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889*1.02*1.0083333333333333333333333333333*1.005; //13.37 //
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = 6.22;
 

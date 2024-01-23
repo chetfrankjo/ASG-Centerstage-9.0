@@ -120,7 +120,7 @@ public class RobotDriver {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
 
-    private boolean invertClaw = false;
+    private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
@@ -208,15 +208,18 @@ public class RobotDriver {
 
         //int[] portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        /*int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-        PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), viewportContainerIds[0]);
-        propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
-        PropCameraL.setPipeline(propPipeline);
-        PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), viewportContainerIds[0]);
-        propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
-        PropCameraR.setPipeline(propPipeline);
+        if (loadAlliancePreset() == AllianceLocation.BLUE_NORTH | loadAlliancePreset() == AllianceLocation.BLUE_SOUTH) {
+            PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), viewportContainerIds[1]);
+            propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
+            PropCameraR.setPipeline(propPipeline);
+        } else {
+            PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), viewportContainerIds[0]);
+            propPipeline = new ThreeZonePropDetectionPipeline(true, loadAlliancePreset());
+            PropCameraL.setPipeline(propPipeline);
+        }
 
 
         if (prepAutoCamera) {
@@ -234,16 +237,15 @@ public class RobotDriver {
 
                 @Override
                 public void onError(int errorCode) {
-                    /*
-                     * This will be called if the camera could not be opened
-                     */
+
                 }
             });
 
             cameraMode = CameraMode.PROP;
         }
+        */
 
-        aprilTag = new AprilTagProcessor.Builder()
+        //aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
@@ -258,17 +260,17 @@ public class RobotDriver {
 
                 // ... these parameters are fx, fy, cx, cy.
 
-                .build();
+                //.build();
 
-        VisionPortal.Builder builder = new VisionPortal.Builder();
-        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
-        builder.setCameraResolution(new Size(640, 480));
+        //VisionPortal.Builder builder = new VisionPortal.Builder();
+        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
+        // builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        builder.addProcessor(aprilTag);
-        builder.setLiveViewContainerId(viewportContainerIds[1]);
+        //builder.addProcessor(aprilTag);
+        //builder.setLiveViewContainerId(viewportContainerIds[1]);
         // Build the Vision Portal, using the above settings.
-        visionPortal = builder.build();
+        //visionPortal = builder.build();
 
         //allHubs = hardwareMap.getAll(LynxModule.class);
         /*for (LynxModule module : allHubs) {
@@ -317,6 +319,7 @@ public class RobotDriver {
         }
         packet.put("slides", slidesLength);
         packet.put("loop speed", loopSpeed);
+        //packet.put("camera of interest", cameraOfInterest.);
 
         overlay = packet.fieldOverlay();
 
@@ -381,7 +384,7 @@ public class RobotDriver {
             case INTAKING: // rollers on, ready to grab
                 slidesTarget = 0;
                 setClawLiftPos(false);
-                if (getRightHasPixel()) {
+                if (getRightHasPixel()) { // dont open a claw that has a pixel in it
                     if (getLeftHasPixel()) {
                         clawMode = ClawMode.BOTH;
                     } else {
@@ -394,13 +397,12 @@ public class RobotDriver {
                         clawMode = ClawMode.OPEN;
                     }
                 }
-                //clawMode = ClawMode.INTAKING;
                 weaponsState = WeaponsState.IDLE;
                 flipperState = FlipperState.STORED;
                 intakeMode = IntakeMode.INTAKE;
                 break;
             case HOLDING: // grab, invert rollers to spit out extras
-                if (openClawForPostDeposit) {
+                if (openClawForPostDeposit) { // dont grab if you just outtaked
                     clawMode = ClawMode.OPEN;
                     openClawForPostDeposit = false;
                 } else {
@@ -417,10 +419,10 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (depositTimer.time()>0.3 && waitingForDepsoit) {
+                if (depositTimer.time()>0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
                     setClawLiftPos(false);
                 }
-                if (depositTimer.time() > 0.4 && waitingForDepsoit) {
+                if (depositTimer.time() > 0.4 && waitingForDepsoit) { // waits for pixels to drop before folding up
                     waitingForDepsoit=false;
                     weaponsState = WeaponsState.HOLDING;
                     clawMode = ClawMode.OPEN;
@@ -702,14 +704,14 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.6) { //(flipperAngle < 180)
-                        flipper.setPower(-0.65);
+                    if (flipperTimer.time() < 0.25) { //(flipperAngle < 180)
+                        flipper.setPower(-1.0);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.6) { // flipperAngle > 180
-                        flipper.setPower(0.65);
+                    if (flipperTimer.time() < 0.2) { // flipperAngle > 180
+                        flipper.setPower(0.7);
                     } else {
                         flipper.setPower(0);
                     }
@@ -779,11 +781,15 @@ public class RobotDriver {
 
              */
         }
-
-        if (clawTimer.time()>0.2 && invertClaw) {
+        if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
             clawLift.setPosition(0.22);
         }
+        if (clawTimer.time()>0.05 && invertOtherClaw) {
+            invertOtherClaw = false;
+            clawLift.setPosition(0.7875);
+        }
+
     }
     public void setClawLPos(boolean closed) {
         if (closed) {
@@ -812,7 +818,9 @@ public class RobotDriver {
             invertClaw = true;
             //clawLift.setPosition(0.22);
         } else {
-            clawLift.setPosition(0.7875);
+            clawTimer.reset();
+            invertOtherClaw = true;
+            //clawLift.setPosition(0.7875);
         }
 
     }
@@ -834,8 +842,8 @@ public class RobotDriver {
     }
 
     public void launchHang() {
-        hangReleaseRight.setPosition(0.3);
-        hangReleaseLeft.setPosition(0.7);
+        hangReleaseRight.setPosition(0.5);
+        hangReleaseLeft.setPosition(0.5);
     }
     public void storeHang() {
         hangReleaseRight.setPosition(0);
@@ -843,10 +851,10 @@ public class RobotDriver {
     }
 
     public void launchPlane() {
-        launcher.setPosition(1);
+        launcher.setPosition(0.5);
     }
     public void storePlane() {
-        launcher.setPosition(-1);
+        launcher.setPosition(0.2);
     }
 
     public void setPurpleRelease(boolean val) {
@@ -912,7 +920,7 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 2);
+        return (fsr.getVoltage() > 1.2);
     }
 
     //1 Set internal transfer servos/motor power

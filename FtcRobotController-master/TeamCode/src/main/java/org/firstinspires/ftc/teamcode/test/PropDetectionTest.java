@@ -29,14 +29,14 @@ public class PropDetectionTest extends LinearOpMode
 {
     OpenCvCamera webcam;
     ThreeZonePropDetectionPipeline pipeline;
-    public static int avg1, avg2, avg3, avg4, avg5;
+    public static int avg1, avg2, avg3, avg4, avg5, avg6;
     @Override
     public void runOpMode()
     {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), cameraMonitorViewId); // PropCamR
-        pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.BLUE_NORTH);
+        pipeline = new ThreeZonePropDetectionPipeline(true, General.AllianceLocation.RED_NORTH);
         webcam.setPipeline(pipeline);
 
 
@@ -59,6 +59,13 @@ public class PropDetectionTest extends LinearOpMode
 
         FtcDashboard dash;
         dash = FtcDashboard.getInstance();
+
+        while (!isStarted() && !isStopRequested()) { // TODO: try with no camera, try just !opModeIsActive or just !isStarted
+            telemetry.addData("analysis", pipeline.getAnalysis());
+            telemetry.update();
+        }
+
+
         waitForStart();
 
         while (opModeIsActive())
@@ -70,11 +77,13 @@ public class PropDetectionTest extends LinearOpMode
             avg3 = pipeline.getReadings()[2];
             avg4 = pipeline.getReadings()[3];
             avg5 = pipeline.getReadings()[4];
+            avg6 = pipeline.getReadings()[5];
             telemetry.addData("avg1", avg1);
             telemetry.addData("avg2", avg2);
             telemetry.addData("avg3", avg3);
             telemetry.addData("avg4", avg4);
-            telemetry.addData("avg5 (calibration)", avg5);
+            telemetry.addData("avg5", avg5);
+            telemetry.addData("avg6", avg6);
             telemetry.update();
 
 

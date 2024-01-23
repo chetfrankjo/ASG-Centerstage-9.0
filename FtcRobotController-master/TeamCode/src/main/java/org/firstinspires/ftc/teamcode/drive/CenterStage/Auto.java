@@ -1,14 +1,21 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.AutoStorage;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
+import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
@@ -18,13 +25,14 @@ public class Auto extends LinearOpMode {
     General.SpikePosition position = General.SpikePosition.LEFT;
     General.AllianceLocation allianceLocation;
     General.ParkLocation parkLocation;
-    General.AutoMode autoMode = General.AutoMode.STANDARD;
-    ElapsedTime timer;
+    ElapsedTime timer, stateOverrideTimer;
+    OpenCvCamera PropCameraR, PropCameraL, cameraOfInterest;
+    ThreeZonePropDetectionPipeline propPipeline;
     double timerOffset;
+    boolean weaponsExtended = false;
     @Override
     public void runOpMode() throws InterruptedException {
-
-        RobotDriver driver = new RobotDriver(hardwareMap, true);
+        RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.storeAll();
         driver.resetFlipperEncoder();
         driver.resetSlidesEncoder();
@@ -34,10 +42,7 @@ public class Auto extends LinearOpMode {
         driver.resetSlidesEncoder();
         timerOffset = driver.loadTimerPreset();
 
-        timer = new ElapsedTime();
-        timer.reset();
-
-        ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH);
+        ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH); // Default loaded paths. Are changed later in code once vision estimate is received
         allianceLocation = driver.loadAlliancePreset();
         parkLocation = driver.loadParkPreset();
 
@@ -56,7 +61,6 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
 
-
         switch (allianceLocation) {
 
             case RED_SOUTH:
@@ -73,149 +77,111 @@ public class Auto extends LinearOpMode {
                 break;
         }
 
-
+        initCameras(allianceLocation); // initialize the correct camera
 
         driver.setWeaponsState(General.WeaponsState.HOLDING);
-        telemetry.addLine("Waiting on Camera Initialization...");
-        telemetry.update();
         driver.setClawLiftPos(false);
-        int loops = 0;
-        while (opModeInInit() && loops<500) {
-            driver.setCameraMode(General.CameraMode.PROP);
-            driver.getCameraEstimate();
-            driver.update();
-            position = driver.propLocation;
-            loops++;
-        }
-        telemetry.addLine("Camera Initialized and Ready");
-        telemetry.update();
-        waitForStart();
-        timer.reset();
-        while (opModeIsActive()) {
 
-            driver.setSlidesDepositTarget(12);
+        while (!isStarted() && !isStopRequested()) { // warm up the camera as long as init goes on
+            telemetry.addLine("Running Detection");
+            telemetry.addData("analysis", propPipeline.getAnalysis());
+            telemetry.update();
+        }
+
+        timer = new ElapsedTime();
+        stateOverrideTimer = new ElapsedTime();
+        timer.reset();
+
+        driver.setSlidesDepositTarget(10);
+
+        while (opModeIsActive()) {
             driver.update();
-            telemetry.addData("CurrentPos", driver.getCurrentPos().toString());
+            telemetry.addData("x", driver.getCurrentPos().getX());
+            telemetry.addData("y", driver.getCurrentPos().getY());
+            telemetry.addData("head", driver.getCurrentPos().getHeading());
             telemetry.addData("Spike Position", position);
             telemetry.update();
-
 
             switch (autoState) {
 
                 case VISION:
                     timer.reset();
                     driver.setClawMode(General.ClawMode.BOTH);
-                    while (timer.time() < 0.5+timerOffset && opModeIsActive()) {
-                        driver.setCameraMode(General.CameraMode.PROP);
-                        driver.getCameraEstimate();
-                        driver.update();
-                        position = driver.propLocation;
-                        telemetry.addData("Estimate", position.toString());
+                    while (timer.time() < 0.1+timerOffset && opModeIsActive()) { // Grab the final camera estimate
+                        position = propPipeline.getAnalysis();
+                        telemetry.addData("analysis", position);
                         telemetry.update();
                     }
-                    driver.setCameraMode(General.CameraMode.IDLE);
                     autoState = General.AutoState.PURPLE_APPROACH;
-                    //trajectories = Constants.AutoPaths.generateAutoPaths(parkLocation, position, allianceLocation);
-                    trajectories = AutoStorage.generateAutoPaths(parkLocation, position, allianceLocation);
+                    cameraOfInterest.stopStreaming();
+                    cameraOfInterest.closeCameraDevice();
+                    trajectories = AutoStorage.generateAutoPaths(parkLocation, position, allianceLocation); // Load all auto paths
+                    stateOverrideTimer.reset();
                     break;
                 case PURPLE_APPROACH:
-                    driver.setSlidesTarget(0);
-                    boolean result = driver.runAutoPath(trajectories.get(0).path);
-                    telemetry.addLine("Running Approach 1");
-                    //telemetry.update();
-                    if (result) {
-                        // the path is ready to move on
+                    boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
+                    if (result) { // if the path is complete, move on
                         timer.reset();
-
-                        while (timer.time() < 1 && opModeIsActive()) {
+                        while (timer.time() < 0.2 && opModeIsActive()) { // release the purple pixel on the spike mark
                             driver.drive(0, 0, 0, false);
-                            //driver.followCurve(trajectories.get(0).path);
-                            switch (allianceLocation) {
-                                case RED_SOUTH:
-                                    driver.setClawMode(General.ClawMode.LEFT);
-                                    break;
-                                case RED_NORTH:
-                                    driver.setClawMode(General.ClawMode.RIGHT);
-                                    break;
-                                case BLUE_SOUTH:
-                                    driver.setClawMode(General.ClawMode.RIGHT);
-                                    break;
-                                case BLUE_NORTH:
-                                    driver.setClawMode(General.ClawMode.LEFT);
-                                    break;
-                                case NONE:
-                                    break;
-                            }
+                            //TODO: RELEASE PIXEL WITH SERVO
 
                             // release pixel
                             driver.update();
                         }
-
-                        autoState = General.AutoState.BACKUP;
+                        autoState = General.AutoState.APPROACH_2; // advance to the next state
+                        stateOverrideTimer.reset();
                     }
-                    break;
-                case BACKUP:
-                    driver.setWeaponsState(General.WeaponsState.HOLDING);
-                    result = driver.runAutoPath(trajectories.get(1).path);
-                    if (result) {
-                        timer.reset();
+                    if (stateOverrideTimer.time() > 7) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
+                        System.out.println("State Skipped due to timeout");
+                        stateOverrideTimer.reset();
                     }
                     break;
                 case APPROACH_2:
-                    result = driver.runAutoPath(trajectories.get(2).path);
+                    result = driver.runAutoPath(trajectories.get(1).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
-                        if (driver.getCurrentPos().getY() > 85) {
-                            //driver.setSlidesTarget(4);
+                        if (driver.getCurrentPos().getY() > 85 && !weaponsExtended) { // extend all subsystems after you have cleared the stage door
                             driver.setWeaponsState(General.WeaponsState.EXTEND);
+                            weaponsExtended = true;
                         }
                     } else {
-                        driver.setWeaponsState(General.WeaponsState.EXTEND);
-                        //driver.setSlidesTarget(4);
+                        if (!weaponsExtended) {
+                            driver.setWeaponsState(General.WeaponsState.EXTEND); // extend all subsystems
+                            weaponsExtended = true;
+                        }
                     }
                     if (result) {
-                        //driver.waitAndUpdateWithPath(1000, Constants.AutoPaths.approach_2.path); //depositing pixel
+                        autoState = General.AutoState.APPROACH_3; // move on to the next state
+                    }
+                    if (stateOverrideTimer.time() > 7) { // if the robot stalls, skip to the next state
                         autoState = General.AutoState.APPROACH_3;
+                        System.out.println("State Skipped due to timeout");
+                        stateOverrideTimer.reset();
                     }
                     break;
                 case APPROACH_3:
                     timer.reset();
-                    while (timer.time() < 0.8 && opModeIsActive()) {
-                        driver.followCurve(trajectories.get(3).path);
-                        //driver.drive(0, 0.2, 0, false);
+                    while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) { // drive into the backdrop until the FSR is pressed
+                        driver.drive(0, 0.2, 0, false);
                         driver.update();
                     }
-                    while (timer.time() < 2 && opModeIsActive()) {
-                        //TODO: Drive until FSR
-                        //driver.drive(0, 0.2, 0, false);
-                        driver.update();
-                    }
-                    while (timer.time() < 3.5 && opModeIsActive()) {
+                    driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
+                    while (timer.time() < 0.6 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
-                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                         // release pixel
                         driver.update();
                     }
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
                 case PARK_1:
-                    if (parkLocation != General.ParkLocation.CENTER) {
-
-
-                        telemetry.addData("x", driver.getCurrentPos().getX());
-                        telemetry.addData("y", driver.getCurrentPos().getY());
-                        telemetry.addData("head", driver.getCurrentPos().getHeading());
-                        telemetry.update();
-                        driver.setClawMode(General.ClawMode.BOTH);
-                        result = driver.runAutoPath(trajectories.get(4).path);
-                        //driver.storePancake();
+                    if (parkLocation != General.ParkLocation.CENTER) { // Follow the corresponding path for the park
+                        result = driver.runAutoPath(trajectories.get(2).path);
                         if (result) {
                             autoState = General.AutoState.PARK2;
                         }
-                    } else {
+                    } else { // If you are doing a center park, just back up slowly for a second
                         if (timer.time() > 1) {
-                            driver.setSlidesTarget(0);
-                            //driver.setClawMode(General.ClawMode.OPEN);
                             driver.drive(0,0,0,false);
                         } else {
                             driver.drive(0, -0.2, 0, false);
@@ -223,17 +189,45 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case PARK2:
-                    telemetry.addData("x", driver.getCurrentPos().getX());
-                    telemetry.addData("y", driver.getCurrentPos().getY());
-                    telemetry.addData("head", driver.getCurrentPos().getHeading());
-                    telemetry.update();
-                    driver.setSlidesTarget(0);
-                    driver.followCurve(trajectories.get(5).path);
+                    driver.followCurve(trajectories.get(3).path); // do the final parking move
                     break;
             }
-
-
-
         }
     }
+
+    public void initCameras(General.AllianceLocation allianceLocation) { // handles camera intialization and selection
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
+
+        if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+            PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), viewportContainerIds[1]);
+            propPipeline = new ThreeZonePropDetectionPipeline(true, allianceLocation);
+            PropCameraR.setPipeline(propPipeline);
+        } else {
+            PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), viewportContainerIds[0]);
+            propPipeline = new ThreeZonePropDetectionPipeline(true, allianceLocation);
+            PropCameraL.setPipeline(propPipeline);
+        }
+
+        if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+            cameraOfInterest = PropCameraR;
+        } else {
+            cameraOfInterest = PropCameraL;
+        }
+
+        cameraOfInterest.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                cameraOfInterest.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
+    }
+
 }
