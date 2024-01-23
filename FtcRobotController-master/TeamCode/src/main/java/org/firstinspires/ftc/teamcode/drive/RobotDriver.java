@@ -208,7 +208,7 @@ public class RobotDriver {
 
         //int[] portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        /*int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
         if (loadAlliancePreset() == AllianceLocation.BLUE_NORTH | loadAlliancePreset() == AllianceLocation.BLUE_SOUTH) {
@@ -237,14 +237,13 @@ public class RobotDriver {
 
                 @Override
                 public void onError(int errorCode) {
-                    /*
-                     * This will be called if the camera could not be opened
-                     */
+
                 }
             });
 
             cameraMode = CameraMode.PROP;
         }
+        */
 
         //aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)

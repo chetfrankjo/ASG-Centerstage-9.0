@@ -59,6 +59,13 @@ public class PropDetectionTest extends LinearOpMode
 
         FtcDashboard dash;
         dash = FtcDashboard.getInstance();
+
+        while (!isStarted() && !isStopRequested()) { // TODO: try with no camera, try just !opModeIsActive or just !isStarted
+            telemetry.addData("analysis", pipeline.getAnalysis());
+            telemetry.update();
+        }
+
+
         waitForStart();
 
         while (opModeIsActive())
