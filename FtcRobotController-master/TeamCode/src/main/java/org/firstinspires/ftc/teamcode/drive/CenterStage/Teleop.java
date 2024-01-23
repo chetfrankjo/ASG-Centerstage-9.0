@@ -25,7 +25,7 @@ public class Teleop extends LinearOpMode{
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setClawMode(General.ClawMode.OPEN);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-        driver.setPurpleRelease(true);
+        driver.setPurpleSouthRelease(true);
         driver.resetSlidesEncoder();
         driver.resetFlipperEncoder();
 

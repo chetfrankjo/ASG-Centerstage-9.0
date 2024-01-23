@@ -14,7 +14,7 @@ public class ParkAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotDriver driver = new RobotDriver(hardwareMap, false);
-        driver.setPurpleRelease(true);
+        driver.setPurpleSouthRelease(true);
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.update();
         ElapsedTime timer = new ElapsedTime();

@@ -10,13 +10,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.drive.Constants;
-@Disabled
 @Config
 @TeleOp
 public class flipperTuner extends LinearOpMode {
     public static double target = -0;
     double flipperAngle, flipperI, previousFlipperError;
-    public static double pc, ic, dc, fc;
+    public static double pc, ic, dc, fc, constant;
     long lastLoopTime = System.nanoTime();
     double loopSpeed;
     @Override
@@ -44,7 +43,7 @@ public class flipperTuner extends LinearOpMode {
             loopSpeed = (currentTime - lastLoopTime)/1000000000.0;
             lastLoopTime = currentTime;
 
-            double error = (target- flipperAngle);
+            /*double error = (target- flipperAngle);
             double p = pc * error;
             flipperI +=ic * error * loopSpeed;
             double d = dc * (error- previousFlipperError) / loopSpeed;
@@ -54,14 +53,16 @@ public class flipperTuner extends LinearOpMode {
             } else {
                 power = (p + flipperI + d);
             }
+             */
+            double error = (target- flipperAngle);
 
+            double p = pc*error;
+            double f = fc*Math.sin(Math.toRadians(flipperAngle*constant));
+            double d = dc * (error- previousFlipperError) / loopSpeed;
 
             previousFlipperError = error;
 
-
-
-
-            flipper.setPower(power);
+            flipper.setPower(p + d + f);
 
             telemetry.addData("pos", flipperAngle);
             telemetry.addData("target", target);

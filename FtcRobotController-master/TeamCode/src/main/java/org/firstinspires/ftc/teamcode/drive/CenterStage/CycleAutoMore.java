@@ -1,27 +1,18 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
-import android.util.Size;
-
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.AutoStorage;
-import org.firstinspires.ftc.teamcode.drive.Constants;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Autonomous(group = "a", name = "2+3 - SOUTH ONLY")
 public class CycleAutoMore extends LinearOpMode {
@@ -70,8 +61,8 @@ public class CycleAutoMore extends LinearOpMode {
         driver.resetIMUHeading();
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
-        driver.setPurpleRelease(false);
-        timerOffset = driver.loadTimerPreset();
+        driver.setPurpleSouthRelease(false);
+        timerOffset = driver.loadTimerPreset1();
 
         timer = new ElapsedTime();
         timer.reset();
@@ -226,7 +217,7 @@ public class CycleAutoMore extends LinearOpMode {
 
                         while (timer.time() < 0.3 && opModeIsActive()) {
                             driver.drive(0, 0, 0, false);
-                            driver.setPurpleRelease(true); // release pixel
+                            driver.setPurpleSouthRelease(true); // release pixel
                             driver.update();
                         }
                         timer.reset();

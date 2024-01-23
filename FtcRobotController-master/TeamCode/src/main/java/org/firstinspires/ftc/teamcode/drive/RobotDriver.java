@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
-import android.util.Size;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
@@ -17,20 +15,16 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
-import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.ArrayList;
@@ -42,17 +36,14 @@ import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
 import org.firstinspires.ftc.teamcode.vision.PDP_DualCamera;
 import org.firstinspires.ftc.teamcode.vision.PDP_LeftCam;
-import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
 import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
@@ -471,9 +462,17 @@ public class RobotDriver {
         }
         return location;
     }
-    public double loadTimerPreset() {
+    public double loadTimerPreset1() {
         Reader r = new Reader();
         return Double.parseDouble(r.readFile("timer"));
+    }
+    public double loadTimerPreset2() {
+        Reader r = new Reader();
+        return Double.parseDouble(r.readFile("timer2"));
+    }
+    public double loadTimerPreset3() {
+        Reader r = new Reader();
+        return Double.parseDouble(r.readFile("timer3"));
     }
 
 
@@ -857,7 +856,7 @@ public class RobotDriver {
         launcher.setPosition(0.2);
     }
 
-    public void setPurpleRelease(boolean val) {
+    public void setPurpleSouthRelease(boolean val) {
         if (val) {
             purpleRelease.setPosition(1);
         } else {
