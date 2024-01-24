@@ -6,15 +6,15 @@ import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import java.util.ArrayList;
 
 public class AutoStorage {
-    
+
     public static ArrayList<Trajectory> generateAutoPaths(General.ParkLocation parkLocation, General.SpikePosition spikePosition, General.AllianceLocation allianceLocation) {
         ArrayList<Trajectory> paths = new ArrayList<>();
         switch (allianceLocation) {
             case RED_SOUTH:
                 switch (spikePosition) {
                     case LEFT:
-                        paths.add(new Trajectory(135, 34, 0.5, 12).addPoint(111, 34, 90).addPoint(111, 17, 180).build());
-                        paths.add(new Trajectory(111, 17, 0.6, 13).addPoint(111, 13, 180).addPoint(83, 13, 90).addPoint(83, 108, 0).addPoint(99, 108, -90).addPoint(99, 116, 0).build());
+                        paths.add(new Trajectory(135, 34, 0.5, 12, 0).addPoint(108, 34, 90).addPoint(108, 15, 180).build());
+                        paths.add(new Trajectory(108, 15, 0.6, 13).addPoint(108, 10, 180).addPoint(83, 10, 90).addPoint(83, 108, 0).addPoint(98, 108, -90).addPoint(98, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(110, 115, 0.4, 8, 0).addPoint(110, 104, 180).addPointSpeed(81, 104, 90, 0.3).build());
@@ -28,7 +28,7 @@ public class AutoStorage {
                         break;
                     case CENTER:
                         paths.add(new Trajectory(135, 34, 0.5, 12).addPoint(99, 34, 90).addPoint(99, 30, 180).build());
-                        paths.add(new Trajectory(99, 30, 0.6, 13).addPoint(99, 22, 180).addPoint(83, 22, 90).addPoint(83, 108, 0).addPoint(106, 108, -90).addPoint(106, 116, 0).build());
+                        paths.add(new Trajectory(99, 30, 0.6, 13).addPoint(99, 16, 180).addPoint(83, 16, 90).addPoint(83, 108, 0).addPoint(106, 108, -90).addPoint(106, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(102, 115, 0.4, 8, 0).addPoint(102, 104, 180).addPointSpeed(82, 104, 90, 0.3).build());
@@ -42,7 +42,7 @@ public class AutoStorage {
                         break;
                     case RIGHT:
                         paths.add(new Trajectory(135, 34, 0.5, 12).addPoint(106, 34, 90).addPoint(106, 38.5, 0).build());
-                        paths.add(new Trajectory(106, 38, 0.6, 13).addPoint(106, 32, 0).addPoint(83, 32, 90).addPoint(83, 108, 0).addPoint(105, 108, -90).addPoint(105, 116, 0).build());
+                        paths.add(new Trajectory(106, 38, 0.6, 13).addPoint(106, 22, 180).addPoint(83, 22, 90).addPoint(83, 108, 0).addPoint(109, 108, -90).addPoint(109, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(110, 115, 0.4, 8, 0).addPoint(110, 104, 180).addPointSpeed(78, 104, 90, 0.3).build());
@@ -62,12 +62,12 @@ public class AutoStorage {
                         paths.add(new Trajectory(106, 80, 0.6, 12).addPoint(106, 112, 0).addPoint(98, 112, 90).addPoint(98, 118, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(93, 115, 0.6, 8, 0).addPoint(93, 104, 180).addPointSpeed(82, 104, 90, 0.3).build());
-                                paths.add(new Trajectory(82, 104, 0.6, 20).addPoint(82, 115, 0).build());
+                                paths.add(new Trajectory(93, 115, 0.6, 12, 0).addPoint(93, 104, 180).addPoint(82, 104, 90).build());
+                                paths.add(new Trajectory(82, 104, 0.6, 12).addPoint(82, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(93, 115, 0.6, 8, 0).addPoint(93, 104, 180).addPoint(130, 104, -90).build());
-                                paths.add(new Trajectory(130, 104, 0.6, 20).addPoint(130, 115, 0).build());
+                                paths.add(new Trajectory(93, 115, 0.6, 12, 0).addPoint(93, 104, 180).addPoint(130, 104, -90).build());
+                                paths.add(new Trajectory(130, 104, 0.6, 12).addPoint(130, 115, 0).build());
                                 break;
                         }
                         break;
@@ -76,12 +76,12 @@ public class AutoStorage {
                         paths.add(new Trajectory(97, 95, 0.5, 12).addPoint(106, 95, -90).addPoint(106, 110, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(106, 109, 0.4, 8, 0).addPoint(106, 104, 180).addPointSpeed(82, 104, 90, 0.3).build());
-                                paths.add(new Trajectory(82, 104, 0.4, 20).addPoint(82, 115, 0).build());
+                                paths.add(new Trajectory(106, 115, 0.6, 12, 0).addPoint(106, 104, 180).addPoint(82, 104, 90).build());
+                                paths.add(new Trajectory(82, 104, 0.6, 12).addPoint(82, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(106, 109, 0.4, 8, 0).addPoint(106, 104, 180).addPoint(130, 104, -90).build());
-                                paths.add(new Trajectory(130, 104, 0.4, 10).addPoint(130, 115, 0).build());
+                                paths.add(new Trajectory(106, 115, 0.6, 12, 0).addPoint(106, 104, 180).addPoint(130, 104, -90).build());
+                                paths.add(new Trajectory(130, 104, 0.6, 12).addPoint(130, 115, 0).build());
                                 break;
                         }
                         break;
@@ -90,12 +90,12 @@ public class AutoStorage {
                         paths.add(new Trajectory(102, 103, 0.6, 12).addPoint(102, 110, 0).addPoint(112, 110, -90).addPoint(112, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(110, 115, 0.6, 8, 0).addPoint(110, 110, 180).addPointSpeed(83, 110, 90, 0.3).build());
-                                paths.add(new Trajectory(83, 110, 0.6, 5).addPoint(83, 116, 0).build());
+                                paths.add(new Trajectory(112, 115, 0.6, 12, 0).addPoint(112, 104, 180).addPoint(82, 104, 90).build());
+                                paths.add(new Trajectory(82, 104, 0.6, 12).addPoint(82, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(110, 115, 0.6, 8, 0).addPoint(110, 104, 180).addPoint(130, 104, -90).build());
-                                paths.add(new Trajectory(130, 104, 0.6, 20).addPoint(130, 115, 0).build());
+                                paths.add(new Trajectory(112, 115, 0.6, 12, 0).addPoint(112, 104, 180).addPoint(130, 104, -90).build());
+                                paths.add(new Trajectory(130, 104, 0.6, 12).addPoint(130, 115, 0).build());
                                 break;
                         }
                         break;
@@ -104,8 +104,8 @@ public class AutoStorage {
             case BLUE_SOUTH:
                 switch (spikePosition) {
                     case LEFT:
-                        paths.add(new Trajectory(9, 34, 0.5, 12).addPoint(36, 34, -90).addPoint(36, 38.5, 0).build());
-                        paths.add(new Trajectory(36, 38, 0.6, 13).addPoint(36, 32, 180).addPoint(63, 32, -90).addPoint(63, 108, 0).addPoint(29, 108, 90).addPoint(29, 116, 0).build());
+                        paths.add(new Trajectory(9, 34, 0.5, 12).addPoint(9, 32, 180).addPoint(37, 32, -90).addPoint(37, 38, 0).build());
+                        paths.add(new Trajectory(37, 38, 0.6, 13).addPoint(37, 26, 180).addPoint(63, 26, -90).addPoint(63, 108, 0).addPoint(22, 108, 90).addPoint(22, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(29, 115, 0.4, 8, 0).addPoint(29, 104, 180).addPointSpeed(5, 104, 90, 0.3).build());
@@ -118,8 +118,8 @@ public class AutoStorage {
                         }
                         break;
                     case CENTER:
-                        paths.add(new Trajectory(9, 34, 0.5, 12).addPoint(46, 34, -90).addPoint(46, 30, 180).build());
-                        paths.add(new Trajectory(46, 30, 0.6, 13).addPoint(46, 22, 180).addPoint(63, 22, -90).addPoint(63, 108, 0).addPoint(36, 108, 90).addPoint(36, 116, 0).build());
+                        paths.add(new Trajectory(9, 34, 0.5, 12).addPoint(9, 32, 180).addPoint(48, 32, -90).addPoint(48, 28, 180).build());
+                        paths.add(new Trajectory(48, 30, 0.6, 10).addPoint(48, 20, 180).addPoint(63, 20, -90).addPoint(63, 108, 0).addPoint(30, 108, 90).addPoint(30, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(30, 115, 0.4, 8, 0).addPoint(30, 104, 180).addPointSpeed(5, 104, 90, 0.3).build());
@@ -132,8 +132,8 @@ public class AutoStorage {
                         }
                         break;
                     case RIGHT:
-                        paths.add(new Trajectory(9, 34, 0.5, 12).addPoint(36, 34, -90).addPoint(36, 17, 180).build());
-                        paths.add(new Trajectory(36, 17, 0.6, 13).addPoint(36, 13, 180).addPoint(63, 13, -90).addPoint(63, 108, 0).addPoint(46, 108, 90).addPoint(46, 116, 0).build());
+                        paths.add(new Trajectory(9, 34, 0.5, 12, 0).addPoint(39, 34, -90).addPoint(39, 15, 180).build());
+                        paths.add(new Trajectory(39, 15, 0.6, 13).addPoint(39, 10, 180).addPoint(61, 10, -90).addPoint(61, 108, 0).addPoint(35, 108, 90).addPoint(35, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(35, 115, 0.4, 8, 0).addPoint(35, 104, 180).addPointSpeed(5, 104, 90, 0.3).build());
@@ -154,11 +154,11 @@ public class AutoStorage {
                         paths.add(new Trajectory(40, 105, 0.4, 7).addPoint(29, 105, 90).addPoint(29, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(35, 115, 0.4, 8, 0).addPoint(35, 104, 180).addPointSpeed(10, 104, 90, 0.3).build());
+                                paths.add(new Trajectory(29, 115, 0.4, 8, 0).addPoint(29, 104, 180).addPointSpeed(10, 104, 90, 0.3).build());
                                 paths.add(new Trajectory(10, 104, 0.3, 20).addPoint(10, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(35, 115, 0.4, 8, 0).addPoint(35, 104, 180).addPoint(59, 104, -90).build());
+                                paths.add(new Trajectory(29, 115, 0.4, 8, 0).addPoint(29, 104, 180).addPoint(59, 104, -90).build());
                                 paths.add(new Trajectory(59, 104, 0.3, 20).addPoint(59, 115, 0).build());
                                 break;
                         }
@@ -182,11 +182,11 @@ public class AutoStorage {
                         paths.add(new Trajectory(38, 83, 0.6, 12).addPoint(38, 90, 0).addPoint(43, 90, -90).addPoint(43, 116, 0).build());
                         switch (parkLocation) {
                             case LEFT:
-                                paths.add(new Trajectory(50, 115, 0.4, 8, 0).addPoint(50, 104, 180).addPointSpeed(10, 104, 90, 0.3).build());
+                                paths.add(new Trajectory(43, 115, 0.4, 8, 0).addPoint(43, 104, 180).addPointSpeed(10, 104, 90, 0.3).build());
                                 paths.add(new Trajectory(10, 104, 0.3, 20).addPoint(10, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(50, 115, 0.4, 8, 0).addPoint(50, 104, 180).addPoint(59, 104, -90).build());
+                                paths.add(new Trajectory(43, 115, 0.4, 8, 0).addPoint(43, 104, 180).addPoint(59, 104, -90).build());
                                 paths.add(new Trajectory(59, 104, 0.3, 20).addPoint(59, 115, 0).build());
                                 break;
                         }

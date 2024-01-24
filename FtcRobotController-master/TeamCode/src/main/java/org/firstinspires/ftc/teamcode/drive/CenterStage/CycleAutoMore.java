@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 
+@Disabled
 @Autonomous(group = "a", name = "2+3 - SOUTH ONLY")
 public class CycleAutoMore extends LinearOpMode {
     General.AutoState autoState = General.AutoState.VISION;

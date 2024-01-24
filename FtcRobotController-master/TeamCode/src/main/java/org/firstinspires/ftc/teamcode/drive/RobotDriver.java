@@ -55,7 +55,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     private RevColorSensorV3 colorLeft;
@@ -180,6 +180,7 @@ public class RobotDriver {
         fsr = hardwareMap.analogInput.get("fsr");
 
         purpleRelease = hardwareMap.get(Servo.class, "purple");
+        purpleReleaseNorth = hardwareMap.get(Servo.class, "purpleNorth");
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -703,13 +704,13 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.25) { //(flipperAngle < 180)
+                    if (flipperAngle < 160) { //(flipperAngle < 180)(flipperTimer.time() < 0.25)
                         flipper.setPower(-1.0);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.2) { // flipperAngle > 180
+                    if (flipperAngle > 150) { // flipperAngle > 180    (flipperTimer.time() < 0.2)
                         flipper.setPower(0.7);
                     } else {
                         flipper.setPower(0);
@@ -864,6 +865,14 @@ public class RobotDriver {
         }
     }
 
+    public void setPurpleNorthRelease(boolean val) {
+        if (val) {
+            purpleReleaseNorth.setPosition(0.265);
+        } else {
+            purpleReleaseNorth.setPosition(0.55);
+        }
+    }
+
 
     public void storeAll() {
         storePlane();
@@ -919,7 +928,7 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 1.2);
+        return (fsr.getVoltage() > 0.6);
     }
 
     //1 Set internal transfer servos/motor power

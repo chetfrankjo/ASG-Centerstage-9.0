@@ -69,6 +69,7 @@ public class Auto extends LinearOpMode {
                 break;
             case RED_NORTH:
                 driver.localizer.setEstimatePos(135, 84, 0);
+                driver.setPurpleNorthRelease(false);
                 break;
             case BLUE_SOUTH:
                 driver.localizer.setEstimatePos(9, 34, 0);
@@ -76,6 +77,7 @@ public class Auto extends LinearOpMode {
                 break;
             case BLUE_NORTH:
                 driver.localizer.setEstimatePos(9, 84, 0);
+                driver.setPurpleNorthRelease(false);
                 break;
         }
 
@@ -130,7 +132,7 @@ public class Auto extends LinearOpMode {
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {
                                 driver.setPurpleSouthRelease(true);
                             } else {
-                                //release the other one
+                                driver.setPurpleNorthRelease(true);
                             }
                             // release pixel
                             driver.update();
@@ -178,7 +180,7 @@ public class Auto extends LinearOpMode {
                     if (result) {
                         autoState = General.AutoState.APPROACH_3; // move on to the next state
                     }
-                    if (stateOverrideTimer.time() > 7) { // if the robot stalls, skip to the next state
+                    if (stateOverrideTimer.time() > 9) { // if the robot stalls, skip to the next state
                         autoState = General.AutoState.APPROACH_3;
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
@@ -191,6 +193,7 @@ public class Auto extends LinearOpMode {
                         driver.update();
                     }
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
+                    timer.reset();
                     while (timer.time() < 0.6 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
                         // release pixel

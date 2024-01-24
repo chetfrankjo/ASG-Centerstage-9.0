@@ -160,7 +160,7 @@ public class RobotSetup extends LinearOpMode {
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
-            telemetry.addData("Added Timer - STAGE 2 TIMER (After dropping pixel on spike mark)", timerOffset);
+            telemetry.addData("Added Timer - STAGE 2 TIMER (After dropping pixel on spike mark)", timerOffset2);
             telemetry.addLine("Press START to advance");
             telemetry.update();
             if (gamepad1.dpad_up) {
@@ -190,7 +190,7 @@ public class RobotSetup extends LinearOpMode {
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
-            telemetry.addData("Added Timer - STAGE 3 TIMER (After dropping pixel on backdrop)", timerOffset);
+            telemetry.addData("Added Timer - STAGE 3 TIMER (After dropping pixel on backdrop)", timerOffset3);
             telemetry.addLine("Press START to advance");
             telemetry.update();
             if (gamepad1.dpad_up) {
