@@ -475,6 +475,10 @@ public class RobotDriver {
         Reader r = new Reader();
         return Double.parseDouble(r.readFile("timer3"));
     }
+    public boolean loadParkOnWall() {
+        Reader r = new Reader();
+        return r.readFile("parkspot").equals("wall");
+    }
 
 
     public Pose2d getCurrentPos() {
@@ -867,9 +871,9 @@ public class RobotDriver {
 
     public void setPurpleNorthRelease(boolean val) {
         if (val) {
-            purpleReleaseNorth.setPosition(0.265);
+            purpleReleaseNorth.setPosition(0.4);
         } else {
-            purpleReleaseNorth.setPosition(0.55);
+            purpleReleaseNorth.setPosition(0.1);
         }
     }
 

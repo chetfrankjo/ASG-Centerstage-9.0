@@ -214,6 +214,7 @@ public class Auto extends LinearOpMode {
                         result = driver.runAutoPath(trajectories.get(2).path);
                         if (result) {
                             autoState = General.AutoState.PARK2;
+                            timer.reset();
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
                         if (timer.time() > 1) {
@@ -224,7 +225,16 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case PARK2:
-                    driver.followCurve(trajectories.get(3).path); // do the final parking move
+                    if (driver.loadParkOnWall()) {
+                        if (timer.time() < 0.7) {
+                            driver.drive(0, 0.5, 0, false);
+                        } else {
+                            driver.drive(0, 0, 0, false);
+                            driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);
+                        }
+                    } else {
+                        driver.followCurve(trajectories.get(3).path); // do the final parking move
+                    }
                     break;
             }
         }

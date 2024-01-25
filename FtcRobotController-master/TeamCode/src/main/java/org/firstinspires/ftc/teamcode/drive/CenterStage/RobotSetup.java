@@ -23,7 +23,7 @@ public class RobotSetup extends LinearOpMode {
             "                  |.          .\n" +
             "                   |________|";
 
-    boolean advance = false;
+    boolean advance = false, parkOnWall = false;
     double timerOffset = 0, timerOffset2 = 0, timerOffset3 = 0;
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
@@ -120,6 +120,37 @@ public class RobotSetup extends LinearOpMode {
                 advance=true;
             }
         }
+        advance = false;
+        telemetry.clearAll();
+        if (parkLocation != General.ParkLocation.CENTER) {
+            while (!advance && opModeInInit()) {
+                telemetry.addLine("DPAD UP - Park On Wall\nDPAD DOWN - Park On Line");
+                telemetry.update();
+                if (gamepad1.dpad_up) {
+                    parkOnWall = true;
+                    Logger a = new Logger("parkspot", false);
+                    String l = "wall";
+                    a.addData(l);
+                    a.update();
+                    a.close();
+                    while (gamepad1.dpad_up) {
+                    }
+                    advance = true;
+                }
+                if (gamepad1.dpad_down) {
+                    parkOnWall = false;
+                    Logger a = new Logger("parkspot", false);
+                    String l = "line";
+                    a.addData(l);
+                    a.update();
+                    a.close();
+                    while (gamepad1.dpad_down) {
+                    }
+                    advance = true;
+                }
+            }
+        }
+
 
         advance=false;
         telemetry.clearAll();
@@ -127,9 +158,9 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addData("Added Timer - STAGE 1 TIMER", timerOffset);
             telemetry.addLine("Press START to advance");
             if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                telemetry.addLine("Auto Timings:\nStandard: 7 Seconds\nCycle: None");
+                telemetry.addLine("Auto Timings:\nStandard: 6 Seconds\nCycle: None");
             } else {
-                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: None");
+                telemetry.addLine("Auto Timings:\nStandard: 9 Seconds\nCycle: None");
             }
 
             telemetry.update();
@@ -221,6 +252,7 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addLine("PRESS START TO CONFIRM SETTINGS:\n");
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
+            telemetry.addData("Parking on Wall?", parkOnWall);
             telemetry.addData("Stage 1 Timer", timerOffset);
             telemetry.addData("Stage 2 Timer", timerOffset2);
             telemetry.addData("Stage 3 Timer", timerOffset3);
