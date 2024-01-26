@@ -873,7 +873,7 @@ public class RobotDriver {
         if (val) {
             purpleReleaseNorth.setPosition(0.4);
         } else {
-            purpleReleaseNorth.setPosition(0.1);
+            purpleReleaseNorth.setPosition(0.06);
         }
     }
 

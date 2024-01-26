@@ -96,7 +96,7 @@ public class Auto extends LinearOpMode {
         stateOverrideTimer = new ElapsedTime();
         timer.reset();
 
-        driver.setSlidesDepositTarget(10);
+        driver.setSlidesDepositTarget(8);
 
         while (opModeIsActive()) {
             driver.update();
@@ -126,7 +126,7 @@ public class Auto extends LinearOpMode {
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
                     if (result) { // if the path is complete, move on
                         timer.reset();
-                        while (timer.time() < 0.2 && opModeIsActive()) { // release the purple pixel on the spike mark
+                        while (timer.time() < 0.35 && opModeIsActive()) { // release the purple pixel on the spike mark
                             driver.drive(0, 0, 0, false);
                             //TODO: RELEASE PIXEL WITH SERVO
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {
@@ -151,6 +151,8 @@ public class Auto extends LinearOpMode {
                     }
                     if (stateOverrideTimer.time() > 7) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
+                        driver.setPurpleNorthRelease(true);
+                        driver.setPurpleSouthRelease(true);
                         System.out.println("State Skipped due to timeout");
                         timer.reset();
                         while (timer.time() + 7 < timerOffset2 && opModeIsActive()) { // offset the timer based off of the time already spent in stall
