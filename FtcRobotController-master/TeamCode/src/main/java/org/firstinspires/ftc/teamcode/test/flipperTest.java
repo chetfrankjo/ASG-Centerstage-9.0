@@ -6,23 +6,26 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+
 @Config
 @TeleOp
 public class flipperTest extends LinearOpMode {
     public static double constant = 1;
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotorEx flipper = hardwareMap.get(DcMotorEx.class, "flipper");
-        flipper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flipper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flipper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Servo flipper = hardwareMap.get(Servo.class, "clawLift");
         waitForStart();
 
         while (opModeIsActive()) {
-
-            flipper.setPower(-gamepad1.left_stick_y);
+            if (gamepad1.a) {
+                flipper.setPosition(0.299);
+            }
+            if (gamepad1.b) {
+                flipper.setPosition(0.765);
+            }
             // angle / ticks
-            telemetry.addData("pos", flipper.getCurrentPosition()*constant);
+            telemetry.addData("pos", flipper.getPosition());
             telemetry.update();
 
         }
