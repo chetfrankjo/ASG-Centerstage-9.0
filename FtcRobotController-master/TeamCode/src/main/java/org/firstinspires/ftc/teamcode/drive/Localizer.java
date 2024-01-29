@@ -42,29 +42,37 @@ public class Localizer {
 
     public void update(double loopspeed){
         this.loopspeed=loopspeed;
+
+
         leftChange = encoders[0] - prevencoders[0];
         rightChange = encoders[1] - prevencoders[1];
-
+        rawHorizontalChange = encoders[2] - prevencoders[2];
         //Calculate Angle
         dtheta = (leftChange - rightChange) / (robotEncoderWheelDistance);
         angle = ((angle + dtheta));
         double heading = angle-Math.toRadians(startAngleOffset);
+        //double horizontalChange = rawHorizontalChange - (dtheta*horizontalEncoderTickPerDegreeOffset); TODO: Replace dX=rawHorizontalChange with this horizontal change
+        double dX, dY;
+        if (dtheta == 0) {
+            dX = rawHorizontalChange;
+            dY = ((rightChange + leftChange) / 2);
+        } else {
+            double turnRadius = (robotEncoderWheelDistance/2)*(leftChange+rightChange)/(rightChange-leftChange);
+            double strafeRadius = rawHorizontalChange/dtheta - horizontalEncoderTickPerDegreeOffset;
 
-        //Get the components of the motion
-        rawHorizontalChange = encoders[2] - prevencoders[2];
-        double horizontalChange = rawHorizontalChange - (dtheta*horizontalEncoderTickPerDegreeOffset);
+            //dX = turnRadius*(Math.cos(dtheta)-1) + (strafeRadius*Math.sin(dtheta)); from sample code
+            //dY = turnRadius*Math.sin(dtheta) + strafeRadius*(1-Math.cos(dtheta));
 
-        double p = ((rightChange + leftChange) / 2);
-        double n = horizontalChange;
-        deltaX = (p*Math.sin(heading) + n*Math.cos(heading));
-        deltaY = (p*Math.cos(heading) - n*Math.sin(heading)); // was negative
+            dX = turnRadius*(Math.cos(dtheta)-1.0) + (strafeRadius*Math.sin(dtheta));
+            dY = turnRadius*Math.sin(dtheta) - strafeRadius*(Math.cos(dtheta)-1.0);
+        }
+        deltaX = (dY*Math.sin(heading) + dX*Math.cos(heading));
+        deltaY = (dY*Math.cos(heading) - dX*Math.sin(heading)); // was negative
 
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        //angle = Math.toDegrees(-angle)+startAngleOffset;
         robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, -((y/COUNTS_PER_INCH)+startYOffset), Math.toDegrees(-heading));
-        //robotpos = new Pose2d((x/COUNTS_PER_INCH), (y/COUNTS_PER_INCH), Math.toDegrees(angle));
 
         for (int i=0; i<prevencoders.length; i++) {
             prevencoders[i] = encoders[i];

@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -55,7 +56,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth, clawFlipper;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     private RevColorSensorV3 colorLeft;
@@ -162,6 +163,7 @@ public class RobotDriver {
         clawL = hardwareMap.get(Servo.class, "lclaw");
         clawR = hardwareMap.get(Servo.class, "rclaw");
         clawLift = hardwareMap.get(Servo.class, "clawLift");
+        clawFlipper = hardwareMap.get(Servo.class, "armLift");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
@@ -491,7 +493,8 @@ public class RobotDriver {
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
-        flipperAngle = flipper.getCurrentPosition();
+        //flipperAngle = flipper.getCurrentPosition();
+        flipperAngle = clawFlipper.getPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -672,7 +675,9 @@ public class RobotDriver {
     public boolean getFlipperDisable() {return flipperDisable;}
     public void setFlipperState(FlipperState state) {flipperState = state;}
     public void setFlipperPower(double power) {flipperPower=power;}
-    public double getFLipperPos() {return flipperAngle;}
+    public double getFLipperPos() {
+        return flipperAngle;
+    }
     public FlipperState getFlipperState() {return flipperState;}
     public void updateFlipper() {
         switch (flipperState) {
@@ -704,10 +709,27 @@ public class RobotDriver {
                 }
                 previousFlipperError = error;
                 flipper.setPower(power);
-
                  */
 
-                if (flipperTarget==300) {
+                if (flipperTarget == 300) {
+                    if (flipperAngle < 0.72) {
+                        clawFlipper.setPosition(0.75);
+                    } else {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                            clawFlipper.getController().pwmDisable();
+                        }
+                    }
+                } else {
+                    if (flipperAngle > 0.27) {
+                        clawFlipper.setPosition(0.25);
+                    } else {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                            clawFlipper.getController().pwmDisable();
+                        }
+                    }
+                }
+
+                /*if (flipperTarget==300) {
                     if (flipperAngle < 160) { //(flipperAngle < 180)(flipperTimer.time() < 0.25)
                         flipper.setPower(-1.0);
                     } else {
@@ -721,8 +743,10 @@ public class RobotDriver {
                     }
                 }
 
+                 */
+
             } else {
-                flipper.setPower(0);
+                //flipper.setPower(0);
             }
             previousFlipperTarget = flipperTarget;
         } else {
