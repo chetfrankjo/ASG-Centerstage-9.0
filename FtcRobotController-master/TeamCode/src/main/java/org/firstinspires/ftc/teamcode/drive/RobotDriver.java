@@ -712,16 +712,22 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget == 300) {
-                    if (flipperAngle < 0.72) {
-                        clawFlipper.setPosition(0.75);
+                    if (flipperAngle < 0.74) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                            clawFlipper.getController().pwmEnable();
+                        }
+                        clawFlipper.setPosition(0.765);
                     } else {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
                             clawFlipper.getController().pwmDisable();
                         }
                     }
                 } else {
-                    if (flipperAngle > 0.27) {
-                        clawFlipper.setPosition(0.25);
+                    if (flipperAngle > 0.32) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                            clawFlipper.getController().pwmEnable();
+                        }
+                        clawFlipper.setPosition(0.299);
                     } else {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
                             clawFlipper.getController().pwmDisable();
