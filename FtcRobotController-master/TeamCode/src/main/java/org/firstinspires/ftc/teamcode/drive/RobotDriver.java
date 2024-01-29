@@ -716,7 +716,8 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget == 300) {
-                    if (flipperPosAnalog > 1.78) {
+                    clawFlipper.setPosition(0.765);
+                    /*if (flipperPosAnalog > 1.78) {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
                             //clawFlipper.getController().pwmEnable();
                         }
@@ -726,8 +727,11 @@ public class RobotDriver {
                             //clawFlipper.getController().pwmDisable();
                         }
                     }
+
+                     */
                 } else {
-                    if (flipperPosAnalog < 3.02) {
+                    clawFlipper.setPosition(0.299);
+                    /*if (flipperPosAnalog < 3.02) {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
                             //clawFlipper.getController().pwmEnable();
                         }
@@ -739,6 +743,8 @@ public class RobotDriver {
 
 
                     }
+
+                     */
                 }
 
                 /*if (flipperTarget==300) {
