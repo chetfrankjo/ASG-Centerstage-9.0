@@ -57,7 +57,7 @@ public class RobotDriver {
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
     private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth, clawFlipper;
-    private AnalogInput distLeft, distRight;
+    private AnalogInput distLeft, distRight, flipperEnc;
     private AnalogInput gantryEnc;
     private RevColorSensorV3 colorLeft;
     private ColorSensor colorRight;
@@ -105,13 +105,13 @@ public class RobotDriver {
     boolean openClawForPostDeposit = false;
     boolean isFlipperOut = false;
     private int tagOfInterest = 0;
+    double flipperPosAnalog = 0;
 
     final FtcDashboard dashboard;
 
 
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
-
     private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
@@ -164,6 +164,7 @@ public class RobotDriver {
         clawR = hardwareMap.get(Servo.class, "rclaw");
         clawLift = hardwareMap.get(Servo.class, "clawLift");
         clawFlipper = hardwareMap.get(Servo.class, "armLift");
+        flipperEnc = hardwareMap.get(AnalogInput.class, "armAxon");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
@@ -495,6 +496,7 @@ public class RobotDriver {
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
         //flipperAngle = flipper.getCurrentPosition();
         flipperAngle = clawFlipper.getPosition();
+        flipperPosAnalog = flipperEnc.getVoltage();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -697,6 +699,8 @@ public class RobotDriver {
         }
         if (flipperPower==0) {
             if (!flipperDisable) {
+                //3.02, 1.78
+
                 /*double error = (flipperTarget - flipperAngle);
                 double p = AssemblyConstants.flipperPIDConstants.p * error;
                 flipperI += AssemblyConstants.flipperPIDConstants.i * error * loopSpeed;
@@ -712,34 +716,32 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget == 300) {
-                    if (flipperAngle < 0.74) {
-                        /*if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                    if (flipperPosAnalog > 1.78) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
                             clawFlipper.getController().pwmEnable();
                         }
-
-                         */
                         clawFlipper.setPosition(0.765);
                     } else {
-                        /*if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
                             clawFlipper.getController().pwmDisable();
                         }
-                        
-                         */
+
+
                     }
                 } else {
-                    if (flipperAngle > 0.32) {
-                        /*if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                    if (flipperAngle < 3.02) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
                             clawFlipper.getController().pwmEnable();
                         }
 
-                         */
+
                         clawFlipper.setPosition(0.299);
                     } else {
-                        /*if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
                             clawFlipper.getController().pwmDisable();
                         }
 
-                         */
+
                     }
                 }
 
