@@ -169,7 +169,7 @@ public class RobotDriver {
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
         hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
-
+        clawFlipper.getController().pwmEnable();
         distLeft = hardwareMap.get(AnalogInput.class, "distleft");
         distRight = hardwareMap.get(AnalogInput.class, "distright");
 
