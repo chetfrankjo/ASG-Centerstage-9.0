@@ -14,7 +14,7 @@ public class flipperTest extends LinearOpMode {
     public static double constant = 1;
     @Override
     public void runOpMode() throws InterruptedException {
-        Servo flipper = hardwareMap.get(Servo.class, "clawLift");
+        Servo flipper = hardwareMap.get(Servo.class, "armLift");
         waitForStart();
 
         while (opModeIsActive()) {
