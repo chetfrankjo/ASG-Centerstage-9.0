@@ -23,8 +23,8 @@ public class RobotSetup extends LinearOpMode {
             "                  |.          .\n" +
             "                   |________|";
 
-    boolean advance = false;
-    double timerOffset = 0;
+    boolean advance = false, parkOnWall = false;
+    double timerOffset = 0, timerOffset2 = 0, timerOffset3 = 0;
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
     General.AutoMode autoMode;
@@ -120,16 +120,47 @@ public class RobotSetup extends LinearOpMode {
                 advance=true;
             }
         }
+        advance = false;
+        telemetry.clearAll();
+        if (parkLocation != General.ParkLocation.CENTER) {
+            while (!advance && opModeInInit()) {
+                telemetry.addLine("DPAD UP - Park On Wall\nDPAD DOWN - Park On Line");
+                telemetry.update();
+                if (gamepad1.dpad_up) {
+                    parkOnWall = true;
+                    Logger a = new Logger("parkspot", false);
+                    String l = "wall";
+                    a.addData(l);
+                    a.update();
+                    a.close();
+                    while (gamepad1.dpad_up) {
+                    }
+                    advance = true;
+                }
+                if (gamepad1.dpad_down) {
+                    parkOnWall = false;
+                    Logger a = new Logger("parkspot", false);
+                    String l = "line";
+                    a.addData(l);
+                    a.update();
+                    a.close();
+                    while (gamepad1.dpad_down) {
+                    }
+                    advance = true;
+                }
+            }
+        }
+
 
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
-            telemetry.addData("Added Timer", timerOffset);
+            telemetry.addData("Added Timer - STAGE 1 TIMER", timerOffset);
             telemetry.addLine("Press START to advance");
             if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
-                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: None");
+                telemetry.addLine("Auto Timings:\nStandard: 6 Seconds\nCycle: None");
             } else {
-                telemetry.addLine("Auto Timings:\nStandard: 11 Seconds\nCycle: 28 Seconds");
+                telemetry.addLine("Auto Timings:\nStandard: 9 Seconds\nCycle: None");
             }
 
             telemetry.update();
@@ -150,19 +181,81 @@ public class RobotSetup extends LinearOpMode {
         }
         advance=false;
         telemetry.clearAll();
-
-
         Logger a = new Logger("timer", false);
         String l = String.valueOf(timerOffset);
         a.addData(l);
         a.update();
         a.close();
+
+
+        advance=false;
+        telemetry.clearAll();
+        while (!advance && opModeInInit()) {
+            telemetry.addData("Added Timer - STAGE 2 TIMER (After dropping pixel on spike mark)", timerOffset2);
+            telemetry.addLine("Press START to advance");
+            telemetry.update();
+            if (gamepad1.dpad_up) {
+                timerOffset2+=1;
+                while (gamepad1.dpad_up) {}
+            }
+            if (gamepad1.dpad_down) {
+                if (timerOffset2>0) {
+                    timerOffset2-=1;
+                }
+                while (gamepad1.dpad_down) {}
+            }
+            if (gamepad1.start) {
+                while (gamepad1.start) {}
+                advance=true;
+            }
+        }
+        advance=false;
+        telemetry.clearAll();
+        Logger b = new Logger("timer2", false);
+        String c = String.valueOf(timerOffset2);
+        b.addData(c);
+        b.update();
+        b.close();
+
+
+        advance=false;
+        telemetry.clearAll();
+        while (!advance && opModeInInit()) {
+            telemetry.addData("Added Timer - STAGE 3 TIMER (After dropping pixel on backdrop)", timerOffset3);
+            telemetry.addLine("Press START to advance");
+            telemetry.update();
+            if (gamepad1.dpad_up) {
+                timerOffset3+=1;
+                while (gamepad1.dpad_up) {}
+            }
+            if (gamepad1.dpad_down) {
+                if (timerOffset3>0) {
+                    timerOffset3-=1;
+                }
+                while (gamepad1.dpad_down) {}
+            }
+            if (gamepad1.start) {
+                while (gamepad1.start) {}
+                advance=true;
+            }
+        }
+        advance=false;
+        telemetry.clearAll();
+        Logger d = new Logger("timer3", false);
+        String e = String.valueOf(timerOffset3);
+        d.addData(e);
+        d.update();
+        d.close();
+
         telemetry.clearAll();
         while (opModeInInit()) {
             telemetry.addLine("PRESS START TO CONFIRM SETTINGS:\n");
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
-            telemetry.addData("Timer Offset", timerOffset);
+            telemetry.addData("Parking on Wall?", parkOnWall);
+            telemetry.addData("Stage 1 Timer", timerOffset);
+            telemetry.addData("Stage 2 Timer", timerOffset2);
+            telemetry.addData("Stage 3 Timer", timerOffset3);
             telemetry.update();
         }
 

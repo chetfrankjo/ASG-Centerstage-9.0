@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
-import android.util.Log;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -28,7 +26,7 @@ public class Auto extends LinearOpMode {
     ElapsedTime timer, stateOverrideTimer;
     OpenCvCamera PropCameraR, PropCameraL, cameraOfInterest;
     ThreeZonePropDetectionPipeline propPipeline;
-    double timerOffset;
+    double timerOffset1, timerOffset2, timerOffset3;
     boolean weaponsExtended = false;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,7 +38,9 @@ public class Auto extends LinearOpMode {
         driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
-        timerOffset = driver.loadTimerPreset();
+        timerOffset1 = driver.loadTimerPreset1();
+        timerOffset2 = driver.loadTimerPreset2();
+        timerOffset3 = driver.loadTimerPreset3();
 
         ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH); // Default loaded paths. Are changed later in code once vision estimate is received
         allianceLocation = driver.loadAlliancePreset();
@@ -65,15 +65,19 @@ public class Auto extends LinearOpMode {
 
             case RED_SOUTH:
                 driver.localizer.setEstimatePos(135, 34, 0);
+                driver.setPurpleSouthRelease(false);
                 break;
             case RED_NORTH:
                 driver.localizer.setEstimatePos(135, 84, 0);
+                driver.setPurpleNorthRelease(false);
                 break;
             case BLUE_SOUTH:
                 driver.localizer.setEstimatePos(9, 34, 0);
+                driver.setPurpleSouthRelease(false);
                 break;
             case BLUE_NORTH:
                 driver.localizer.setEstimatePos(9, 84, 0);
+                driver.setPurpleNorthRelease(false);
                 break;
         }
 
@@ -92,7 +96,7 @@ public class Auto extends LinearOpMode {
         stateOverrideTimer = new ElapsedTime();
         timer.reset();
 
-        driver.setSlidesDepositTarget(10);
+        driver.setSlidesDepositTarget(8);
 
         while (opModeIsActive()) {
             driver.update();
@@ -107,7 +111,7 @@ public class Auto extends LinearOpMode {
                 case VISION:
                     timer.reset();
                     driver.setClawMode(General.ClawMode.BOTH);
-                    while (timer.time() < 0.1+timerOffset && opModeIsActive()) { // Grab the final camera estimate
+                    while (timer.time() < 0.1+ timerOffset1 && opModeIsActive()) { // Grab the final camera estimate
                         position = propPipeline.getAnalysis();
                         telemetry.addData("analysis", position);
                         telemetry.update();
@@ -122,19 +126,43 @@ public class Auto extends LinearOpMode {
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
                     if (result) { // if the path is complete, move on
                         timer.reset();
-                        while (timer.time() < 0.2 && opModeIsActive()) { // release the purple pixel on the spike mark
+                        while (timer.time() < 0.35 && opModeIsActive()) { // release the purple pixel on the spike mark
                             driver.drive(0, 0, 0, false);
                             //TODO: RELEASE PIXEL WITH SERVO
-
+                            if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {
+                                driver.setPurpleSouthRelease(true);
+                            } else {
+                                driver.setPurpleNorthRelease(true);
+                            }
                             // release pixel
                             driver.update();
                         }
                         autoState = General.AutoState.APPROACH_2; // advance to the next state
+                        timer.reset();
+                        while (timer.time() < timerOffset2 && opModeIsActive()) { // wait the commanded period of time
+                            telemetry.addLine("Waiting for Preset Timer to expire");
+                            telemetry.addData("Time Remaining", timerOffset2-timer.time());
+                            telemetry.update();
+                            driver.update();
+                            driver.drive(0, 0, 0, false);
+                        }
+                        timer.reset();
                         stateOverrideTimer.reset();
                     }
                     if (stateOverrideTimer.time() > 7) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
+                        driver.setPurpleNorthRelease(true);
+                        driver.setPurpleSouthRelease(true);
                         System.out.println("State Skipped due to timeout");
+                        timer.reset();
+                        while (timer.time() + 7 < timerOffset2 && opModeIsActive()) { // offset the timer based off of the time already spent in stall
+                            telemetry.addLine("Waiting for Preset Timer to expire");
+                            telemetry.addData("Time Remaining", timerOffset2-timer.time());
+                            telemetry.update();
+                            driver.update();
+                            driver.drive(0, 0, 0, false);
+                        }
+                        timer.reset();
                         stateOverrideTimer.reset();
                     }
                     break;
@@ -154,7 +182,7 @@ public class Auto extends LinearOpMode {
                     if (result) {
                         autoState = General.AutoState.APPROACH_3; // move on to the next state
                     }
-                    if (stateOverrideTimer.time() > 7) { // if the robot stalls, skip to the next state
+                    if (stateOverrideTimer.time() > 9) { // if the robot stalls, skip to the next state
                         autoState = General.AutoState.APPROACH_3;
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
@@ -167,10 +195,19 @@ public class Auto extends LinearOpMode {
                         driver.update();
                     }
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
+                    timer.reset();
                     while (timer.time() < 0.6 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
                         // release pixel
                         driver.update();
+                    }
+                    timer.reset();
+                    while (timer.time() < timerOffset3 && opModeIsActive()) { // offset the timer based off of the time already spent in stall
+                        telemetry.addLine("Waiting for Preset Timer to expire");
+                        telemetry.addData("Time Remaining", timerOffset3-timer.time());
+                        telemetry.update();
+                        driver.update();
+                        driver.drive(0, 0, 0, false);
                     }
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
@@ -179,6 +216,7 @@ public class Auto extends LinearOpMode {
                         result = driver.runAutoPath(trajectories.get(2).path);
                         if (result) {
                             autoState = General.AutoState.PARK2;
+                            timer.reset();
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
                         if (timer.time() > 1) {
@@ -189,7 +227,16 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case PARK2:
-                    driver.followCurve(trajectories.get(3).path); // do the final parking move
+                    if (driver.loadParkOnWall()) {
+                        if (timer.time() < 0.7) {
+                            driver.drive(0, 0.5, 0, false);
+                        } else {
+                            driver.drive(0, 0, 0, false);
+                            driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);
+                        }
+                    } else {
+                        driver.followCurve(trajectories.get(3).path); // do the final parking move
+                    }
                     break;
             }
         }

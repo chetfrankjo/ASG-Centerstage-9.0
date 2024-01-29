@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
-import android.util.Size;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
@@ -17,20 +15,17 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
-import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.ArrayList;
@@ -42,17 +37,14 @@ import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
 import org.firstinspires.ftc.teamcode.DataTypes.Point;
 import org.firstinspires.ftc.teamcode.drive.Constants.AssemblyConstants;
 import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.Sensors.ContinousAnalogAxon;
 import org.firstinspires.ftc.teamcode.vision.PDP_DualCamera;
 import org.firstinspires.ftc.teamcode.vision.PDP_LeftCam;
-import org.firstinspires.ftc.teamcode.vision.PropDetectionPipeline_DualZone;
 import org.firstinspires.ftc.teamcode.DataTypes.General.*;
 import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
@@ -64,7 +56,7 @@ public class RobotDriver {
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth, clawFlipper;
     private AnalogInput distLeft, distRight;
     private AnalogInput gantryEnc;
     private RevColorSensorV3 colorLeft;
@@ -171,6 +163,7 @@ public class RobotDriver {
         clawL = hardwareMap.get(Servo.class, "lclaw");
         clawR = hardwareMap.get(Servo.class, "rclaw");
         clawLift = hardwareMap.get(Servo.class, "clawLift");
+        clawFlipper = hardwareMap.get(Servo.class, "armLift");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
@@ -189,6 +182,7 @@ public class RobotDriver {
         fsr = hardwareMap.analogInput.get("fsr");
 
         purpleRelease = hardwareMap.get(Servo.class, "purple");
+        purpleReleaseNorth = hardwareMap.get(Servo.class, "purpleNorth");
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -471,9 +465,21 @@ public class RobotDriver {
         }
         return location;
     }
-    public double loadTimerPreset() {
+    public double loadTimerPreset1() {
         Reader r = new Reader();
         return Double.parseDouble(r.readFile("timer"));
+    }
+    public double loadTimerPreset2() {
+        Reader r = new Reader();
+        return Double.parseDouble(r.readFile("timer2"));
+    }
+    public double loadTimerPreset3() {
+        Reader r = new Reader();
+        return Double.parseDouble(r.readFile("timer3"));
+    }
+    public boolean loadParkOnWall() {
+        Reader r = new Reader();
+        return r.readFile("parkspot").equals("wall");
     }
 
 
@@ -487,7 +493,8 @@ public class RobotDriver {
         encoders[2] = horizontal.getCurrentPosition();
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
-        flipperAngle = flipper.getCurrentPosition();
+        //flipperAngle = flipper.getCurrentPosition();
+        flipperAngle = clawFlipper.getPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -668,7 +675,9 @@ public class RobotDriver {
     public boolean getFlipperDisable() {return flipperDisable;}
     public void setFlipperState(FlipperState state) {flipperState = state;}
     public void setFlipperPower(double power) {flipperPower=power;}
-    public double getFLipperPos() {return flipperAngle;}
+    public double getFLipperPos() {
+        return flipperAngle;
+    }
     public FlipperState getFlipperState() {return flipperState;}
     public void updateFlipper() {
         switch (flipperState) {
@@ -700,25 +709,44 @@ public class RobotDriver {
                 }
                 previousFlipperError = error;
                 flipper.setPower(power);
-
                  */
 
-                if (flipperTarget==300) {
-                    if (flipperTimer.time() < 0.25) { //(flipperAngle < 180)
+                if (flipperTarget == 300) {
+                    if (flipperAngle < 0.72) {
+                        clawFlipper.setPosition(0.75);
+                    } else {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                            clawFlipper.getController().pwmDisable();
+                        }
+                    }
+                } else {
+                    if (flipperAngle > 0.27) {
+                        clawFlipper.setPosition(0.25);
+                    } else {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
+                            clawFlipper.getController().pwmDisable();
+                        }
+                    }
+                }
+
+                /*if (flipperTarget==300) {
+                    if (flipperAngle < 160) { //(flipperAngle < 180)(flipperTimer.time() < 0.25)
                         flipper.setPower(-1.0);
                     } else {
                         flipper.setPower(0);
                     }
                 } else {
-                    if (flipperTimer.time() < 0.2) { // flipperAngle > 180
+                    if (flipperAngle > 150) { // flipperAngle > 180    (flipperTimer.time() < 0.2)
                         flipper.setPower(0.7);
                     } else {
                         flipper.setPower(0);
                     }
                 }
 
+                 */
+
             } else {
-                flipper.setPower(0);
+                //flipper.setPower(0);
             }
             previousFlipperTarget = flipperTarget;
         } else {
@@ -857,11 +885,19 @@ public class RobotDriver {
         launcher.setPosition(0.2);
     }
 
-    public void setPurpleRelease(boolean val) {
+    public void setPurpleSouthRelease(boolean val) {
         if (val) {
             purpleRelease.setPosition(1);
         } else {
             purpleRelease.setPosition(0.72);
+        }
+    }
+
+    public void setPurpleNorthRelease(boolean val) {
+        if (val) {
+            purpleReleaseNorth.setPosition(0.4);
+        } else {
+            purpleReleaseNorth.setPosition(0.06);
         }
     }
 
@@ -920,7 +956,7 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 1.2);
+        return (fsr.getVoltage() > 0.6);
     }
 
     //1 Set internal transfer servos/motor power
