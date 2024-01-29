@@ -725,16 +725,12 @@ public class RobotDriver {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
                             clawFlipper.getController().pwmDisable();
                         }
-
-
                     }
                 } else {
-                    if (flipperAngle < 3.02) {
+                    if (flipperPosAnalog < 3.02) {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
                             clawFlipper.getController().pwmEnable();
                         }
-
-
                         clawFlipper.setPosition(0.299);
                     } else {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
