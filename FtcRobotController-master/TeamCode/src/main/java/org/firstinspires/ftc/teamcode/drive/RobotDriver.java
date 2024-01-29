@@ -713,6 +713,9 @@ public class RobotDriver {
 
                 if (flipperTarget == 300) {
                     if (flipperAngle < 0.72) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                            clawFlipper.getController().pwmEnable();
+                        }
                         clawFlipper.setPosition(0.75);
                     } else {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
@@ -721,6 +724,9 @@ public class RobotDriver {
                     }
                 } else {
                     if (flipperAngle > 0.27) {
+                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
+                            clawFlipper.getController().pwmEnable();
+                        }
                         clawFlipper.setPosition(0.25);
                     } else {
                         if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
