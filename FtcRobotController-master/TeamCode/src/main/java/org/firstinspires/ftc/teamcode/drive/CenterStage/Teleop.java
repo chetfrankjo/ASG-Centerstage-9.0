@@ -27,7 +27,7 @@ public class Teleop extends LinearOpMode{
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.setPurpleSouthRelease(true);
         driver.resetSlidesEncoder();
-        driver.resetFlipperEncoder();
+        //driver.resetFlipperEncoder();
 
         switch (driver.loadAlliancePreset()) {
             case RED_SOUTH:
@@ -112,7 +112,7 @@ public class Teleop extends LinearOpMode{
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
-            driver.setFlipperPower(-gamepad2.left_stick_y/2); // manual flipper
+            //driver.setFlipperPower(-gamepad2.left_stick_y/2); // manual flipper
 
             if (gamepad2.left_trigger > 0.2 && !tl) { // open left claw
                 tl=true;

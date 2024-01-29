@@ -685,9 +685,11 @@ public class RobotDriver {
         switch (flipperState) {
             case STORED:
                 flipperTarget = 0;
+                clawFlipper.setPosition(0.299);
                 break;
             case READY:
                 flipperTarget = 300;
+                clawFlipper.setPosition(0.765);
                 break;
             case IDLE:
 
