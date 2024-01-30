@@ -15,6 +15,12 @@ public class flipperTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Servo flipper = hardwareMap.get(Servo.class, "armLift");
+        DcMotorEx slidesL = hardwareMap.get(DcMotorEx.class, "slidesL");
+        slidesL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slidesL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotorEx slidesR = hardwareMap.get(DcMotorEx.class, "slidesR");
+        slidesR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitForStart();
 
         while (opModeIsActive()) {
@@ -24,6 +30,8 @@ public class flipperTest extends LinearOpMode {
             if (gamepad1.b) {
                 flipper.setPosition(0.765);
             }
+            slidesL.setPower(gamepad1.right_stick_y);
+            slidesR.setPower(gamepad1.right_stick_y);
             // angle / ticks
             telemetry.addData("pos", flipper.getPosition());
             telemetry.update();

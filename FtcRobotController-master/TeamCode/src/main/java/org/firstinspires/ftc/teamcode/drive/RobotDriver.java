@@ -18,10 +18,12 @@ import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -63,6 +65,7 @@ public class RobotDriver {
     private ColorSensor colorRight;
     private AnalogInput fsr;
     //private ContinousAnalogAxon gantyEncoder;
+    ServoImplEx flipperimpl;
     public int[] encoders;
     public Localizer localizer;
     public Pose2d CurrentVelocities = new Pose2d(), PreviousVelocities = new Pose2d();
@@ -173,9 +176,12 @@ public class RobotDriver {
         distLeft = hardwareMap.get(AnalogInput.class, "distleft");
         distRight = hardwareMap.get(AnalogInput.class, "distright");
 
+        flipperimpl = hardwareMap.get(ServoImplEx.class, "armLift");
+        flipperimpl.setPwmEnable();
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
         colorRight = hardwareMap.get(ColorSensor.class, "colorRight");
@@ -680,16 +686,18 @@ public class RobotDriver {
     public double getFLipperPos() {
         return flipperAngle;
     }
+    public double getFlipperPosAnalog() {return flipperPosAnalog;}
     public FlipperState getFlipperState() {return flipperState;}
+    public double getFlipperTarget() {return flipperTarget;}
     public void updateFlipper() {
         switch (flipperState) {
             case STORED:
                 flipperTarget = 0;
-                clawFlipper.setPosition(0.299);
+                //clawFlipper.setPosition(0.299);
                 break;
             case READY:
                 flipperTarget = 300;
-                clawFlipper.setPosition(0.765);
+                //clawFlipper.setPosition(0.765);
                 break;
             case IDLE:
 
@@ -718,35 +726,35 @@ public class RobotDriver {
                  */
 
                 if (flipperTarget == 300) {
-                    clawFlipper.setPosition(0.765);
-                    /*if (flipperPosAnalog > 1.78) {
-                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
-                            //clawFlipper.getController().pwmEnable();
+                    //clawFlipper.setPosition(0.765);
+                    if (flipperPosAnalog > 1.38) {
+                        if (!flipperimpl.isPwmEnabled()) {
+                            flipperimpl.setPwmEnable();
                         }
                         clawFlipper.setPosition(0.765);
                     } else {
-                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
-                            //clawFlipper.getController().pwmDisable();
+                        if (flipperimpl.isPwmEnabled()) {
+                            flipperimpl.setPwmDisable();
                         }
                     }
 
-                     */
-                } else {
-                    clawFlipper.setPosition(0.299);
-                    /*if (flipperPosAnalog < 3.02) {
-                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.DISABLED) {
-                            //clawFlipper.getController().pwmEnable();
+
+                } else if (flipperState != FlipperState.IDLE){
+                    //clawFlipper.setPosition(0.299);
+                    if (flipperPosAnalog < 1.92) {
+                        if (!flipperimpl.isPwmEnabled()) {
+                            flipperimpl.setPwmEnable();
                         }
                         clawFlipper.setPosition(0.299);
                     } else {
-                        if (clawFlipper.getController().getPwmStatus() == ServoController.PwmStatus.ENABLED) {
-                            //clawFlipper.getController().pwmDisable();
+                        if (flipperimpl.isPwmEnabled()) {
+                            flipperimpl.setPwmDisable();
                         }
 
 
                     }
 
-                     */
+
                 }
 
                 /*if (flipperTarget==300) {
@@ -770,7 +778,8 @@ public class RobotDriver {
             }
             previousFlipperTarget = flipperTarget;
         } else {
-            flipper.setPower(-flipperPower);
+            clawFlipper.setPosition(clawFlipper.getPosition()+flipperPower/100);
+            //flipper.setPower(-flipperPower);
             //flipperTarget=flipperAngle;
             /*if (flipperPower < 0) {
                 flipperTarget = 0;
@@ -917,7 +926,7 @@ public class RobotDriver {
         if (val) {
             purpleReleaseNorth.setPosition(0.4);
         } else {
-            purpleReleaseNorth.setPosition(0.06);
+            purpleReleaseNorth.setPosition(0.05);
         }
     }
 

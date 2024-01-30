@@ -112,7 +112,7 @@ public class Teleop extends LinearOpMode{
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
-            //driver.setFlipperPower(-gamepad2.left_stick_y/2); // manual flipper
+            driver.setFlipperPower(-gamepad2.left_stick_y); // manual flipper
 
             if (gamepad2.left_trigger > 0.2 && !tl) { // open left claw
                 tl=true;
@@ -531,8 +531,11 @@ public class Teleop extends LinearOpMode{
             if (gamepad1.left_trigger <= 0.7) {
                 hasTouchedBoard = false;
             }
+            telemetry.addData("flipper pos", driver.getFlipperPosAnalog());
+            telemetry.addData("flipper state", driver.getFlipperState());
+            telemetry.addData("flipper target", driver.getFlipperTarget());
             telemetry.addData("current pos", driver.getCurrentPos().toString());
-            telemetry.addData("flipper pos", driver.getFLipperPos());
+            //telemetry.addData("flipper pos", driver.getFLipperPos());
             telemetry.addData("claw lift pos", driver.getClawLiftPos());
             telemetry.addData("weapons state", driver.getWeaponsState());
             telemetry.addData("Claw State", driver.getClawMode().toString());
