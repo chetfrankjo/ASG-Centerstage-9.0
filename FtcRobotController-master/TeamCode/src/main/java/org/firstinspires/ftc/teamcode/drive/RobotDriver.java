@@ -14,6 +14,7 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -53,16 +54,17 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Config
 public class RobotDriver {
 
-    private DcMotorEx fl, bl, fr, br, verticalLeft, verticalRight, horizontal, slidesL, slidesR, intake, leftSlidesEnc, flipper;
+    private DcMotorEx fl, bl, fr, br, verticalLeft, verticalRight, horizontal, slidesL, slidesR, intake, leftSlidesEnc;
     private List<DcMotorEx> driveMotors, odometryEncoders, slides;
     private IMU imu;
     private VoltageSensor batterylevel;
     private CRServoImplEx gantry;
-    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth, clawFlipper;
-    private AnalogInput distLeft, distRight, flipperEnc;
+    private Servo plunger, clawL, clawR, launcher, hangReleaseLeft, hangReleaseRight, clawLift, intakeLift, purpleRelease, purpleReleaseNorth;
+    CRServo clawFlipper;
+    private AnalogInput flipperEnc;
     private AnalogInput gantryEnc;
-    private RevColorSensorV3 colorLeft;
-    private ColorSensor colorRight;
+    private ColorSensor colorLeft;
+    private RevColorSensorV3 colorRight;
     private AnalogInput fsr;
     //private ContinousAnalogAxon gantyEncoder;
     ServoImplEx flipperimpl;
@@ -111,8 +113,8 @@ public class RobotDriver {
     double flipperPosAnalog = 0;
 
     final FtcDashboard dashboard;
-
-
+    double flipperAccelPower = 0;
+    FlipperState previousFlipperState = FlipperState.IDLE;
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
     private boolean invertClaw = false, invertOtherClaw = false;
@@ -159,32 +161,28 @@ public class RobotDriver {
         slides = Arrays.asList(slidesL, slidesR);
         leftSlidesEnc = hardwareMap.get(DcMotorEx.class, "bl");
 
-        flipper = hardwareMap.get(DcMotorEx.class, "flipper");
-        flipper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flipper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         clawL = hardwareMap.get(Servo.class, "lclaw");
         clawR = hardwareMap.get(Servo.class, "rclaw");
         clawLift = hardwareMap.get(Servo.class, "clawLift");
-        clawFlipper = hardwareMap.get(Servo.class, "armLift");
+        clawFlipper = hardwareMap.get(CRServo.class, "armLift");
         flipperEnc = hardwareMap.get(AnalogInput.class, "armAxon");
         launcher = hardwareMap.get(Servo.class, "launcher");
         hangReleaseLeft = hardwareMap.get(Servo.class, "hangReleaseLeft");
         hangReleaseRight = hardwareMap.get(Servo.class, "hangReleaseRight");
         hangReleaseServos = new Servo[] {hangReleaseLeft, hangReleaseRight};
-        clawFlipper.getController().pwmEnable();
-        distLeft = hardwareMap.get(AnalogInput.class, "distleft");
-        distRight = hardwareMap.get(AnalogInput.class, "distright");
+        //clawFlipper.getController().pwmEnable();
 
-        flipperimpl = hardwareMap.get(ServoImplEx.class, "armLift");
-        flipperimpl.setPwmEnable();
+        //flipperimpl = hardwareMap.get(ServoImplEx.class, "armLift");
+        //flipperimpl.setPwmEnable();
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
-        colorRight = hardwareMap.get(ColorSensor.class, "colorRight");
+        colorLeft = hardwareMap.get(ColorSensor.class, "colorLeft");
+        colorRight = hardwareMap.get(RevColorSensorV3.class, "colorRight");
 
         fsr = hardwareMap.analogInput.get("fsr");
 
@@ -501,8 +499,8 @@ public class RobotDriver {
         encoders[1] = -verticalRight.getCurrentPosition();
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
         //flipperAngle = flipper.getCurrentPosition();
-        flipperAngle = clawFlipper.getPosition();
-        flipperPosAnalog = flipperEnc.getVoltage();
+        flipperAngle = 0;
+        flipperPosAnalog = flipperEnc.getVoltage()/3.3*360-202;
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -692,16 +690,21 @@ public class RobotDriver {
     public void updateFlipper() {
         switch (flipperState) {
             case STORED:
-                flipperTarget = 0;
+                //flipperTarget = 0;
+                flipperTarget = 60;
                 //clawFlipper.setPosition(0.299);
                 break;
             case READY:
-                flipperTarget = 300;
+                flipperTarget = -60;
+                //flipperTarget = 300;
                 //clawFlipper.setPosition(0.765);
                 break;
             case IDLE:
 
                 break;
+        }
+        if (flipperState != previousFlipperState) {
+            flipperAccelPower = 0;
         }
         if (previousFlipperTarget != flipperTarget) {
             // you have changed states
@@ -710,6 +713,27 @@ public class RobotDriver {
         if (flipperPower==0) {
             if (!flipperDisable) {
                 //3.02, 1.78
+
+
+                double error = (flipperTarget- flipperPosAnalog);
+                double p = AssemblyConstants.flipperPIDConstants.p*error;
+                double f = AssemblyConstants.flipperPIDConstants.f*Math.sin(Math.toRadians(flipperPosAnalog));
+                double d = AssemblyConstants.flipperPIDConstants.d * (error- previousFlipperError) / loopSpeed;
+
+                previousFlipperError = error;
+
+
+                if (flipperTarget == 60 && flipperPosAnalog > 55) {
+                    clawFlipper.setPower(0);
+                } else if (flipperTarget == -60 && flipperPosAnalog < -55){
+                    clawFlipper.setPower(0);
+                } else {
+                    clawFlipper.setPower(p+d+f);
+                }
+
+
+                //clawFlipper.setPower(p+d+f);
+
 
                 /*double error = (flipperTarget - flipperAngle);
                 double p = AssemblyConstants.flipperPIDConstants.p * error;
@@ -724,38 +748,77 @@ public class RobotDriver {
                 previousFlipperError = error;
                 flipper.setPower(power);
                  */
-
-                if (flipperTarget == 300) {
+//2.5, 1.1
+                /*if (flipperTarget == 300) {
                     //clawFlipper.setPosition(0.765);
-                    if (flipperPosAnalog > 1.38) {
-                        if (!flipperimpl.isPwmEnabled()) {
-                            flipperimpl.setPwmEnable();
+                    if (flipperPosAnalog > 2.1) {
+                        if (flipperPosAnalog > 2.2) {
+                            flipperAccelPower += 0.04;
+                            if (flipperAccelPower > 0.4) {
+                                clawFlipper.setPower(0.4);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
+                        } else {
+                            flipperAccelPower += 0.01;
+                            if (flipperAccelPower > 0.6) {
+                                clawFlipper.setPower(0.6);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
                         }
-                        clawFlipper.setPosition(0.765);
                     } else {
-                        if (flipperimpl.isPwmEnabled()) {
-                            flipperimpl.setPwmDisable();
+                        if (flipperPosAnalog < 1.3) {
+                            clawFlipper.setPower(0);
+                        } else {
+                            flipperAccelPower -= 0.17;
+                            if (flipperAccelPower < 0) {
+                                clawFlipper.setPower(0);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
+                            //clawFlipper.setPower(0);
                         }
                     }
-
-
-                } else if (flipperState != FlipperState.IDLE){
+                } else if (flipperState != FlipperState.IDLE) {
                     //clawFlipper.setPosition(0.299);
-                    if (flipperPosAnalog < 1.92) {
-                        if (!flipperimpl.isPwmEnabled()) {
-                            flipperimpl.setPwmEnable();
+                    if (flipperPosAnalog < 1.7) {
+                        if (flipperPosAnalog < 1.5) {
+                            flipperAccelPower -= 0.04;
+                            if (flipperAccelPower < -0.4) {
+                                clawFlipper.setPower(-0.4);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
+                        } else {
+                            flipperAccelPower -= 0.01;
+                            if (flipperAccelPower < -0.7) {
+                                clawFlipper.setPower(-0.7);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
                         }
-                        clawFlipper.setPosition(0.299);
                     } else {
-                        if (flipperimpl.isPwmEnabled()) {
-                            flipperimpl.setPwmDisable();
+                        if (flipperPosAnalog > 2.1) {
+                            clawFlipper.setPower(0);
+                        } else {
+
+                            flipperAccelPower += 0.15;
+                            if (flipperAccelPower > 0) {
+                                clawFlipper.setPower(0);
+                            } else {
+                                clawFlipper.setPower(flipperAccelPower);
+                            }
                         }
-
-
                     }
-
-
+                } else {
+                    clawFlipper.setPower(0);
                 }
+
+                 */
+
+
+
 
                 /*if (flipperTarget==300) {
                     if (flipperAngle < 160) { //(flipperAngle < 180)(flipperTimer.time() < 0.25)
@@ -778,7 +841,8 @@ public class RobotDriver {
             }
             previousFlipperTarget = flipperTarget;
         } else {
-            clawFlipper.setPosition(clawFlipper.getPosition()+flipperPower/100);
+            //clawFlipper.setPosition(clawFlipper.getPosition()+flipperPower/100);
+            clawFlipper.setPower(flipperPower);
             //flipper.setPower(-flipperPower);
             //flipperTarget=flipperAngle;
             /*if (flipperPower < 0) {
@@ -789,12 +853,13 @@ public class RobotDriver {
 
              */
             flipperState = FlipperState.IDLE;
+            flipperTarget = flipperPosAnalog;
         }
-
+        previousFlipperState = flipperState;
     }
     public void resetFlipperEncoder() {
-        flipper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flipper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //flipper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //flipper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 
@@ -840,11 +905,11 @@ public class RobotDriver {
         }
         if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
-            clawLift.setPosition(0.22);
+            clawLift.setPosition(0.27); //0.22
         }
         if (clawTimer.time()>0.05 && invertOtherClaw) {
             invertOtherClaw = false;
-            clawLift.setPosition(0.7875);
+            clawLift.setPosition(0.7975);
         }
 
     }
@@ -985,7 +1050,7 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 0.6);
+        return (fsr.getVoltage() > 0.8);
     }
 
     //1 Set internal transfer servos/motor power

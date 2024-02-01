@@ -20,7 +20,7 @@ public class Teleop extends LinearOpMode{
     int leftColorLoops = 0, rightColorLoops = 0;
     @Override
     public void runOpMode() throws InterruptedException {
-
+        //TODO: do not deposit until driven away from backdrop
         RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setClawMode(General.ClawMode.OPEN);
@@ -531,6 +531,7 @@ public class Teleop extends LinearOpMode{
             if (gamepad1.left_trigger <= 0.7) {
                 hasTouchedBoard = false;
             }
+            telemetry.addData("fsr pressed", driver.getFSRPressed());
             telemetry.addData("flipper pos", driver.getFlipperPosAnalog());
             telemetry.addData("flipper state", driver.getFlipperState());
             telemetry.addData("flipper target", driver.getFlipperTarget());

@@ -27,7 +27,7 @@ public class RobotDriverTest extends LinearOpMode {
         //driver.setv4barZeroPower(FLOAT);
         driver.resetFlipperEncoder();
         driver.resetSlidesEncoder();
-        driver.localizer.setEstimatePos(0, 0, 0);
+        driver.localizer.setEstimatePos(135, 34, 0);
         Pose2d currentPos;
         driver.setLocalizationMode(General.LocalMode.ODOMETRY);
         driver.resetIMUHeading();
@@ -75,6 +75,7 @@ public class RobotDriverTest extends LinearOpMode {
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+            telemetry.addData("flipper angle", driver.getFlipperPosAnalog());
             telemetry.addData("left has pixel?", driver.getLeftHasPixel());
             telemetry.addData("right has pixel?", driver.getRightHasPixel());
             telemetry.addData("current", driver.getIntakeCurrent());

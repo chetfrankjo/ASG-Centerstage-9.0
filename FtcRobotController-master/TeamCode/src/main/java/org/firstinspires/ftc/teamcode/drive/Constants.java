@@ -15,12 +15,12 @@ public class Constants {
 
 
     public static class AssemblyConstants {
-        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.23, 0.004, 0, 0);
+        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.35, 0.05, 0.02, -0.035);
         //public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.007, 0, 0.0005, -0.09);
-        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.005, 0, 0, -0.14);
+        public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(-0.0035, 0, -0.00005, 0.13);
         public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
 
-        public static final double slideTickToInch = 104.54545454545454545454545454545;
+        public static final double slideTickToInch = 75;
         public static final double gantryAngleToInch = 0.00;
         public static final double flipperTickToAngle = 0;
 

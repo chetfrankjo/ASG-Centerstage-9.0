@@ -60,19 +60,19 @@ public class Localizer {
             double turnRadius = (robotEncoderWheelDistance/2)*(leftChange+rightChange)/(rightChange-leftChange);
             double strafeRadius = rawHorizontalChange/dtheta - horizontalEncoderTickPerDegreeOffset;
 
-            //dX = turnRadius*(Math.cos(dtheta)-1) + (strafeRadius*Math.sin(dtheta)); from sample code
+            //dX = turnRadius*(Math.cos(dtheta)-1) + (strafeRadius*Math.sin(dtheta)); //from sample code
             //dY = turnRadius*Math.sin(dtheta) + strafeRadius*(1-Math.cos(dtheta));
 
             dX = turnRadius*(Math.cos(dtheta)-1.0) + (strafeRadius*Math.sin(dtheta));
             dY = turnRadius*Math.sin(dtheta) - strafeRadius*(Math.cos(dtheta)-1.0);
         }
-        deltaX = (dY*Math.sin(heading) + dX*Math.cos(heading));
-        deltaY = (dY*Math.cos(heading) - dX*Math.sin(heading)); // was negative
+        deltaX = (dY*Math.sin(heading) - dX*Math.cos(heading));
+        deltaY = (dY*Math.cos(heading) + dX*Math.sin(heading)); // was negative
 
         //Calculate and update the position values
         x = x + deltaX;
         y = y + deltaY;
-        robotpos = new Pose2d((x/COUNTS_PER_INCH)+startXOffset, -((y/COUNTS_PER_INCH)+startYOffset), Math.toDegrees(-heading));
+        robotpos = new Pose2d((-x/COUNTS_PER_INCH)+startXOffset, ((y/COUNTS_PER_INCH)-startYOffset), Math.toDegrees(-heading));
 
         for (int i=0; i<prevencoders.length; i++) {
             prevencoders[i] = encoders[i];

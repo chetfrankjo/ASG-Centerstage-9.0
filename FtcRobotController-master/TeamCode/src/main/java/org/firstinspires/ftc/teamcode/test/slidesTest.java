@@ -7,12 +7,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 @Disabled
 @Config
 @TeleOp
 public class slidesTest extends LinearOpMode {
-    public static double cons = 104.54545454545454545454545454545;
+    public static double cons = 75;
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotorEx sl = hardwareMap.get(DcMotorEx.class, "slidesL");
