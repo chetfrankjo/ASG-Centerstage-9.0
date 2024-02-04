@@ -96,7 +96,7 @@ public class Auto extends LinearOpMode {
         stateOverrideTimer = new ElapsedTime();
         timer.reset();
 
-        driver.setSlidesDepositTarget(8);
+        driver.setSlidesDepositTarget(9);
 
         while (opModeIsActive()) {
             driver.update();
@@ -124,15 +124,22 @@ public class Auto extends LinearOpMode {
                     break;
                 case PURPLE_APPROACH:
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
+                    if (driver.getIntakePos() < 20) {
+                        driver.setIntakePower(-0.2);
+                    } else {
+                        driver.setIntakePower(0);
+                    }
                     if (result) { // if the path is complete, move on
                         timer.reset();
                         while (timer.time() < 0.35 && opModeIsActive()) { // release the purple pixel on the spike mark
                             driver.drive(0, 0, 0, false);
                             //TODO: RELEASE PIXEL WITH SERVO
+
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {
                                 driver.setPurpleSouthRelease(true);
                             } else {
                                 driver.setPurpleNorthRelease(true);
+
                             }
                             // release pixel
                             driver.update();
@@ -191,12 +198,12 @@ public class Auto extends LinearOpMode {
                 case APPROACH_3:
                     timer.reset();
                     while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) { // drive into the backdrop until the FSR is pressed
-                        driver.drive(0, 0.2, 0, false);
+                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/8, false);
                         driver.update();
                     }
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
                     timer.reset();
-                    while (timer.time() < 0.6 && opModeIsActive()) {
+                    while (timer.time() < 0.5 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
                         // release pixel
                         driver.update();
@@ -219,16 +226,16 @@ public class Auto extends LinearOpMode {
                             timer.reset();
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
-                        if (timer.time() > 1) {
+                        if (timer.time() > 0.8) {
                             driver.drive(0,0,0,false);
                         } else {
-                            driver.drive(0, -0.2, 0, false);
+                            driver.drive(0, -0.3, 0, false);
                         }
                     }
                     break;
                 case PARK2:
                     if (driver.loadParkOnWall()) {
-                        if (timer.time() < 0.7) {
+                        if (timer.time() < 0.6) {
                             driver.drive(0, 0.5, 0, false);
                         } else {
                             driver.drive(0, 0, 0, false);

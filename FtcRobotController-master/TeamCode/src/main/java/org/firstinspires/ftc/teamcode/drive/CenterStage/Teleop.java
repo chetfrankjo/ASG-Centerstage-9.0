@@ -26,6 +26,7 @@ public class Teleop extends LinearOpMode{
         driver.setClawMode(General.ClawMode.OPEN);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.setPurpleSouthRelease(true);
+        driver.setPurpleNorthRelease(true);
         driver.resetSlidesEncoder();
         //driver.resetFlipperEncoder();
 
@@ -112,7 +113,11 @@ public class Teleop extends LinearOpMode{
             driver.update();
 
             driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
-            driver.setFlipperPower(-gamepad2.left_stick_y); // manual flipper
+            if (gamepad2.left_stick_y > 0.1 || gamepad2.left_stick_y < -0.1) {
+                driver.setFlipperPower(-gamepad2.left_stick_y); // manual flipper
+            } else {
+                driver.setFlipperPower(0);
+            }
 
             if (gamepad2.left_trigger > 0.2 && !tl) { // open left claw
                 tl=true;
@@ -243,7 +248,7 @@ public class Teleop extends LinearOpMode{
                 intakeWhileExtendingTimer.reset();
             }
             if (intakingWhileExtending && intakeWhileExtendingTimer.time()< 0.5) { // Intake slightly while extending so pixels dont get knocked out
-                if (intakeWhileExtendingTimer.time()>0.1&&intakeWhileExtendingTimer.time()<0.2) {
+                if (intakeWhileExtendingTimer.time()>0.05&&intakeWhileExtendingTimer.time()<0.12) {
                     driver.setWeaponsState(General.WeaponsState.EXTEND);
                 }
                 driver.setIntakePower(0.5);
@@ -425,6 +430,7 @@ public class Teleop extends LinearOpMode{
 
             if (gamepad1.back) {
                 driver.resetSlidesEncoder();
+                driver.setSlidesTarget(0);
             }
             /*if (gamepad2.back) {
                 if (driver.getFlipperDisable()) {
@@ -505,27 +511,27 @@ public class Teleop extends LinearOpMode{
                     hanging = false;
                 }
             } else if (gamepad1.dpad_down) {
-                driver.drive(gamepad1.left_stick_x/2, -0.5, gamepad1.right_stick_x, false);
+                driver.drive(gamepad1.left_stick_x/2+gamepad2.left_stick_x, -0.5, gamepad1.right_stick_x, false);
                 hangtime.reset();
                 hanging = true;
             } else if (gamepad1.right_trigger > 0.7){
                 if (intakeFront) {
-                    driver.drive(-(gamepad1.left_stick_x / 3), gamepad1.left_stick_y / 3, gamepad1.right_stick_x / 3, superMegaDrive);
+                    driver.drive(-(gamepad1.left_stick_x / 3)+gamepad2.left_stick_x, gamepad1.left_stick_y / 3, gamepad1.right_stick_x / 3, superMegaDrive);
                 } else {
-                    driver.drive((gamepad1.left_stick_x / 3), -gamepad1.left_stick_y / 3, gamepad1.right_stick_x / 3, superMegaDrive);
+                    driver.drive((gamepad1.left_stick_x / 3)+gamepad2.left_stick_x, -gamepad1.left_stick_y / 3, gamepad1.right_stick_x / 3, superMegaDrive);
                 }
             } else if (gamepad1.left_trigger > 0.7 && allowAutoDeposit) {
                 if (!driver.getFSRPressed() && !hasTouchedBoard) {
-                    driver.drive(gamepad1.left_stick_x / 2, 0.3, gamepad1.right_stick_x, false);
+                    driver.drive(gamepad1.left_stick_x / 2 +gamepad2.left_stick_x, 0.3, gamepad1.right_stick_x, false);
                 } else {
                     hasTouchedBoard = true;
-                    driver.drive(gamepad1.left_stick_x / 2, -0.3, gamepad1.right_stick_x, false);
+                    driver.drive(gamepad1.left_stick_x / 2 +gamepad2.left_stick_x, -0.3, gamepad1.right_stick_x, false);
                 }
             } else {
                 if (intakeFront) {
-                    driver.drive(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
+                    driver.drive(-gamepad1.left_stick_x+gamepad2.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
                 } else {
-                    driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
+                    driver.drive(gamepad1.left_stick_x+gamepad2.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, superMegaDrive);
                 }
             }
             if (gamepad1.left_trigger <= 0.7) {

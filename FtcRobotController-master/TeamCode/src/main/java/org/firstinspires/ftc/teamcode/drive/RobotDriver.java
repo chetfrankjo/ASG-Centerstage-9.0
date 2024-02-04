@@ -111,7 +111,7 @@ public class RobotDriver {
     boolean isFlipperOut = false;
     private int tagOfInterest = 0;
     double flipperPosAnalog = 0;
-
+    Pose2d depositPos;
     final FtcDashboard dashboard;
     double flipperAccelPower = 0;
     FlipperState previousFlipperState = FlipperState.IDLE;
@@ -119,6 +119,8 @@ public class RobotDriver {
     private VisionPortal visionPortal;
     private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
+    boolean runningRawFlipper = false;
+    double intakePos = 0;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -177,6 +179,7 @@ public class RobotDriver {
         //flipperimpl = hardwareMap.get(ServoImplEx.class, "armLift");
         //flipperimpl.setPwmEnable();
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -373,6 +376,7 @@ public class RobotDriver {
                 intakeMode = IntakeMode.LOCK;
                 break;
             case DEPOSIT: // release claw, flip thing back, slides down
+                depositPos = currentPos;
                 clawMode = ClawMode.OPEN;
                 depositTimer.reset();
                 waitingForDepsoit = true;
@@ -418,14 +422,16 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (depositTimer.time()>0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
-                    setClawLiftPos(false);
-                }
-                if (depositTimer.time() > 0.4 && waitingForDepsoit) { // waits for pixels to drop before folding up
-                    waitingForDepsoit=false;
-                    weaponsState = WeaponsState.HOLDING;
-                    clawMode = ClawMode.OPEN;
-                    openClawForPostDeposit = true;
+                if (waitingForDepsoit && (!isInRange(currentPos.getX(), depositPos.getX()-2, depositPos.getX()+2) || !isInRange(currentPos.getY(), depositPos.getY()-2, depositPos.getY()+2) || !isInRange(currentPos.getHeading(), depositPos.getHeading()-20, depositPos.getHeading()+20))) {
+                    if (depositTimer.time() > 0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
+                        setClawLiftPos(false);
+                    }
+                    if (depositTimer.time() > 0.4 && waitingForDepsoit) { // waits for pixels to drop before folding up
+                        waitingForDepsoit = false;
+                        weaponsState = WeaponsState.HOLDING;
+                        clawMode = ClawMode.OPEN;
+                        openClawForPostDeposit = true;
+                    }
                 }
                 break;
                 //do nothing, as all parameters are now set
@@ -501,6 +507,7 @@ public class RobotDriver {
         //flipperAngle = flipper.getCurrentPosition();
         flipperAngle = 0;
         flipperPosAnalog = flipperEnc.getVoltage()/3.3*360-202;
+        intakePos = intake.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
 
@@ -676,6 +683,7 @@ public class RobotDriver {
     }
     public IntakeMode getIntakeMode() {return intakeMode;}
     public double getIntakeCurrent() {return intake.getCurrent(CurrentUnit.AMPS);}
+    public double getIntakePos() {return intakePos;}
 
     public void setFlipperDisable(boolean b) {flipperDisable=b;}
     public boolean getFlipperDisable() {return flipperDisable;}
@@ -692,10 +700,12 @@ public class RobotDriver {
             case STORED:
                 //flipperTarget = 0;
                 flipperTarget = 60;
+                runningRawFlipper = false;
                 //clawFlipper.setPosition(0.299);
                 break;
             case READY:
                 flipperTarget = -60;
+                runningRawFlipper = false;
                 //flipperTarget = 300;
                 //clawFlipper.setPosition(0.765);
                 break;
@@ -705,6 +715,7 @@ public class RobotDriver {
         }
         if (flipperState != previousFlipperState) {
             flipperAccelPower = 0;
+           // runningRawFlipper = false;
         }
         if (previousFlipperTarget != flipperTarget) {
             // you have changed states
@@ -714,21 +725,24 @@ public class RobotDriver {
             if (!flipperDisable) {
                 //3.02, 1.78
 
+                if (!runningRawFlipper) {
+                    double error = (flipperTarget - flipperPosAnalog);
+                    double p = AssemblyConstants.flipperPIDConstants.p * error;
+                    double f = AssemblyConstants.flipperPIDConstants.f * Math.sin(Math.toRadians(flipperPosAnalog));
+                    double d = AssemblyConstants.flipperPIDConstants.d * (error - previousFlipperError) / loopSpeed;
 
-                double error = (flipperTarget- flipperPosAnalog);
-                double p = AssemblyConstants.flipperPIDConstants.p*error;
-                double f = AssemblyConstants.flipperPIDConstants.f*Math.sin(Math.toRadians(flipperPosAnalog));
-                double d = AssemblyConstants.flipperPIDConstants.d * (error- previousFlipperError) / loopSpeed;
-
-                previousFlipperError = error;
+                    previousFlipperError = error;
 
 
-                if (flipperTarget == 60 && flipperPosAnalog > 55) {
-                    clawFlipper.setPower(0);
-                } else if (flipperTarget == -60 && flipperPosAnalog < -55){
-                    clawFlipper.setPower(0);
+                    if (flipperTarget == 60 && flipperPosAnalog > 55) {
+                        clawFlipper.setPower(0);
+                    } else if (flipperTarget == -60 && flipperPosAnalog < -55) {
+                        clawFlipper.setPower(0);
+                    } else {
+                        clawFlipper.setPower(p + d + f);
+                    }
                 } else {
-                    clawFlipper.setPower(p+d+f);
+                    clawFlipper.setPower(0);
                 }
 
 
@@ -843,6 +857,7 @@ public class RobotDriver {
         } else {
             //clawFlipper.setPosition(clawFlipper.getPosition()+flipperPower/100);
             clawFlipper.setPower(flipperPower);
+            runningRawFlipper = true;
             //flipper.setPower(-flipperPower);
             //flipperTarget=flipperAngle;
             /*if (flipperPower < 0) {
@@ -905,7 +920,7 @@ public class RobotDriver {
         }
         if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
-            clawLift.setPosition(0.27); //0.22
+            clawLift.setPosition(0.22); //0.22
         }
         if (clawTimer.time()>0.05 && invertOtherClaw) {
             invertOtherClaw = false;
@@ -989,9 +1004,9 @@ public class RobotDriver {
 
     public void setPurpleNorthRelease(boolean val) {
         if (val) {
-            purpleReleaseNorth.setPosition(0.4);
+            purpleReleaseNorth.setPosition(1.0);
         } else {
-            purpleReleaseNorth.setPosition(0.05);
+            purpleReleaseNorth.setPosition(0.72);
         }
     }
 
@@ -1381,6 +1396,11 @@ public class RobotDriver {
         } else {
             driveXY(0, 0, Range.clip(AngleWrap(Math.toRadians(targetAngle) - Math.toRadians(currentPos.getHeading())) / Math.toRadians(30), -1, 1) * turnSpeed);
         }
+    }
+
+
+    private static boolean isInRange(double number, double lowerBound, double upperBound) {
+        return (lowerBound < number && number < upperBound);
     }
 
 }
