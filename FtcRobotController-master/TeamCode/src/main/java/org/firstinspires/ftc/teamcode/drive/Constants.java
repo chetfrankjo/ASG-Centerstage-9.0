@@ -31,7 +31,7 @@ public class Constants {
         public static final double RIGHT_CLAW_CLOSED_POS = 0.495;
         public static final double RIGHT_CLAW_OPEN_POS = 0.71;
 
-        public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 202;
+        public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 171;
 
     }
 
