@@ -23,7 +23,7 @@ public class RobotSetup extends LinearOpMode {
             "                  |.          .\n" +
             "                   |________|";
 
-    boolean advance = false, parkOnWall = false;
+    boolean advance = false, parkOnWall = false, slidesUp = false;
     double timerOffset = 0, timerOffset2 = 0, timerOffset3 = 0;
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
@@ -155,6 +155,37 @@ public class RobotSetup extends LinearOpMode {
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
+            telemetry.addLine("Slides LOW or HIGH - DPAD up/down");
+            telemetry.update();
+            if (gamepad1.dpad_up) {
+                parkOnWall = true;
+                Logger a = new Logger("slidespos", false);
+                slidesUp = true;
+                String l = "up";
+                a.addData(l);
+                a.update();
+                a.close();
+                while (gamepad1.dpad_up) {
+                }
+                advance = true;
+            }
+            if (gamepad1.dpad_down) {
+                parkOnWall = false;
+                slidesUp = false;
+                Logger a = new Logger("slidespos", false);
+                String l = "down";
+                a.addData(l);
+                a.update();
+                a.close();
+                while (gamepad1.dpad_down) {
+                }
+                advance = true;
+            }
+        }
+
+        advance=false;
+        telemetry.clearAll();
+        while (!advance && opModeInInit()) {
             telemetry.addData("Added Timer - STAGE 1 TIMER", timerOffset);
             telemetry.addLine("Press START to advance");
             if (location== General.AllianceLocation.BLUE_NORTH | location== General.AllianceLocation.RED_NORTH) {
@@ -253,6 +284,7 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
             telemetry.addData("Parking on Wall?", parkOnWall);
+            telemetry.addData("Slides up", slidesUp);
             telemetry.addData("Stage 1 Timer", timerOffset);
             telemetry.addData("Stage 2 Timer", timerOffset2);
             telemetry.addData("Stage 3 Timer", timerOffset3);

@@ -120,7 +120,7 @@ public class RobotDriver {
     private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
     boolean runningRawFlipper = false;
-    double intakePos = 0;
+    double intakePos = 0, previousSlidesPower = 0;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -492,6 +492,10 @@ public class RobotDriver {
         Reader r = new Reader();
         return r.readFile("parkspot").equals("wall");
     }
+    public boolean loadSlidesUpPreset() {
+        Reader r = new Reader();
+        return r.readFile("slidespos").equals("up");
+    }
 
 
     public Pose2d getCurrentPos() {
@@ -506,7 +510,7 @@ public class RobotDriver {
         slidesLength = leftSlidesEnc.getCurrentPosition()/slideTickToInch;
         //flipperAngle = flipper.getCurrentPosition();
         flipperAngle = 0;
-        flipperPosAnalog = flipperEnc.getVoltage()/3.3*360-202;
+        flipperPosAnalog = flipperEnc.getVoltage()/3.3*360-AssemblyConstants.FLIPPER_ENCODER_DEGREES_OFFSET; //TODO: if the servo is replaced, this will need changed
         intakePos = intake.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
@@ -611,6 +615,10 @@ public class RobotDriver {
         if (slidesPower == 0) {
             if (!slidesDisable) {
 
+                if (previousSlidesPower != 0) {
+                    slidesTarget = slidesLength;
+                }
+
                 if (slidesTarget<0) {
                     slidesTarget=0;
                 }
@@ -642,8 +650,8 @@ public class RobotDriver {
                 }
             }
             slidesTarget = slidesLength; //TODO: this will make the PID one loop of error behind. This will need fixed if bounce-back is a problem.
-
         }
+        previousSlidesPower = slidesPower;
     }
     public void resetSlidesEncoder() {
         for (DcMotorEx slide: slides) {
@@ -979,12 +987,12 @@ public class RobotDriver {
     }
 
     public void launchHang() {
-        hangReleaseRight.setPosition(0.5);
-        hangReleaseLeft.setPosition(0.5);
+        hangReleaseRight.setPosition(1.0);
+        hangReleaseLeft.setPosition(0.2);
     }
     public void storeHang() {
-        hangReleaseRight.setPosition(0);
-        hangReleaseLeft.setPosition(1);
+        hangReleaseRight.setPosition(0.5);
+        hangReleaseLeft.setPosition(0.68);
     }
 
     public void launchPlane() {

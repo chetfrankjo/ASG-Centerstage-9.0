@@ -96,7 +96,11 @@ public class Auto extends LinearOpMode {
         stateOverrideTimer = new ElapsedTime();
         timer.reset();
 
-        driver.setSlidesDepositTarget(9);
+        if (driver.loadSlidesUpPreset()) {
+            driver.setSlidesDepositTarget(11);
+        } else {
+            driver.setSlidesDepositTarget(9);
+        }
 
         while (opModeIsActive()) {
             driver.update();
@@ -226,10 +230,10 @@ public class Auto extends LinearOpMode {
                             timer.reset();
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
-                        if (timer.time() > 0.8) {
+                        if (timer.time() > 0.5) {
                             driver.drive(0,0,0,false);
                         } else {
-                            driver.drive(0, -0.3, 0, false);
+                            driver.drive(0, -0.4, 0, false);
                         }
                     }
                     break;

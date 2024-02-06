@@ -15,7 +15,7 @@ public class Teleop extends LinearOpMode{
     boolean superMegaDrive = false;
     boolean g1Launch = false, g2Launch = false, g1Hang = false, g2Hang = false, hanging =false, tl=false, tr=false, bl=false, br=false;
     boolean redAlliance = false;
-    boolean allowSmartDeposit = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false, intakingWhileExtending, hasTouchedBoard = false;
+    boolean allowSmartDeposit = false, allowAutoHolding=false, allowAutoDeposit=false, intakeFront=false, g1lt=false, outtake = false, autoIntaking = false, waitForDepositToOpenClaw = false, waitingForTimer = false, waitToStopIntake = false, intakingWhileExtending, hasTouchedBoard = false, hangHasReleased = false;
     ElapsedTime outtakeTimer, waitForDepositClawTimer, waitToStopIntakeTimer, intakeWhileExtendingTimer;
     int leftColorLoops = 0, rightColorLoops = 0;
     @Override
@@ -246,7 +246,17 @@ public class Teleop extends LinearOpMode{
             if (gamepad2.y) { // extend+flip for depositing
                 intakingWhileExtending = true;
                 intakeWhileExtendingTimer.reset();
+                if (hangHasReleased) {
+                    driver.storeHang();
+                }
             }
+
+            if (hangHasReleased && driver.getSlidesLength() > 5) {
+                driver.storeHang();
+            } else if (hangHasReleased) {
+                driver.launchHang();
+            }
+
             if (intakingWhileExtending && intakeWhileExtendingTimer.time()< 0.5) { // Intake slightly while extending so pixels dont get knocked out
                 if (intakeWhileExtendingTimer.time()>0.05&&intakeWhileExtendingTimer.time()<0.12) {
                     driver.setWeaponsState(General.WeaponsState.EXTEND);
@@ -302,6 +312,9 @@ public class Teleop extends LinearOpMode{
             } else if (driver.getCurrentPos().getY()>=50) {
                 autoIntaking = false;
             }
+
+
+
             if (driver.getIntakeMode() == General.IntakeMode.INTAKE && allowAutoHolding) { // when color sensor sees pixel, grab it
                 boolean leftHasPixel = driver.getLeftHasPixel();
                 boolean rightHasPixel = driver.getRightHasPixel();
@@ -500,6 +513,7 @@ public class Teleop extends LinearOpMode{
 
             if (g1Hang && g2Hang) {
                 driver.launchHang();
+                hangHasReleased = true;
                 gamepad1.rumble(1, 1, 500);
                 gamepad2.rumble(1, 1, 500);
                 g2Hang=false;

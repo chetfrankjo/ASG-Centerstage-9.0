@@ -26,11 +26,12 @@ public class Constants {
 
         public static final double defaultSlideLength = 0;
 
-
         public static final double LEFT_CLAW_CLOSED_POS = 0.82;
         public static final double LEFT_CLAW_OPEN_POS = 0.605;
         public static final double RIGHT_CLAW_CLOSED_POS = 0.495;
         public static final double RIGHT_CLAW_OPEN_POS = 0.71;
+
+        public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 202;
 
     }
 

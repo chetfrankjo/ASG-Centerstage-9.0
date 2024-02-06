@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 
-@TeleOp(group = "b")
+@TeleOp(group = "c")
 public class StoreRobot extends LinearOpMode {
 
     @Override
