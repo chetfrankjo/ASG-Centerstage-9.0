@@ -29,7 +29,7 @@ public class Constants {
         public static final double LEFT_CLAW_CLOSED_POS = 0.82;
         public static final double LEFT_CLAW_OPEN_POS = 0.605;
         public static final double RIGHT_CLAW_CLOSED_POS = 0.495;
-        public static final double RIGHT_CLAW_OPEN_POS = 0.71;
+        public static final double RIGHT_CLAW_OPEN_POS = 0.81;
 
         public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 171;
 
@@ -39,7 +39,7 @@ public class Constants {
         // for FTCDashboard visualization
         public static final double ROBOT_RADIUS = 5;
         // Localization Constants
-        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889*1.02*1.0083333333333333333333333333333*1.005*1.0027777777777777777777777777778*1.0019444444444444444444444444444; //13.37 //
+        public static final double wheelbaseseparation = 12.8125*0.98944444444444444444444444444444*0.97138888888888888888888888888889*1.02*1.0083333333333333333333333333333*1.005*1.0027777777777777777777777777778*1.0019444444444444444444444444444*0.9963888888888889*1.0011111111111111111111111111111*0.9975;//*0.9966666666666667; //13.37 //
         public static final double COUNTS_PER_INCH = 1752.875;
         public static final double horizontalTickOffset = 6.22;
 

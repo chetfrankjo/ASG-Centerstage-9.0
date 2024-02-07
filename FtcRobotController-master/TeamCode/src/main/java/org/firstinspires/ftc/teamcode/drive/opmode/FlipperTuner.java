@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import org.firstinspires.ftc.teamcode.drive.Constants;
+
 @TeleOp(group = "z")
 public class FlipperTuner extends LinearOpMode {
 
@@ -17,7 +19,7 @@ public class FlipperTuner extends LinearOpMode {
 
         while (opModeIsActive()) {
             flipper.setPower(-gamepad1.left_stick_y);
-            telemetry.addData("pos corrected", enc.getVoltage()/3.3*360-202);
+            telemetry.addData("pos corrected", enc.getVoltage()/3.3*360- Constants.AssemblyConstants.FLIPPER_ENCODER_DEGREES_OFFSET);
             telemetry.addData("pos raw (deg)", enc.getVoltage()/3.3*360);
             telemetry.addData("raw voltage", enc.getVoltage());
             telemetry.update();
