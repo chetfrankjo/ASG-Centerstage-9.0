@@ -37,7 +37,11 @@ public class RobotDriverTest extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, fieldCentric);
+            if (!gamepad1.a) {
+                driver.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, fieldCentric);
+            } else {
+                driver.drive(gamepad1.left_stick_x, -0.5, gamepad1.right_stick_x, fieldCentric);
+            }
 
 
             /*if (gamepad1.a) {
@@ -75,6 +79,7 @@ public class RobotDriverTest extends LinearOpMode {
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+            telemetry.addData("velocity", driver.getCurrentVelocities().getY());
             telemetry.addData("flipper angle", driver.getFlipperPosAnalog());
             telemetry.addData("left has pixel?", driver.getLeftHasPixel());
             telemetry.addData("right has pixel?", driver.getRightHasPixel());

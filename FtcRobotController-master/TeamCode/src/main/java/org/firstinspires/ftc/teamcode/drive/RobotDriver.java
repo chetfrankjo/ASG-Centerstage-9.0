@@ -121,6 +121,7 @@ public class RobotDriver {
     private double previousFlipperTarget;
     boolean runningRawFlipper = false;
     double intakePos = 0, previousSlidesPower = 0;
+    boolean speedyDeposit = false, convertCurPosToIMU = false;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -150,7 +151,7 @@ public class RobotDriver {
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
         imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP)));
         //imu.resetYaw();
 
         // SLIDES
@@ -339,6 +340,9 @@ public class RobotDriver {
             currentPos = localizer.getPosEstimate();
             PreviousVelocities = CurrentVelocities;
             CurrentVelocities = localizer.getvelocity();
+            if (convertCurPosToIMU) {
+                currentPos = new Pose2d(currentPos.getX(), currentPos.getY(), pullIMUHeading());
+            }
         } else if (localizationMode == LocalMode.FUSED) {
             localizer.updateEncoders(encoders);
             localizer.update(loopSpeed);
@@ -354,6 +358,10 @@ public class RobotDriver {
             cameraMode = CameraMode.APRILTAG; // the updateCamera() method (called later) will handle everything from here
         }
 
+    }
+
+    public void setUseIMUForLocalization(boolean bool) {
+        convertCurPosToIMU = bool;
     }
 
     public void updateAutomation() {
@@ -422,7 +430,7 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (waitingForDepsoit && (!isInRange(currentPos.getX(), depositPos.getX()-2, depositPos.getX()+2) || !isInRange(currentPos.getY(), depositPos.getY()-2, depositPos.getY()+2) || !isInRange(currentPos.getHeading(), depositPos.getHeading()-20, depositPos.getHeading()+20))) {
+                if (waitingForDepsoit && (speedyDeposit || (!isInRange(currentPos.getX(), depositPos.getX()-2, depositPos.getX()+2) || !isInRange(currentPos.getY(), depositPos.getY()-2, depositPos.getY()+2) || !isInRange(currentPos.getHeading(), depositPos.getHeading()-20, depositPos.getHeading()+20)))) {
                     if (depositTimer.time() > 0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
                         setClawLiftPos(false);
                     }
@@ -438,6 +446,10 @@ public class RobotDriver {
         }
     }
     public WeaponsState getWeaponsState() {return weaponsState;}
+
+    public void setSpeedyDeposit(boolean speed) {
+        speedyDeposit = speed;
+    }
 
     public AllianceLocation loadAlliancePreset() {
         Reader r = new Reader();
