@@ -1008,10 +1008,10 @@ public class RobotDriver {
     }
 
     public void launchPlane() {
-        launcher.setPosition(0.5);
+        launcher.setPosition(AssemblyConstants.DRONE_LAUNCHER_RELEASE_POS);
     }
     public void storePlane() {
-        launcher.setPosition(0.2);
+        launcher.setPosition(AssemblyConstants.DRONE_LAUNCHER_STORED_POS);
     }
 
     public void setPurpleSouthRelease(boolean val) {
