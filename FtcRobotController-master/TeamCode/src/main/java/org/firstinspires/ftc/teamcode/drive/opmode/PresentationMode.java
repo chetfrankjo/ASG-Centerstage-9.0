@@ -30,6 +30,7 @@ public class PresentationMode extends LinearOpMode {
         driver.setWeaponsState(General.WeaponsState.EXTEND);
         while (opModeIsActive()) {
             driver.update();
+            driver.drive(0, 0, 0, false);
 
             if (driver.getFSRPressed()) {
                 driver.setWeaponsState(General.WeaponsState.DEPOSIT);

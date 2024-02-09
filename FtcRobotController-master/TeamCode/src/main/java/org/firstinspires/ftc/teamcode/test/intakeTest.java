@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-
 @Disabled
 @TeleOp
 public class intakeTest extends LinearOpMode {
@@ -34,17 +33,23 @@ public class intakeTest extends LinearOpMode {
             if (gamepad1.b) {
                 intakePower = 0;
             }
+            if (gamepad1.x) {
+                intakePower = 1;
+            }
 
 
             //intake.setPower(intakePower);
 
-
-            if (intake.getCurrentPosition() < 20) {
-                intake.setPower(-0.2);
-            } else {
-                intake.setPower(0);
+            if (gamepad1.dpad_down) {
+                intakePower -= 0.05;
+                while (gamepad1.dpad_down) {}
             }
-
+            if (gamepad1.dpad_up) {
+                intakePower += 0.05;
+                while (gamepad1.dpad_up) {}
+            }
+            intake.setPower(intakePower);
+            telemetry.addData("intake power", intakePower);
             telemetry.addData("intake pos", intake.getCurrentPosition());
             telemetry.addData("current", intake.getCurrent(CurrentUnit.AMPS));
             telemetry.update();

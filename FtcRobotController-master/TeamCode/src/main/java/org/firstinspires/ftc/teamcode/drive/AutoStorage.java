@@ -140,7 +140,7 @@ public class AutoStorage {
                                 paths.add(new Trajectory(10, 110, 0.3, 20).addPoint(10, 115, 0).build());
                                 break;
                             case RIGHT:
-                                paths.add(new Trajectory(40, 115, 0.5, 8, 0).addPoint(40, 104, 180).addPoint(55, 104, -90).build());
+                                paths.add(new Trajectory(40, 115, 0.5, 12, 0).addPoint(40, 104, 180).addPoint(55, 104, -90).build());
                                 paths.add(new Trajectory(55, 110, 0.3, 20).addPoint(55, 115, 0).build());
                                 break;
                         }
