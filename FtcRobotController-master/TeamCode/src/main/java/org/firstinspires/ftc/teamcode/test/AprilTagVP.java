@@ -51,7 +51,6 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@Disabled
 @TeleOp(name = "Concept: AprilTag", group = "Concept")
 public class AprilTagVP extends LinearOpMode {
 
@@ -175,12 +174,13 @@ public class AprilTagVP extends LinearOpMode {
             if (detection.metadata != null) {
                 telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
                 telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addData("yaw", detection.rawPose.y);
-                telemetry.addData("other yaw", detection.rawPose.R);
-                telemetry.addData("more other year", detection.rawPose.x);
-                telemetry.addData("more more other yaw", detection.rawPose.z);
                 telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
                 telemetry.addData("field position", detection.metadata.fieldPosition.toString());
+                telemetry.addData("corrected field position y", detection.metadata.fieldPosition.get(0)+72);
+                telemetry.addData("corrected field position x", 72-detection.metadata.fieldPosition.get(1));
+
+                telemetry.addData("global position x", 72-detection.metadata.fieldPosition.get(1)-detection.ftcPose.x);
+                telemetry.addData("global position y", detection.metadata.fieldPosition.get(0)+72-detection.ftcPose.y);
                 //detection.metadata.fi
 
             } else {

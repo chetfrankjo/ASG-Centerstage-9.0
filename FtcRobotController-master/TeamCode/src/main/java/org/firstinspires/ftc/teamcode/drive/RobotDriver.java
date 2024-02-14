@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.MathFunctions.AngleWrap;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
@@ -29,6 +31,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.ArrayList;
@@ -248,7 +251,7 @@ public class RobotDriver {
         }
         */
 
-        //aprilTag = new AprilTagProcessor.Builder()
+        aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
@@ -263,17 +266,17 @@ public class RobotDriver {
 
                 // ... these parameters are fx, fy, cx, cy.
 
-                //.build();
+                .build();
 
-        //VisionPortal.Builder builder = new VisionPortal.Builder();
-        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 3"));
-        // builder.setCameraResolution(new Size(640, 480));
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+         builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        //builder.addProcessor(aprilTag);
+        builder.addProcessor(aprilTag);
         //builder.setLiveViewContainerId(viewportContainerIds[1]);
         // Build the Vision Portal, using the above settings.
-        //visionPortal = builder.build();
+        visionPortal = builder.build();
 
         //allHubs = hardwareMap.getAll(LynxModule.class);
         /*for (LynxModule module : allHubs) {
@@ -349,13 +352,21 @@ public class RobotDriver {
             currentPos = localizer.getPosEstimate();
             PreviousVelocities = CurrentVelocities;
             CurrentVelocities = localizer.getvelocity();
-            if (tagTimer.time() >= 15) { // pull an AprilTag reading every 15 seconds
+            setCameraMode(CameraMode.APRILTAG);
+            getCameraEstimate();
+            if (aprilTagPosition != null) {
+                currentPos = new Pose2d(mean(currentPos.getX(), aprilTagPosition.getX()), mean(currentPos.getY(), aprilTagPosition.getY()), currentPos.getHeading()); //TODO: kalman filter? IMU heading data?
+            }
+            /*if (tagTimer.time() >= 15) { // pull an AprilTag reading every 15 seconds
                 tagTimer.reset();
                 setCameraMode(CameraMode.APRILTAG);
                 getCameraEstimate();
+
             }
+             */
         } else if (localizationMode == LocalMode.APRILTAG) {
             cameraMode = CameraMode.APRILTAG; // the updateCamera() method (called later) will handle everything from here
+            currentPos = aprilTagPosition;
         }
 
     }
@@ -1227,29 +1238,23 @@ public class RobotDriver {
     public Pose2d getAprilTagEstimate() {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        //double head = pullIMUHeading(); // We don't have time to wait for the IMU to update in the next loop, so pull a reading right now
-        // offset the camera estimation based off of where the camera is on the robot
-        //Pose2d offsetPose = new Pose2d((CAMERA_X_OFFSET*Math.cos(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.sin(Math.toRadians(head))),
-                //CAMERA_X_OFFSET*Math.sin(Math.toRadians(head)) + CAMERA_Y_OFFSET*Math.cos(Math.toRadians(head)),
-                //head
-                //);
         Pose2d tagEstimate = null;
-
         // Step through the list of detections
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
-                if (detection.id==5) {
-                    //Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
-                    tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.bearing);
-                }
-                /*for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
-                    if (detection.id==5) {
-                        //Pose2d offset = Constants.FieldConstants.TAG_FIELD_POSITIONS[i-1];
-                        tagEstimate = new Pose2d(detection.ftcPose.x, detection.ftcPose.y, head);
+
+                for (int i : Constants.VisionConstants.ACCEPTED_IDS) { // ensure that we are not looking at the tags on the wall... those will be inaccurate
+                    if (i == detection.id) { // if a detected tag is a permissible one
+                        if (tagEstimate == null) {
+                            tagEstimate = new Pose2d(72 - detection.metadata.fieldPosition.get(1) - detection.ftcPose.x, detection.metadata.fieldPosition.get(0) + 72 - detection.ftcPose.y, currentPos.getHeading());
+                        } else {
+                            tagEstimate = new Pose2d(mean(72 - detection.metadata.fieldPosition.get(1) - detection.ftcPose.x, tagEstimate.getX()), mean(detection.metadata.fieldPosition.get(0) + 72 - detection.ftcPose.y, tagEstimate.getY()), currentPos.getHeading());
+                        }
                     }
+
                 }
 
-                 */
+
 
             } else {
                 // unknown tag ID
@@ -1421,6 +1426,10 @@ public class RobotDriver {
 
     private static boolean isInRange(double number, double lowerBound, double upperBound) {
         return (lowerBound < number && number < upperBound);
+    }
+
+    private static double mean(double n1, double n2) {
+        return (n1+n2)/2;
     }
 
 }
