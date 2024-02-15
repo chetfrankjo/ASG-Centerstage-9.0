@@ -251,7 +251,7 @@ public class RobotDriver {
         }
         */
 
-        aprilTag = new AprilTagProcessor.Builder()
+        //aprilTag = new AprilTagProcessor.Builder()
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
@@ -266,17 +266,17 @@ public class RobotDriver {
 
                 // ... these parameters are fx, fy, cx, cy.
 
-                .build();
+                //.build();
 
-        VisionPortal.Builder builder = new VisionPortal.Builder();
-        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-         builder.setCameraResolution(new Size(640, 480));
+        //VisionPortal.Builder builder = new VisionPortal.Builder();
+        //builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+         //builder.setCameraResolution(new Size(640, 480));
 
         // Set and enable the processor.
-        builder.addProcessor(aprilTag);
+        //builder.addProcessor(aprilTag);
         //builder.setLiveViewContainerId(viewportContainerIds[1]);
         // Build the Vision Portal, using the above settings.
-        visionPortal = builder.build();
+        //visionPortal = builder.build();
 
         //allHubs = hardwareMap.getAll(LynxModule.class);
         /*for (LynxModule module : allHubs) {
