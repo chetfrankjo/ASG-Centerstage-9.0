@@ -325,6 +325,7 @@ public class RobotDriver {
         }
         packet.put("slides", slidesLength);
         packet.put("loop speed", loopSpeed);
+        packet.put("Normalized angle", (currentPos.getHeading()%90));
         //packet.put("camera of interest", cameraOfInterest.);
 
         overlay = packet.fieldOverlay();

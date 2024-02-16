@@ -1,14 +1,26 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
+import org.firstinspires.ftc.teamcode.drive.Constants.DriveConstants;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
+import org.firstinspires.ftc.teamcode.drive.Localizer;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
@@ -20,44 +32,140 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-
+@Config
 @TeleOp(group = "a")
 public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
     //double Xcurrent_time, Xprevious_time;
     //double Xcurrent_error, Xprevious_error;
     //double Xp, Xi, Xd, Xk_p, Xk_i, Xmax_i, Xk_d;
+    double Tcurrent_time, Tprevious_time;
+    double Xcurrent_error, Xprevious_error;
+    double Tcurrent_error, Tprevious_error;
+    double Tp, Ti, Td, Tmax_i, Ttotal;
+    double Xp, Xi, Xd, Xmax_i, Xtotal;
 
-    ElapsedTime Xtimer;
+    long Tlast_time;
+
+    public static double Tk_p = 0.0132;
+    public static double Tk_i = 0.00000001;
+    public static double Tk_d = 0.0008;
+
+    public static double Xk_p = 0.5;
+    public static double Xk_i = 0;
+    public static double Xk_d = 0;
+
+    public static double offpos = 0;
+
+    double Tangle = 0;
+
+    double Xpos = 100;
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     /**
      * The variable to store our instance of the AprilTag processor.
      */
-    private AprilTagProcessor aprilTag;
+    FtcDashboard dashboard;
 
+    private AprilTagProcessor aprilTag;
+    Pose2d position;
     /**
      * The variable to store our instance of the vision portal.
      */
     private VisionPortal visionPortal;
     @Override
     public void runOpMode(){
+        dashboard = FtcDashboard.getInstance();
+
         //Xtimer = new ElapsedTime();
         initAprilTag();
         RobotDriver driver = new RobotDriver(hardwareMap, true);
-
+        driver.getSensors();
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
+        Tmax_i = 1;
+        Xmax_i = .4;
         waitForStart();
         if (opModeIsActive()){
+            driver.resetIMUHeading();
             while (opModeIsActive()){
-                //Xtimer.reset();
-                //Xcurrent_time = Xtimer;
-                //Xcurrent_error = Xgoto-
-                telemetryAprilTag();
+
+
+                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+                for (AprilTagDetection detection : currentDetections){
+                    if (detection.metadata != null) {
+                        if (detection.id == 2 && Xpos == 100){
+                            Xpos = -detection.ftcPose.x;
+                        }
+                    }
+                }
+                driver.getSensors();
+                position = driver.getCurrentPos();
+                telemetry.addData("thing", position.getX());
+                TelemetryPacket packet = new TelemetryPacket();
+                dashboard.sendTelemetryPacket(packet);          // Send field overlay and telemetry data to FTCDashboard
+
+
+                telemetry.addData("Tag position", Xpos);
+                Tcurrent_time = System.nanoTime();
+                Tcurrent_error = Tangle - driver.pullIMUHeading();
+
+                Xcurrent_error = Xpos+offpos-position.getX();
+                packet.put("difference", Xpos-position.getX());
                 telemetry.update();
-                sleep(10);
-                driver.drive(gamepad1.left_stick_x + gamepad2.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, false);
+
+                if(gamepad1.a){
+                    Tangle = 90;
+                    Tprevious_error = 0;
+                    while (gamepad1.a){
+                        sleep(10);
+                    }
+                } else if (gamepad1.b){
+                    Tangle = 0;
+                    Tprevious_error = 0;
+                    while (gamepad1.b){
+                        sleep(10);
+                    }
+                }
+
+                Tp = Tk_p * Tcurrent_error;
+                Ti += Tk_i * (Tcurrent_error * (Tcurrent_time / 1000000000));
+                if (Ti > Tmax_i) {
+                    Ti = Tmax_i;
+                } else if (Ti < -Tmax_i) {
+                    Ti = -Tmax_i;
+                }
+                Td = Tk_d * (Tcurrent_error - Tprevious_error) / (Tcurrent_time);
+                Ttotal = Tp + Ti + Td;
+
+
+                Xp = Xk_p * Xcurrent_error;
+                Xi += Xk_i * (Xcurrent_error * (Tcurrent_time / 1000000000));
+                if (Xi > Xmax_i) {
+                    Xi = Xmax_i;
+                } else if (Xi < -Xmax_i) {
+                    Xi = -Xmax_i;
+                }
+                Xd = Xk_d * (Xcurrent_error - Xprevious_error) / (Tcurrent_time);
+                Xtotal = Xp + Xi + Xd;
+
+                driver.drive(Xtotal, -gamepad1.left_stick_y, Ttotal, false);
+                Xprevious_error = Xcurrent_error;
+                Tprevious_error = Tcurrent_error;
+                Tprevious_time = Tcurrent_time;
+                if(gamepad1.a){
+                    Tangle = 90;
+                    Tprevious_error = 0;
+                    while (gamepad1.a){
+                        sleep(10);
+                    }
+                } else if (gamepad1.b){
+                    Tangle = 0;
+                    Tprevious_error = 0;
+                    while (gamepad1.b){
+                        sleep(10);
+                    }
+                }
                 driver.update();
             }
 

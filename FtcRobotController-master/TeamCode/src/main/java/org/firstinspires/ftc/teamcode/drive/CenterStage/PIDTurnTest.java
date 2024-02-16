@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
-
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
 import android.util.Size;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -20,35 +23,74 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 @TeleOp(group = "a")
+@Config
 public class PIDTurnTest extends LinearOpMode{
     double Tcurrent_time, Tprevious_time;
     double Tcurrent_error, Tprevious_error;
     double Tp, Ti, Td, Tmax_i, Ttotal;
-    ttimer = new ElapsedTime();
+    long Tlast_time;
 
-    double Tk_p = 0.1;
-    double Tk_i = 0;
-    double Tk_d = 0;
+    public static double Tk_p = 0.0132;
+    public static double Tk_i = 0.00000001;
+    public static double Tk_d = 0.0008;
+    double Tangle = 90;
+
     @Override
     public void runOpMode(){
         RobotDriver driver = new RobotDriver(hardwareMap, false);
+        Tmax_i = 1;
         waitForStart();
         if (opModeIsActive()){
-            Tcurrent_time = ttimer.time();
-            Tcurrent_error = Math.toRadians(90)-driver.getIMUHeading();
-            Tp = Tk_p*Tcurrent_error;
-            Ti += Tk_i*(Tcurrent_error*(Tcurrent_time));
-            if (Ti>Tmax_i){
-                Ti = Tmax_i;
-            } else if (Ti < -Tmax_i) {
-                Ti = -Tmax_i;
+            driver.resetIMUHeading();
+            while (opModeIsActive()) {
+
+
+                Tcurrent_time = System.nanoTime();
+                Tcurrent_error = Tangle - driver.pullIMUHeading();
+
+                telemetry.update();
+
+                if(gamepad1.a){
+                    Tangle = 90;
+                    Tprevious_error = 0;
+                    while (gamepad1.a){
+                        sleep(10);
+                    }
+                } else if (gamepad1.b){
+                    Tangle = 0;
+                    Tprevious_error = 0;
+                    while (gamepad1.b){
+                        sleep(10);
+                    }
+                }
+
+                Tp = Tk_p * Tcurrent_error;
+                Ti += Tk_i * (Tcurrent_error * (Tcurrent_time / 1000000000));
+                if (Ti > Tmax_i) {
+                    Ti = Tmax_i;
+                } else if (Ti < -Tmax_i) {
+                    Ti = -Tmax_i;
+                }
+                Td = Tk_d * (Tcurrent_error - Tprevious_error) / (Tcurrent_time);
+                Ttotal = Tp + Ti + Td;
+                driver.drive(0, 0, Ttotal, false);
+                Tprevious_error = Tcurrent_error;
+                Tprevious_time = Tcurrent_time;
+                if(gamepad1.a){
+                    Tangle = 90;
+                    Tprevious_error = 0;
+                    while (gamepad1.a){
+                        sleep(10);
+                    }
+                } else if (gamepad1.b){
+                    Tangle = 0;
+                    Tprevious_error = 0;
+                    while (gamepad1.b){
+                        sleep(10);
+                    }
+                }
+                driver.update();
             }
-            Td = Tk_d*(Tcurrent_error-Tprevious_error)/(Tcurrent_time);
-            Ttotal = Tp+Ti+Td;
-            driver.drive(0,0,Ttotal, false);
-            Tprevious_error = Tcurrent_error;
-            Ttimer.reset();
-            driver.update();
         }
     }
 }
