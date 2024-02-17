@@ -356,7 +356,7 @@ public class RobotDriver {
             setCameraMode(CameraMode.APRILTAG);
             getCameraEstimate();
             if (aprilTagPosition != null) {
-                currentPos = new Pose2d(mean(currentPos.getX(), aprilTagPosition.getX()), mean(currentPos.getY(), aprilTagPosition.getY()), currentPos.getHeading()); //TODO: kalman filter? IMU heading data?
+                currentPos = new Pose2d(mean(currentPos.getX(), aprilTagPosition.getX()), mean(currentPos.getY(), aprilTagPosition.getY()), currentPos.getHeading());
             }
             /*if (tagTimer.time() >= 15) { // pull an AprilTag reading every 15 seconds
                 tagTimer.reset();

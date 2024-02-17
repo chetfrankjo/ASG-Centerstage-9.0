@@ -99,7 +99,7 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
                         }
                     }
                 }
-                driver.getSensors();
+                //driver.getSensors();
                 position = driver.getCurrentPos();
                 telemetry.addData("thing", position.getX());
                 TelemetryPacket packet = new TelemetryPacket();
@@ -114,19 +114,6 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
                 packet.put("difference", Xpos-position.getX());
                 telemetry.update();
 
-                if(gamepad1.a){
-                    Tangle = 90;
-                    Tprevious_error = 0;
-                    while (gamepad1.a){
-                        sleep(10);
-                    }
-                } else if (gamepad1.b){
-                    Tangle = 0;
-                    Tprevious_error = 0;
-                    while (gamepad1.b){
-                        sleep(10);
-                    }
-                }
 
                 Tp = Tk_p * Tcurrent_error;
                 Ti += Tk_i * (Tcurrent_error * (Tcurrent_time / 1000000000));
@@ -199,14 +186,11 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
 
         // Set the camera (webcam vs. built-in RC phone camera).
 
-        if (USE_WEBCAM) {
-            builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        } else {
-            builder.setCamera(BuiltinCameraDirection.BACK);
-        }
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
 
         // Choose a camera resolution. Not all cameras support all resolutions.
-        builder.setCameraResolution(new Size(640, 480));
+        builder.setCameraResolution(new Size(640, 360)); //TODO:  640x480, 800x600, 640x360, 1920x1080, 800x448, 864x480 <- supported resolutions
 
         // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
         //builder.enableCameraMonitoring(true);
@@ -226,6 +210,10 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
         visionPortal = builder.build();
         // Disable or re-enable the aprilTag processor at any time.
         //visionPortal.setProcessorEnabled(aprilTag, true);
+
+        //visionPortal.stopStreaming();
+
+        //visionPortal.resumeStreaming();
 
     }   // end method initAprilTag()
 

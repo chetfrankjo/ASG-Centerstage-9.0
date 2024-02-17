@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.drive.CenterStage;
 
+import android.util.Size;
+
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,11 +14,15 @@ import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.firstinspires.ftc.teamcode.drive.AutoStorage;
 import org.firstinspires.ftc.teamcode.drive.RobotDriver;
 import org.firstinspires.ftc.teamcode.vision.ThreeZonePropDetectionPipeline;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Autonomous(group = "a")
 public class Auto extends LinearOpMode {
@@ -28,6 +35,13 @@ public class Auto extends LinearOpMode {
     ThreeZonePropDetectionPipeline propPipeline;
     double timerOffset1, timerOffset2, timerOffset3;
     boolean weaponsExtended = false;
+    private AprilTagProcessor aprilTag;
+    private VisionPortal visionPortal;
+    public static double offpos = 0;
+
+
+    double Xpos = 100;
+
     @Override
     public void runOpMode() throws InterruptedException {
         RobotDriver driver = new RobotDriver(hardwareMap, false);
@@ -82,9 +96,10 @@ public class Auto extends LinearOpMode {
         }
 
         initCameras(allianceLocation); // initialize the correct camera
-
+        initAprilTag();
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setClawLiftPos(false);
+        driver.setUseIMUForLocalization(true);
 
         while (!isStarted() && !isStopRequested()) { // warm up the camera as long as init goes on
             telemetry.addLine("Running Detection");
@@ -101,6 +116,8 @@ public class Auto extends LinearOpMode {
         } else {
             driver.setSlidesDepositTarget(9);
         }
+
+
 
         while (opModeIsActive()) {
             driver.update();
@@ -177,7 +194,7 @@ public class Auto extends LinearOpMode {
                         stateOverrideTimer.reset();
                     }
                     break;
-                case APPROACH_2:
+                case APPROACH_2: // approach the backdrop
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         if (driver.getCurrentPos().getY() > 85 && !weaponsExtended) { // extend all subsystems after you have cleared the stage door
@@ -199,7 +216,31 @@ public class Auto extends LinearOpMode {
                         stateOverrideTimer.reset();
                     }
                     break;
-                case APPROACH_3:
+                case APPROACH_3: // finalize backdrop position and deposit
+
+                    //TODO: INSERT APRILTAG CODE
+                    visionPortal.resumeStreaming();
+                    timer.reset();
+                    while (timer.time() < 2 && opModeIsActive()) {
+
+                        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+                        for (AprilTagDetection detection : currentDetections){
+                            if (detection.metadata != null) {
+                                if (detection.id == 2 && Xpos == 100){
+                                    Xpos = -detection.ftcPose.x;
+                                }
+                            }
+                        }
+
+                        double Xcurrent_error = Xpos+offpos-driver.getCurrentPos().getX();
+
+                        driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getIMUHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
+
+                    }
+                    visionPortal.stopStreaming();
+
+                    //---------------------------
+
                     timer.reset();
                     while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) { // drive into the backdrop until the FSR is pressed
                         driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/8, false);
@@ -287,5 +328,62 @@ public class Auto extends LinearOpMode {
             }
         });
     }
+
+
+    private void initAprilTag() {
+
+        // Create the AprilTag processor.
+        aprilTag = new AprilTagProcessor.Builder()
+                //.setDrawAxes(false)
+                //.setDrawCubeProjection(false)
+                //.setDrawTagOutline(true)
+                //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
+                //.setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+
+                // == CAMERA CALIBRATION ==
+                // If you do not manually specify calibration parameters, the SDK will attempt
+                // to load a predefined calibration for your camera.
+                //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
+
+                // ... these parameters are fx, fy, cx, cy.
+
+                .build();
+
+        // Create the vision portal by using a builder.
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        // Set the camera (webcam vs. built-in RC phone camera).
+
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+
+        // Choose a camera resolution. Not all cameras support all resolutions.
+        builder.setCameraResolution(new Size(640, 360)); //TODO:  640x480, 800x600, 640x360, 1920x1080, 800x448, 864x480 <- supported resolutions
+
+        // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
+        //builder.enableCameraMonitoring(true);
+
+        // Set the stream format; MJPEG uses less bandwidth than default YUY2.
+        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+
+        // Choose whether or not LiveView stops if no processors are enabled.
+        // If set "true", monitor shows solid orange screen if no processors enabled.
+        // If set "false", monitor shows camera view without annotations.
+        //builder.setAutoStopLiveView(false);
+
+        // Set and enable the processor.
+        builder.addProcessor(aprilTag);
+
+        // Build the Vision Portal, using the above settings.
+        visionPortal = builder.build();
+        // Disable or re-enable the aprilTag processor at any time.
+        //visionPortal.setProcessorEnabled(aprilTag, true);
+
+        visionPortal.stopStreaming();
+
+        //visionPortal.resumeStreaming();
+
+    }   // end method initAprilTag()
 
 }
