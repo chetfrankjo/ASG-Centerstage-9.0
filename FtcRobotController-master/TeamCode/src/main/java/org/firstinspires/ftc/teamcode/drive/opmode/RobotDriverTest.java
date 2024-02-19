@@ -79,6 +79,10 @@ public class RobotDriverTest extends LinearOpMode {
             //telemetry.addData("x", systemCoordinates[0]);
             //telemetry.addData("y", systemCoordinates[1]);
             //telemetry.addData("z", systemCoordinates[2]);
+
+            telemetry.addData("raw distance voltages", driver.getDistVoltages().toString());
+            telemetry.addData("distances", driver.getDistances().toString());
+
             telemetry.addData("velocity", driver.getCurrentVelocities().getY());
             telemetry.addData("flipper angle", driver.getFlipperPosAnalog());
             telemetry.addData("left has pixel?", driver.getLeftHasPixel());

@@ -68,7 +68,7 @@ public class RobotDriver {
     private AnalogInput gantryEnc;
     private ColorSensor colorLeft;
     private RevColorSensorV3 colorRight;
-    private AnalogInput fsr;
+    private AnalogInput fsr, distLeft, distRight, distFrontLeft, distFrontRight;
     //private ContinousAnalogAxon gantyEncoder;
     ServoImplEx flipperimpl;
     public int[] encoders;
@@ -123,7 +123,7 @@ public class RobotDriver {
     private boolean invertClaw = false, invertOtherClaw = false;
     private double previousFlipperTarget;
     boolean runningRawFlipper = false;
-    double intakePos = 0, previousSlidesPower = 0;
+    double intakePos = 0, previousSlidesPower = 0, distLeftIn, distRightIn, distFrontLeftIn, distFrontRightIn;
     boolean speedyDeposit = false, convertCurPosToIMU = false;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
@@ -153,7 +153,7 @@ public class RobotDriver {
         driveMotors = Arrays.asList(fl, bl, fr, br);
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
-        imu = hardwareMap.get(IMU.class, "imu");
+        imu = hardwareMap.get(IMU.class, "adaIMU");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP)));
         //imu.resetYaw();
 
@@ -195,6 +195,13 @@ public class RobotDriver {
 
         purpleRelease = hardwareMap.get(Servo.class, "purple");
         purpleReleaseNorth = hardwareMap.get(Servo.class, "purpleNorth");
+
+        distLeft = hardwareMap.get(AnalogInput.class, "distLeft");
+        distRight = hardwareMap.get(AnalogInput.class, "distRight");
+        distFrontLeft = hardwareMap.get(AnalogInput.class, "distFrontLeft");
+        distFrontRight = hardwareMap.get(AnalogInput.class, "distFrontRight");
+
+
         // INTAKE
         /*intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -538,7 +545,6 @@ public class RobotDriver {
         intakePos = intake.getCurrentPosition();
         //gantryPos = gantyEncoder.getCurrentPosition();
         //touchVal = touch.getValue();
-
         if (useIMU) {
             pullIMUHeading();
         }
@@ -1100,6 +1106,25 @@ public class RobotDriver {
         return (fsr.getVoltage() > 0.8);
     }
 
+    /**
+     * Returns all of the voltages in an array
+     * @return list of raw voltages. Indexes: 0-left, 1-frontLeft, 2-frontRight, 3-right
+     */
+    public double[] getDistVoltages() {
+        return new double[] {distLeft.getVoltage(), distFrontLeft.getVoltage(), distFrontRight.getVoltage(), distRight.getVoltage()};
+    }
+
+    /**
+     * Returns all of the distances in an array
+     * @return list of distances. Indexes: 0-left, 1-frontLeft, 2-frontRight, 3-right
+     */
+    public double[] getDistances() {
+        return new double[] {distLeft.getVoltage()*1000/3.2, distFrontLeft.getVoltage()*1000/3.2, distFrontRight.getVoltage()*1000/3.2, distRight.getVoltage()*1000/3.2};
+    }
+
+
+
+
     //1 Set internal transfer servos/motor power
 
     //set gantry power
@@ -1204,6 +1229,11 @@ public class RobotDriver {
 
     public void resetIMUHeading() {
         imu.resetYaw();
+    }
+
+
+    public void getLeftDist() {
+
     }
 
 
