@@ -37,10 +37,11 @@ public class Auto extends LinearOpMode {
     boolean weaponsExtended = false;
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
-    public static double offpos = 0;
+    public double offpos = 0;
 
 
     double Xpos = 100;
+    boolean tagDetected = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -226,8 +227,29 @@ public class Auto extends LinearOpMode {
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
                             if (detection.metadata != null) {
-                                if (detection.id == 2 && Xpos == 100){
-                                    Xpos = -detection.ftcPose.x;
+                                if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                                    if (detection.id == 2 && !tagDetected) {
+                                        Xpos = -detection.ftcPose.x;
+                                        tagDetected = true;
+                                    } else if (detection.id == 3 && Xpos == 100) {
+                                        Xpos = -detection.ftcPose.x + 2;
+                                        tagDetected = true;
+                                    } else if (detection.id == 1) {
+                                        Xpos = -detection.ftcPose.x - 2;
+                                        tagDetected = true;
+                                    }
+
+                                    if (tagDetected) {
+                                        if (position == General.SpikePosition.LEFT) {
+                                            offpos = -2;
+                                        } else if (position == General.SpikePosition.RIGHT) {
+                                            offpos = 2;
+                                        }
+                                    }
+
+
+                                } else {
+
                                 }
                             }
                         }
