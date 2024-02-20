@@ -261,6 +261,7 @@ public class Auto extends LinearOpMode {
                             }
                         }
                         telemetry.addData("Xpos", Xpos);
+                        telemetry.addData("offset", offpos)
                         telemetry.update();
                         if (tagDetected && timer.time() < 2 && opModeIsActive()) {
                             double Xcurrent_error = Xpos+offpos-driver.getCurrentPos().getX();
