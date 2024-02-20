@@ -229,7 +229,7 @@ public class Auto extends LinearOpMode {
                     //TODO: INSERT APRILTAG CODE
                     visionPortal.resumeStreaming();
                     timer.reset();
-                    while (timer.time() < 2 && opModeIsActive()) {
+                    while (opModeIsActive()) {
 
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
@@ -261,7 +261,7 @@ public class Auto extends LinearOpMode {
                             }
                         }
                         telemetry.addData("Xpos", Xpos);
-                        telemetry.addData("offset", offpos)
+                        telemetry.addData("offset", offpos);
                         telemetry.update();
                         if (tagDetected && timer.time() < 2 && opModeIsActive()) {
                             double Xcurrent_error = Xpos+offpos-driver.getCurrentPos().getX();
