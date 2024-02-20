@@ -261,7 +261,7 @@ public class Auto extends LinearOpMode {
                             }
                         }
                         telemetry.addData("Xpos", Xpos);
-                        telemetry.addData("offset", offpos)
+                        telemetry.addData("offset", offpos);
                         telemetry.update();
                         if (tagDetected && timer.time() < 2 && opModeIsActive()) {
                             double Xcurrent_error = Xpos+offpos-driver.getCurrentPos().getX();
@@ -269,7 +269,7 @@ public class Auto extends LinearOpMode {
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
 
-                            driver.drive(-Xcurrent_error/8, -driver.getCurrentPos().getY()/8, driver.getCurrentPos().getHeading()/8, false);
+                            driver.drive(-Xcurrent_error/8, 0, driver.getCurrentPos().getHeading()/8, false);
 
                         }
                         driver.update();
