@@ -38,7 +38,7 @@ public class Auto extends LinearOpMode {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
     public double offpos = 0;
-
+    int[] portals;
 
     double Xpos = 100;
     boolean tagDetected = false;
@@ -95,6 +95,8 @@ public class Auto extends LinearOpMode {
                 driver.setPurpleNorthRelease(false);
                 break;
         }
+
+        portals = VisionPortal.makeMultiPortalView(3, VisionPortal.MultiPortalLayout.HORIZONTAL);
 
         initCameras(allianceLocation); // initialize the correct camera
         initAprilTag();
@@ -325,11 +327,11 @@ public class Auto extends LinearOpMode {
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
         if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
-            PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), viewportContainerIds[1]);
+            PropCameraR = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamR"), portals[1]);
             propPipeline = new ThreeZonePropDetectionPipeline(true, allianceLocation);
             PropCameraR.setPipeline(propPipeline);
         } else {
-            PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), viewportContainerIds[0]);
+            PropCameraL = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "PropCamL"), portals[0]);
             propPipeline = new ThreeZonePropDetectionPipeline(true, allianceLocation);
             PropCameraL.setPipeline(propPipeline);
         }
@@ -399,6 +401,7 @@ public class Auto extends LinearOpMode {
         //builder.setAutoStopLiveView(false);
 
         // Set and enable the processor.
+        builder.setLiveViewContainerId(portals[2]);
         builder.addProcessor(aprilTag);
 
         // Build the Vision Portal, using the above settings.
