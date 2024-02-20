@@ -271,7 +271,7 @@ public class Auto extends LinearOpMode {
                             driver.drive(-Xcurrent_error/8, -driver.getCurrentPos().getY()/8, driver.getCurrentPos().getHeading()/8, false);
 
                         }
-
+                        driver.update();
                     }
                     //visionPortal.stopStreaming();
 
@@ -279,7 +279,7 @@ public class Auto extends LinearOpMode {
 
                     timer.reset();
                     while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) { // drive into the backdrop until the FSR is pressed
-                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/8, false);
+                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/20, false);
                         driver.update();
                     }
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
