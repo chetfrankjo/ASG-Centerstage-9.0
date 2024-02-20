@@ -231,11 +231,11 @@ public class Auto extends LinearOpMode {
                                     if (detection.id == 2 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
-                                    } else if (detection.id == 3 && Xpos == 100) {
-                                        Xpos = -detection.ftcPose.x + 2;
-                                        tagDetected = true;
-                                    } else if (detection.id == 1) {
+                                    } else if (detection.id == 3 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x - 2;
+                                        tagDetected = true;
+                                    } else if (detection.id == 1 && !tagDetected) {
+                                        Xpos = -detection.ftcPose.x + 2;
                                         tagDetected = true;
                                     }
 
@@ -249,7 +249,7 @@ public class Auto extends LinearOpMode {
 
 
                                 } else {
-
+                                    sleep(10);
                                 }
                             }
                         }
@@ -402,7 +402,7 @@ public class Auto extends LinearOpMode {
         // Disable or re-enable the aprilTag processor at any time.
         //visionPortal.setProcessorEnabled(aprilTag, true);
 
-        visionPortal.stopStreaming();
+        //visionPortal.stopStreaming();
 
         //visionPortal.resumeStreaming();
 
