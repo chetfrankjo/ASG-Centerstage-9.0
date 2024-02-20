@@ -229,7 +229,7 @@ public class Auto extends LinearOpMode {
                     //TODO: INSERT APRILTAG CODE
                     visionPortal.resumeStreaming();
                     timer.reset();
-                    while (timer.time() < 2 && opModeIsActive()) {
+                    while (opModeIsActive()) {
 
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
