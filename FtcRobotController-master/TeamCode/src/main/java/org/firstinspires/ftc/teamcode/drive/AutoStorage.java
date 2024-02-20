@@ -105,7 +105,7 @@ public class AutoStorage {
                 switch (spikePosition) {
                     case LEFT:
                         paths.add(new Trajectory(9, 34, 0.5, 13).addPoint(37, 34, -90).addPoint(37, 38, 0).build());
-                        paths.add(new Trajectory(37, 38, 0.5, 13).addPoint(37, 26, 180).addPoint(63, 26, -90).addPoint(63, 106, 0).addPoint(27, 106, 90).build());
+                        paths.add(new Trajectory(37, 38, 0.5, 13).addPoint(37, 26, 180).addPoint(63, 26, -90).addPoint(63, 106, 0).addPoint(40, 106, 90).build()); // 27
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(29, 115, 0.5, 8, 0).addPoint(29, 108, 180).addPointSpeed(10, 108, 90, 0.3).build());
