@@ -153,6 +153,7 @@ public class Auto extends LinearOpMode {
                     stateOverrideTimer.reset();
                     break;
                 case PURPLE_APPROACH:
+                    visionPortal.resumeStreaming();
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
                     if (driver.getIntakePos() < 20) {
                         driver.setIntakePower(-0.2);
@@ -227,10 +228,10 @@ public class Auto extends LinearOpMode {
                     break;
                 case APPROACH_3: // finalize backdrop position and deposit
                     driver.drive(0,0,0,false);
-                    sleep(100);
+                    sleep(20);
                     startPos = driver.getCurrentPos().getX();
                     //TODO: INSERT APRILTAG CODE
-                    visionPortal.resumeStreaming();
+
                     timer.reset();
                     while (opModeIsActive() && timer.time() < 2) {
 
