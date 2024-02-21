@@ -37,6 +37,7 @@ public class Auto extends LinearOpMode {
     boolean weaponsExtended = false;
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
+    public double startPos;
     public double offpos = 0;
     int[] portals;
 
@@ -225,11 +226,13 @@ public class Auto extends LinearOpMode {
                     }
                     break;
                 case APPROACH_3: // finalize backdrop position and deposit
-
+                    driver.drive(0,0,0,false);
+                    sleep(100);
+                    startPos = driver.getCurrentPos().getX();
                     //TODO: INSERT APRILTAG CODE
                     visionPortal.resumeStreaming();
                     timer.reset();
-                    while (opModeIsActive()) {
+                    while (opModeIsActive() && timer.time() < 2) {
 
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
@@ -239,18 +242,18 @@ public class Auto extends LinearOpMode {
                                         Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
                                     } else if (detection.id == 3 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x - 2;
+                                        Xpos = -detection.ftcPose.x - 6;
                                         tagDetected = true;
                                     } else if (detection.id == 1 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x + 2;
+                                        Xpos = -detection.ftcPose.x + 6;
                                         tagDetected = true;
                                     }
 
                                     if (tagDetected) {
                                         if (position == General.SpikePosition.LEFT) {
-                                            offpos = -2;
+                                            offpos = -6;
                                         } else if (position == General.SpikePosition.RIGHT) {
-                                            offpos = 2;
+                                            offpos = 6;
                                         }
                                     }
 
@@ -258,22 +261,36 @@ public class Auto extends LinearOpMode {
                                 } else {
                                     sleep(10);
                                 }
+
+                            } else {
+                                driver.drive(0, 0, 0, false);
                             }
+                            driver.update();
                         }
                         telemetry.addData("Xpos", Xpos);
                         telemetry.addData("offset", offpos);
+                        telemetry.addData("tagdetect", tagDetected);
                         telemetry.update();
-                        if (tagDetected && timer.time() < 2 && opModeIsActive()) {
-                            double Xcurrent_error = Xpos+offpos-driver.getCurrentPos().getX();
+                        if (tagDetected) {
+                            double Xcurrent_error = Xpos+offpos-(-startPos + driver.getCurrentPos().getX());
 
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
 
-                            driver.drive(-Xcurrent_error/8, 0, driver.getCurrentPos().getHeading()/8, false);
+                            driver.drive(Xcurrent_error/8, 0, -driver.getCurrentPos().getHeading()/16, false);
 
+                        } else {
+                            driver.drive(0, 0, 0, false);
                         }
                         driver.update();
+                        telemetry.addData("tag detect", tagDetected);
+                        telemetry.update();
+
+
                     }
+
+                    visionPortal.stopStreaming();
+
                     //visionPortal.stopStreaming();
 
                     //---------------------------

@@ -130,8 +130,8 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
                             }
 
                             if (tagDetected) {
-                                if (false) {
-                                    offpos = -2;
+                                if (true) {
+                                    offpos = -6;
                                 } else if (false) {
                                     offpos = 2;
                                 }
@@ -143,9 +143,7 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
                 }
                 if (tagDetected) {
                     //sleep(10);
-                    driver.drive(-Xcurrent_error/8, 0, driver.getCurrentPos().getHeading()/8, false);
-                } else {
-                    driver.drive(0, 0, 0, false);
+                    driver.drive(Xcurrent_error/8, 0, -driver.getCurrentPos().getHeading()/16, false);
                 }
                 driver.update();
             }
