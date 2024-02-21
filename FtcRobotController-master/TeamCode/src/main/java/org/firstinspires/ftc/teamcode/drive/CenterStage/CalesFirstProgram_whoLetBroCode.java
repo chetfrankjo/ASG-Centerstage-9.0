@@ -58,9 +58,9 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
 
     double Tangle = 0;
 
-    double Xpos = 100;
+    double Xpos;
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
-
+    boolean tagDetected = false;
     /**
      * The variable to store our instance of the AprilTag processor.
      */
@@ -94,7 +94,7 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
                 List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                 for (AprilTagDetection detection : currentDetections){
                     if (detection.metadata != null) {
-                        if (detection.id == 2 && Xpos == 100){
+                        if (detection.id == 2 && !tagDetected){
                             Xpos = -detection.ftcPose.x;
                         }
                     }
@@ -112,46 +112,40 @@ public class CalesFirstProgram_whoLetBroCode extends LinearOpMode{
 
                 Xcurrent_error = Xpos+offpos-position.getX();
                 packet.put("difference", Xpos-position.getX());
+                telemetry.addData("error", Xcurrent_error);
                 telemetry.update();
 
+                for (AprilTagDetection detection : currentDetections) {
+                    if (detection.metadata != null) {
+                        if (true) {
+                            if (detection.id == 2 && !tagDetected) {
+                                Xpos = -detection.ftcPose.x;
+                                tagDetected = true;
+                            } else if (detection.id == 3 && !tagDetected) {
+                                Xpos = -detection.ftcPose.x - 6;
+                                tagDetected = true;
+                            } else if (detection.id == 1 && !tagDetected) {
+                                Xpos = -detection.ftcPose.x + 6;
+                                tagDetected = true;
+                            }
 
-                Tp = Tk_p * Tcurrent_error;
-                Ti += Tk_i * (Tcurrent_error * (Tcurrent_time / 1000000000));
-                if (Ti > Tmax_i) {
-                    Ti = Tmax_i;
-                } else if (Ti < -Tmax_i) {
-                    Ti = -Tmax_i;
-                }
-                Td = Tk_d * (Tcurrent_error - Tprevious_error) / (Tcurrent_time);
-                Ttotal = Tp + Ti + Td;
-
-
-                Xp = Xk_p * Xcurrent_error;
-                Xi += Xk_i * (Xcurrent_error * (Tcurrent_time / 1000000000));
-                if (Xi > Xmax_i) {
-                    Xi = Xmax_i;
-                } else if (Xi < -Xmax_i) {
-                    Xi = -Xmax_i;
-                }
-                Xd = Xk_d * (Xcurrent_error - Xprevious_error) / (Tcurrent_time);
-                Xtotal = Xp + Xi + Xd;
-
-                driver.drive(Xtotal, -gamepad1.left_stick_y, Ttotal, false);
-                Xprevious_error = Xcurrent_error;
-                Tprevious_error = Tcurrent_error;
-                Tprevious_time = Tcurrent_time;
-                if(gamepad1.a){
-                    Tangle = 90;
-                    Tprevious_error = 0;
-                    while (gamepad1.a){
-                        sleep(10);
+                            if (tagDetected) {
+                                if (false) {
+                                    offpos = -2;
+                                } else if (false) {
+                                    offpos = 2;
+                                }
+                            }
+                        }
                     }
-                } else if (gamepad1.b){
-                    Tangle = 0;
-                    Tprevious_error = 0;
-                    while (gamepad1.b){
-                        sleep(10);
-                    }
+
+
+                }
+                if (tagDetected) {
+                    //sleep(10);
+                    driver.drive(-Xcurrent_error/8, 0, driver.getCurrentPos().getHeading()/8, false);
+                } else {
+                    driver.drive(0, 0, 0, false);
                 }
                 driver.update();
             }

@@ -40,7 +40,7 @@ public class Auto extends LinearOpMode {
     public double offpos = 0;
     int[] portals;
 
-    double Xpos = 100;
+    double Xpos;
     boolean tagDetected = false;
 
     @Override
