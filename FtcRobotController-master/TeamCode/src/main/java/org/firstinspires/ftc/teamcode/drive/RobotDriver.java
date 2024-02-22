@@ -958,7 +958,9 @@ public class RobotDriver {
         }
         if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
-            clawLift.setPosition(0.226); //0.226 up
+
+            clawLift.setPosition(0.23); //0.226
+
         }
         if (clawTimer.time()>0.01 && invertOtherClaw) {
             invertOtherClaw = false;
