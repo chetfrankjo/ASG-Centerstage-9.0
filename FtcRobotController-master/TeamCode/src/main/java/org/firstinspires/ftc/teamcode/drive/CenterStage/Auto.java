@@ -371,33 +371,7 @@ public class Auto extends LinearOpMode {
 
 
                     }
-                    driver.resetOdometry();
-                    driver.localizer.resetOdoAndOffsets();
-                    if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
-                        switch (position) {
-                            case LEFT:
-                                driver.localizer.setEstimatePos(30, 118, 0);
-                                break;
-                            case CENTER:
-                                driver.localizer.setEstimatePos(36, 118, 0);
-                                break;
-                            case RIGHT:
-                                driver.localizer.setEstimatePos(42, 118, 0);
-                                break;
-                        }
-                    } else {
-                        switch (position) {
-                            case LEFT:
-                                driver.localizer.setEstimatePos(100, 118, 0);
-                                break;
-                            case CENTER:
-                                driver.localizer.setEstimatePos(106, 118, 0);
-                                break;
-                            case RIGHT:
-                                driver.localizer.setEstimatePos(112, 118, 0);
-                                break;
-                        }
-                    }
+
 
 
 
@@ -425,6 +399,34 @@ public class Auto extends LinearOpMode {
                         driver.update();
                         driver.drive(0, 0, 0, false);
                     }
+                    driver.resetOdometry();
+                    driver.localizer.resetOdoAndOffsets();
+                    if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                        switch (position) {
+                            case LEFT:
+                                driver.localizer.setEstimatePos(30, 118, 0);
+                                break;
+                            case CENTER:
+                                driver.localizer.setEstimatePos(36, 118, 0);
+                                break;
+                            case RIGHT:
+                                driver.localizer.setEstimatePos(42, 118, 0);
+                                break;
+                        }
+                    } else {
+                        switch (position) {
+                            case LEFT:
+                                driver.localizer.setEstimatePos(100, 118, 0);
+                                break;
+                            case CENTER:
+                                driver.localizer.setEstimatePos(106, 118, 0);
+                                break;
+                            case RIGHT:
+                                driver.localizer.setEstimatePos(112, 118, 0);
+                                break;
+                        }
+                    }
+                    driver.update();
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
                 case PARK_1:
