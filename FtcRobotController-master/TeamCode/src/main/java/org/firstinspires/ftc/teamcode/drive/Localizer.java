@@ -123,6 +123,8 @@ public class Localizer {
         x = 0;
         y = 0;
         angle = 0;
+        prevencoders = new int[] {0, 0, 0};
+        encoders = new int[] {0, 0, 0};
     }
 
     public void resetPosWithEstimate(Pose2d pos) {
