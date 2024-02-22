@@ -204,6 +204,9 @@ public class Auto extends LinearOpMode {
                         stateOverrideTimer.reset();
                     }
                     break;
+
+
+
                 case APPROACH_2: // approach the backdrop and prepare to detect from the ultrasonic sensors
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
@@ -218,14 +221,29 @@ public class Auto extends LinearOpMode {
                         }
                     }
                     if (result) {
-                        autoState = General.AutoState.APPROACH_3; // move on to the next state
+                        autoState = General.AutoState.ULTRASONIC_DETECT; // move on to the next state
                     }
                     if (stateOverrideTimer.time() > 9) { // if the robot stalls, skip to the next state
-                        autoState = General.AutoState.APPROACH_3;
+                        autoState = General.AutoState.ULTRASONIC_DETECT;
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
                     }
                     break;
+
+                case ULTRASONIC_DETECT:
+                    driver.drive(0, 0, 0, false);
+                    if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                        if (driver.getUltraL() < 32) {
+                            timer.time();
+                            while (timer.time() < 6) {
+                                driver.goToAnotherPosition(new Pose2d(63, 106, 0), 63, 82, 0.5, 0, 0.5, 1, true, 0);
+
+                            }
+                        }
+                    }
+
+                    break;
+
                 case APPROACH_3: // finalize backdrop position and deposit
                     driver.drive(0,0,0,false);
                     sleep(150);
