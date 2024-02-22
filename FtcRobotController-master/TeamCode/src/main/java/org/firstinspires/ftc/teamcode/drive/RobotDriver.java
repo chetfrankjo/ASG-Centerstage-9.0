@@ -449,7 +449,7 @@ public class RobotDriver {
                 weaponsState = WeaponsState.IDLE;
                 break;
             case IDLE: // normal resting state, holding positions
-                if (waitingForDepsoit && (speedyDeposit || (!isInRange(currentPos.getX(), depositPos.getX()-2, depositPos.getX()+2) || !isInRange(currentPos.getY(), depositPos.getY()-2, depositPos.getY()+2) || !isInRange(currentPos.getHeading(), depositPos.getHeading()-20, depositPos.getHeading()+20)))) {
+                if (waitingForDepsoit && (speedyDeposit || !isInRange(currentPos.getY(), depositPos.getY()-2, depositPos.getY()+2) || !isInRange(currentPos.getHeading(), depositPos.getHeading()-20, depositPos.getHeading()+20))) { //(!isInRange(currentPos.getX(), depositPos.getX()-2, depositPos.getX()+2)
                     if (depositTimer.time() > 0.2 && waitingForDepsoit) { // waits to flip claw until the flipper has moved sufficiently
                         setClawLiftPos(false);
                     }
