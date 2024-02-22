@@ -116,6 +116,15 @@ public class Localizer {
         this.angle = Math.toRadians(angle);*/
     }
 
+    public void resetOdoAndOffsets() {
+        startXOffset = 0;
+        startYOffset = 0;
+        startAngleOffset = 0;
+        x = 0;
+        y = 0;
+        angle = 0;
+    }
+
     public void resetPosWithEstimate(Pose2d pos) {
         startXOffset = pos.getX();
         startYOffset = pos.getY();
