@@ -408,10 +408,10 @@ public class Auto extends LinearOpMode {
                                 driver.localizer.setEstimatePos(31, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(36, 122, 0);
+                                driver.localizer.setEstimatePos(37, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(42, 122, 0);
+                                driver.localizer.setEstimatePos(43, 122, 0);
                                 break;
                         }
                     } else {
