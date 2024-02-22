@@ -308,7 +308,7 @@ public class Auto extends LinearOpMode {
                     //TODO: INSERT APRILTAG CODE
                     double Xcurrent_error = 100;
                     timer.reset();
-                    while (opModeIsActive() && timer.time() < 3 && ((Xcurrent_error > 0.2 || Xcurrent_error < -0.2) || !driver.getFSRPressed())) {
+                    while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) {
 
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
@@ -347,7 +347,7 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("offset", offpos);
                         telemetry.addData("tagdetect", tagDetected);
                         telemetry.addData("Xcurrent_error", Xcurrent_error);
-                        telemetry.addData("fsr", driver.getFSRPressed());
+                        telemetry.addData("fsr", driver.getFSRVoltage());
                         telemetry.update();
                         if (!tagDetected && timer.time() > 1) { //TODO: FIX IF THIS IS ON THE RED SIDE
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.BLUE_NORTH) {
@@ -366,8 +366,7 @@ public class Auto extends LinearOpMode {
 
                         }
                         driver.update();
-                        telemetry.addData("tag detect", tagDetected);
-                        telemetry.update();
+
 
 
                     }
