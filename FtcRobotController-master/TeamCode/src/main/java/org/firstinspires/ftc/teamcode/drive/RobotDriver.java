@@ -1105,7 +1105,7 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 0.4);
+        return (fsr.getVoltage() > 0.25);
     }
 
     public double getUltraL() {
