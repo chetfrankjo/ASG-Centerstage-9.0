@@ -187,7 +187,7 @@ public class Auto extends LinearOpMode {
                         timer.reset();
                         stateOverrideTimer.reset();
                     }
-                    if (stateOverrideTimer.time() > 7) { // If the robot stalls, move on to the next state
+                    if (stateOverrideTimer.time() > 6) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
                         driver.setPurpleNorthRelease(true);
                         driver.setPurpleSouthRelease(true);
@@ -204,7 +204,7 @@ public class Auto extends LinearOpMode {
                         stateOverrideTimer.reset();
                     }
                     break;
-                case APPROACH_2: // approach the backdrop
+                case APPROACH_2: // approach the backdrop and prepare to detect from the ultrasonic sensors
                     result = driver.runAutoPath(trajectories.get(1).path);
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         if (driver.getCurrentPos().getY() > 85 && !weaponsExtended) { // extend all subsystems after you have cleared the stage door
@@ -228,12 +228,12 @@ public class Auto extends LinearOpMode {
                     break;
                 case APPROACH_3: // finalize backdrop position and deposit
                     driver.drive(0,0,0,false);
-                    sleep(20);
+                    sleep(150);
                     startPos = driver.getCurrentPos().getX();
                     //TODO: INSERT APRILTAG CODE
-
+                    double Xcurrent_error = 100;
                     timer.reset();
-                    while (opModeIsActive() && timer.time() < 2) {
+                    while (opModeIsActive() && timer.time() < 3 && ((Xcurrent_error > 0.2 || Xcurrent_error < -0.2) || !driver.getFSRPressed())) {
 
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
@@ -271,17 +271,24 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("Xpos", Xpos);
                         telemetry.addData("offset", offpos);
                         telemetry.addData("tagdetect", tagDetected);
+                        telemetry.addData("Xcurrent_error", Xcurrent_error);
+                        telemetry.addData("fsr", driver.getFSRPressed());
                         telemetry.update();
+                        if (!tagDetected && timer.time() > 1) { //TODO: FIX IF THIS IS ON THE RED SIDE
+                            if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.BLUE_NORTH) {
+                                driver.drive(-0.5, 0, 0, false);
+
+                                timer.reset();
+                            }
+                        }
                         if (tagDetected) {
-                            double Xcurrent_error = Xpos+offpos-(-startPos + driver.getCurrentPos().getX());
+                            Xcurrent_error = Xpos+offpos-(-startPos + driver.getCurrentPos().getX());
 
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
 
-                            driver.drive(Xcurrent_error/8, 0, -driver.getCurrentPos().getHeading()/16, false);
+                            driver.drive(Xcurrent_error/8, 0.2, -driver.getCurrentPos().getHeading()/20, false);
 
-                        } else {
-                            driver.drive(0, 0, 0, false);
                         }
                         driver.update();
                         telemetry.addData("tag detect", tagDetected);
@@ -297,10 +304,7 @@ public class Auto extends LinearOpMode {
                     //---------------------------
 
                     timer.reset();
-                    while (timer.time() < 2 && opModeIsActive() && !driver.getFSRPressed()) { // drive into the backdrop until the FSR is pressed
-                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading()/20, false);
-                        driver.update();
-                    }
+
                     driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
                     timer.reset();
                     while (timer.time() < 0.5 && opModeIsActive()) {

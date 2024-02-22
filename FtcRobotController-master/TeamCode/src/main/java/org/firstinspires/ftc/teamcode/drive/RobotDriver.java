@@ -1103,9 +1103,21 @@ public class RobotDriver {
         return fsr.getVoltage();
     }
     public boolean getFSRPressed() {
-        return (fsr.getVoltage() > 0.8);
+        return (fsr.getVoltage() > 0.4);
     }
 
+    public double getUltraL() {
+        return (296.3*distLeft.getVoltage()+.889);
+    }
+    public double getUltraFL() {
+        return (296.3*distFrontLeft.getVoltage()+.889);
+    }
+    public double getUltraFR() {
+        return (296.3*distFrontRight.getVoltage()+.889);
+    }
+    public double getUltraR() {
+        return (296.3*distRight.getVoltage()+.889);
+    }
     /**
      * Returns all of the voltages in an array
      * @return list of raw voltages. Indexes: 0-left, 1-frontLeft, 2-frontRight, 3-right
