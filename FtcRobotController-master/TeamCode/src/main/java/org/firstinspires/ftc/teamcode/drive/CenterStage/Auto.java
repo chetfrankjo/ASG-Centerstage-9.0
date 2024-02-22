@@ -401,6 +401,7 @@ public class Auto extends LinearOpMode {
                     }
                     driver.resetOdometry();
                     driver.localizer.resetOdoAndOffsets();
+                    driver.update();
                     if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         switch (position) {
                             case LEFT:
