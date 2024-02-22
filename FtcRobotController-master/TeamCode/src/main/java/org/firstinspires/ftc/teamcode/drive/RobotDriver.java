@@ -1319,8 +1319,8 @@ public class RobotDriver {
 
     public boolean runAutoPath(ArrayList<CurvePoint> path) {
         followCurve(path);
-        if (Math.abs(currentPos.getX() - path.get(path.size() - 2).x) <= 1 &&
-                Math.abs(currentPos.getY() - path.get(path.size() - 2).y) <= 1)
+        if (Math.abs(currentPos.getX() - path.get(path.size() - 2).x) <= 0.5 &&
+                Math.abs(currentPos.getY() - path.get(path.size() - 2).y) <= 0.5)
         {
             // We are at our desired position
             // bump index and apply it to the new trajectory
