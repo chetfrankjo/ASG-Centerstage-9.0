@@ -24,6 +24,7 @@ public class Teleop extends LinearOpMode{
         RobotDriver driver = new RobotDriver(hardwareMap, false);
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setClawMode(General.ClawMode.OPEN);
+        driver.setClawLiftPos(false);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.setPurpleSouthRelease(true);
         driver.setPurpleNorthRelease(true);
