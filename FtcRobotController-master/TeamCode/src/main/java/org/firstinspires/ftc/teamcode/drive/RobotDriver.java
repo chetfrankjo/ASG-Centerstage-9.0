@@ -958,7 +958,7 @@ public class RobotDriver {
         }
         if (clawTimer.time()>0.28 && invertClaw) {
             invertClaw = false;
-            clawLift.setPosition(0.22); //0.22
+            clawLift.setPosition(0.226); //0.226
         }
         if (clawTimer.time()>0.05 && invertOtherClaw) {
             invertOtherClaw = false;
@@ -991,7 +991,7 @@ public class RobotDriver {
             //clawLift.setPosition(0.9);
             clawTimer.reset();
             invertClaw = true;
-            //clawLift.setPosition(0.22);
+            //clawLift.setPosition(0.226);
         } else {
             clawTimer.reset();
             invertOtherClaw = true;
@@ -1107,16 +1107,16 @@ public class RobotDriver {
     }
 
     public double getUltraL() {
-        return (296.3*distLeft.getVoltage()+.889);
+        return distLeft.getVoltage()*1000/3.2;
     }
     public double getUltraFL() {
-        return (296.3*distFrontLeft.getVoltage()+.889);
+        return distFrontLeft.getVoltage()*1000/3.2;
     }
     public double getUltraFR() {
-        return (296.3*distFrontRight.getVoltage()+.889);
+        return distFrontRight.getVoltage()*1000/3.2;
     }
     public double getUltraR() {
-        return (296.3*distRight.getVoltage()+.889);
+        return distRight.getVoltage()*1000/3.2;
     }
     /**
      * Returns all of the voltages in an array

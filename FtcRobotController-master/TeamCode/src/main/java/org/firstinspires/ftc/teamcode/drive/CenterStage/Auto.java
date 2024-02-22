@@ -30,7 +30,7 @@ public class Auto extends LinearOpMode {
     General.SpikePosition position = General.SpikePosition.LEFT;
     General.AllianceLocation allianceLocation;
     General.ParkLocation parkLocation;
-    ElapsedTime timer, stateOverrideTimer;
+    ElapsedTime timer, stateOverrideTimer, ultraTimer;
     OpenCvCamera PropCameraR, PropCameraL, cameraOfInterest;
     ThreeZonePropDetectionPipeline propPipeline;
     double timerOffset1, timerOffset2, timerOffset3;
@@ -39,6 +39,7 @@ public class Auto extends LinearOpMode {
     private VisionPortal visionPortal;
     public double startPos;
     public double offpos = 0;
+    boolean robotDetected = false;
     int[] portals;
 
     double Xpos;
@@ -118,6 +119,7 @@ public class Auto extends LinearOpMode {
 
         timer = new ElapsedTime();
         stateOverrideTimer = new ElapsedTime();
+        ultraTimer = new ElapsedTime();
         timer.reset();
 
         if (driver.loadSlidesUpPreset()) {
@@ -209,6 +211,7 @@ public class Auto extends LinearOpMode {
 
                 case APPROACH_2: // approach the backdrop and prepare to detect from the ultrasonic sensors
                     result = driver.runAutoPath(trajectories.get(1).path);
+
                     if (allianceLocation == General.AllianceLocation.RED_SOUTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         if (driver.getCurrentPos().getY() > 85 && !weaponsExtended) { // extend all subsystems after you have cleared the stage door
                             driver.setWeaponsState(General.WeaponsState.EXTEND);
@@ -228,19 +231,73 @@ public class Auto extends LinearOpMode {
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
                     }
+                    robotDetected = false;
                     break;
 
                 case ULTRASONIC_DETECT:
+                    autoState = General.AutoState.APPROACH_3;
+                    /*
                     driver.drive(0, 0, 0, false);
-                    if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
-                        if (driver.getUltraL() < 32) {
-                            timer.time();
-                            while (timer.time() < 6) {
-                                driver.goToAnotherPosition(new Pose2d(63, 106, 0), 63, 82, 0.5, 0, 0.5, 1, true, 0);
+                    double lowPass = 24;
+                    double refPos = driver.getCurrentPos().getY();
+                    ultraTimer.reset();
+                    timer.reset();
 
+                    if (!robotDetected) {
+                        while (timer.time() < 0.5 && opModeIsActive()) {
+                            if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                                if (ultraTimer.time() >= 0.05) {
+                                    lowPass += ((driver.getUltraL()) - lowPass) * 0.1;
+                                }
+                            } else {
+                                if (ultraTimer.time() >= 0.05) {
+                                    lowPass += ((driver.getUltraR()) - lowPass) * 0.1;
+                                }
                             }
+                            telemetry.addData("lowPass", lowPass);
+                            telemetry.update();
+                        }
+
+                        if (allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                            if (lowPass < 32) {
+
+
+                                while (timer.time() < 6 && opModeIsActive()) {
+                                    if (driver.getCurrentPos().getY() > 86) {
+                                        driver.drive(0, -0.2, -driver.getCurrentPos().getHeading()/20, false);
+
+                                    } else {
+                                        driver.drive(0, 0, 0, false);
+                                    }
+                                    driver.update();
+                                    telemetry.addData("avoiding", driver.getCurrentPos().getY());
+                                    telemetry.update();
+                                }
+                                while (timer.time() < 1.5 && opModeIsActive()) {
+                                    if (driver.getCurrentPos().getY() < 106) {
+                                        driver.drive(0, 0.2, -driver.getCurrentPos().getHeading() / 20, false);
+                                    } else {
+                                        driver.drive(0, 0, 0, false);
+                                    }
+                                    driver.update();
+                                    telemetry.addData("unavoiding", true);
+                                    telemetry.update();
+                                }
+                            }
+
                         }
                     }
+
+                     */
+                    //result = driver.runAutoPath(trajectories.get(2).path);
+                    driver.update();
+                    /*
+                    if (result) {
+                        autoState = General.AutoState.APPROACH_3;
+                    }
+
+                     */
+
 
                     break;
 
