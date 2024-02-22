@@ -27,6 +27,7 @@ public class Teleop extends LinearOpMode{
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.setPurpleSouthRelease(true);
         driver.setPurpleNorthRelease(true);
+        driver.setUseIMUForLocalization(true);
         driver.resetSlidesEncoder();
         //driver.resetFlipperEncoder();
 
