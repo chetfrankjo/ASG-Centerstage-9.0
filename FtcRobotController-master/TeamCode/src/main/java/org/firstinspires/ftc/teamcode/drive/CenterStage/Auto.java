@@ -405,25 +405,25 @@ public class Auto extends LinearOpMode {
                     if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(30, 118, 0);
+                                driver.localizer.setEstimatePos(31, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(36, 118, 0);
+                                driver.localizer.setEstimatePos(36, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(42, 118, 0);
+                                driver.localizer.setEstimatePos(42, 122, 0);
                                 break;
                         }
                     } else {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(100, 118, 0);
+                                driver.localizer.setEstimatePos(100, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(106, 118, 0);
+                                driver.localizer.setEstimatePos(106, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(112, 118, 0);
+                                driver.localizer.setEstimatePos(112, 122, 0);
                                 break;
                         }
                     }
