@@ -28,6 +28,7 @@ public class RobotSetup extends LinearOpMode {
     General.AllianceLocation location;
     General.ParkLocation parkLocation;
     General.AutoMode autoMode;
+    General.PixelPlacement pixelPlacement;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -155,10 +156,45 @@ public class RobotSetup extends LinearOpMode {
         advance=false;
         telemetry.clearAll();
         while (!advance && opModeInInit()) {
+            telemetry.addLine("PIXEL PLACEMENT: DPAD L/R or DPAD UP for CENTER");
+            telemetry.update();
+            if (gamepad1.dpad_left) {
+                pixelPlacement = General.PixelPlacement.LEFT;
+                Logger a = new Logger("pixelplacement", false);
+                a.addData("l");
+                a.update();
+                a.close();
+                while (gamepad1.dpad_left) {}
+                advance = true;
+            }
+            if (gamepad1.dpad_up) {
+                pixelPlacement = General.PixelPlacement.CENTER;
+                Logger a = new Logger("pixelplacement", false);
+                a.addData("c");
+                a.update();
+                a.close();
+                while (gamepad1.dpad_up) {}
+                advance = true;
+            }
+            if (gamepad1.dpad_right) {
+                pixelPlacement = General.PixelPlacement.RIGHT;
+                Logger a = new Logger("pixelplacement", false);
+                a.addData("r");
+                a.update();
+                a.close();
+                while (gamepad1.dpad_right) {}
+                advance = true;
+            }
+
+        }
+
+
+        advance=false;
+        telemetry.clearAll();
+        while (!advance && opModeInInit()) {
             telemetry.addLine("Slides LOW or HIGH - DPAD up/down");
             telemetry.update();
             if (gamepad1.dpad_up) {
-                parkOnWall = true;
                 Logger a = new Logger("slidespos", false);
                 slidesUp = true;
                 String l = "up";
@@ -170,7 +206,6 @@ public class RobotSetup extends LinearOpMode {
                 advance = true;
             }
             if (gamepad1.dpad_down) {
-                parkOnWall = false;
                 slidesUp = false;
                 Logger a = new Logger("slidespos", false);
                 String l = "down";
@@ -284,6 +319,7 @@ public class RobotSetup extends LinearOpMode {
             telemetry.addData("Alliance Location", location.toString());
             telemetry.addData("Park Location", parkLocation.toString());
             telemetry.addData("Parking on Wall?", parkOnWall);
+            telemetry.addData("Pixel Placement", pixelPlacement.toString());
             telemetry.addData("Slides up", slidesUp);
             telemetry.addData("Stage 1 Timer", timerOffset);
             telemetry.addData("Stage 2 Timer", timerOffset2);

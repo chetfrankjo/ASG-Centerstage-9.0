@@ -527,6 +527,22 @@ public class RobotDriver {
         Reader r = new Reader();
         return r.readFile("slidespos").equals("up");
     }
+    public PixelPlacement loadPixelPlacementPreset() {
+        PixelPlacement p = PixelPlacement.CENTER;
+        Reader r = new Reader();
+        switch (r.readFile("pixelplacement")) {
+            case "l":
+                p = PixelPlacement.LEFT;
+                break;
+            case "c":
+                p = PixelPlacement.CENTER;
+                break;
+            case "r":
+                p = PixelPlacement.RIGHT;
+                break;
+        }
+        return p;
+    }
 
 
     public Pose2d getCurrentPos() {
