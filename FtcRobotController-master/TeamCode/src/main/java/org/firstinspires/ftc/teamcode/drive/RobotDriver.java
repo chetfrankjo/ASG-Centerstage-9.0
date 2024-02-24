@@ -1195,7 +1195,7 @@ public class RobotDriver {
         blp /= normalizePower;
         frp /= normalizePower;
         brp /= normalizePower;
-        double kStatic = 0.12;
+        double kStatic = 0.03;
         flp *= 1-kStatic;
         flp += Math.signum(flp)*kStatic;
         blp *= 1-kStatic;
@@ -1471,8 +1471,8 @@ public class RobotDriver {
         } else {    // Otherwise, follow the trig
             turnError = relativeTurnAngle;
         }
-        if (Math.abs(turnError) > Math.toRadians(5)) {
-            movement_turn = Range.clip(AngleWrap((slope+preferredAngle) - currenthead_rad) / Math.toRadians(180), -1, 1) * turnSpeed;
+        if (Math.abs(turnError) > Math.toRadians(2.5)) {
+            movement_turn = Range.clip(AngleWrap((slope+preferredAngle) - currenthead_rad) / Math.toRadians(360), -1, 1) * turnSpeed;
         } else {
             movement_turn = 0;
         }

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.sun.tools.javac.jvm.Gen;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.DataTypes.General;
@@ -383,7 +384,7 @@ public class Auto extends LinearOpMode {
 
                     timer.reset();
 
-                    driver.setWeaponsState(General.WeaponsState.DEPOSIT); // drop the pixel, systems automatically fold up
+                    driver.setClawMode(General.ClawMode.OPEN); // drop the pixel
                     timer.reset();
                     while (timer.time() < 0.5 && opModeIsActive()) {
                         driver.drive(0, 0, 0, false);
@@ -430,6 +431,12 @@ public class Auto extends LinearOpMode {
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
                 case PARK_1:
+                    ultraTimer.reset();
+                    if (ultraTimer.time() < 0.5) {
+                        driver.setWeaponsState(General.WeaponsState.DEPOSIT);
+
+                    }
+
                     if (parkLocation != General.ParkLocation.CENTER) { // Follow the corresponding path for the park
                         result = driver.runAutoPath(trajectories.get(2).path);
                         if (result) {
