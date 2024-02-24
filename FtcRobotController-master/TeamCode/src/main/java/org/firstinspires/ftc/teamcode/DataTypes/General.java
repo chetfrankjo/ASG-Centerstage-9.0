@@ -54,5 +54,9 @@ public class General {
         STANDARD, CYCLE_1, CYCLE_2, PARK
     }
 
+    public enum PixelPlacement {
+        LEFT, CENTER, RIGHT
+    }
+
 
 }

@@ -34,6 +34,7 @@ public class Auto extends LinearOpMode {
     ElapsedTime timer, stateOverrideTimer, ultraTimer;
     OpenCvCamera PropCameraR, PropCameraL, cameraOfInterest;
     ThreeZonePropDetectionPipeline propPipeline;
+    General.PixelPlacement desiredPixelPlacement;
     double timerOffset1, timerOffset2, timerOffset3;
     boolean weaponsExtended = false;
     private AprilTagProcessor aprilTag;
@@ -60,6 +61,7 @@ public class Auto extends LinearOpMode {
         timerOffset1 = driver.loadTimerPreset1();
         timerOffset2 = driver.loadTimerPreset2();
         timerOffset3 = driver.loadTimerPreset3();
+        desiredPixelPlacement = driver.loadPixelPlacementPreset();
 
         ArrayList<Trajectory> trajectories = AutoStorage.generateAutoPaths(General.ParkLocation.RIGHT, General.SpikePosition.CENTER, General.AllianceLocation.RED_NORTH); // Default loaded paths. Are changed later in code once vision estimate is received
         allianceLocation = driver.loadAlliancePreset();
@@ -290,9 +292,8 @@ public class Auto extends LinearOpMode {
                 case APPROACH_3: // finalize backdrop position and deposit
                     driver.drive(0,0,0);
                     driver.update();
-                    sleep(150);
+                    sleep(150); // let the robot stop
                     startPos = driver.getCurrentPos().getX();
-                    //TODO: INSERT APRILTAG CODE
                     double Xcurrent_error = 100;
                     timer.reset();
                     while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) { // detect tags
