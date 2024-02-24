@@ -56,6 +56,7 @@ public class Auto extends LinearOpMode {
         driver.setWeaponsState(General.WeaponsState.INTAKING);
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
+        driver.setSpeedyDeposit(true);
         timerOffset1 = driver.loadTimerPreset1();
         timerOffset2 = driver.loadTimerPreset2();
         timerOffset3 = driver.loadTimerPreset3();
@@ -430,9 +431,11 @@ public class Auto extends LinearOpMode {
                     driver.update();
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
-                case PARK_1:
                     ultraTimer.reset();
-                    if (ultraTimer.time() < 0.5) {
+
+                case PARK_1:
+
+                    if (ultraTimer.time() < 0.05) {
                         driver.setWeaponsState(General.WeaponsState.DEPOSIT);
 
                     }

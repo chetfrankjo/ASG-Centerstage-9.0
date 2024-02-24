@@ -323,7 +323,7 @@ public class Teleop extends LinearOpMode{
                 if (leftHasPixel) { // conserving loop time
                     switch (driver.getClawMode()) {
                         case OPEN:
-                            if (leftColorLoops > 22) {
+                            if (leftColorLoops > 10) {
                                 driver.setClawMode(General.ClawMode.LEFT);
                                 leftColorLoops = 0;
                             }
@@ -331,7 +331,7 @@ public class Teleop extends LinearOpMode{
                         case LEFT:
                             break;
                         case RIGHT:
-                            if (leftColorLoops > 22) {
+                            if (leftColorLoops > 10) {
                                 driver.setClawMode(General.ClawMode.BOTH);
                                 leftColorLoops = 0;
                                 driver.setWeaponsState(General.WeaponsState.HOLDING);
@@ -349,13 +349,13 @@ public class Teleop extends LinearOpMode{
                 if (rightHasPixel) {
                     switch (driver.getClawMode()) {
                         case OPEN:
-                            if (rightColorLoops > 22) {
+                            if (rightColorLoops > 10) {
                                 driver.setClawMode(General.ClawMode.RIGHT);
                                 rightColorLoops = 0;
                             }
                             break;
                         case LEFT:
-                            if (rightColorLoops > 22) {
+                            if (rightColorLoops > 10) {
                                 driver.setClawMode(General.ClawMode.BOTH);
                                 rightColorLoops = 0;
                                 driver.setWeaponsState(General.WeaponsState.HOLDING);
@@ -392,7 +392,7 @@ public class Teleop extends LinearOpMode{
                 if (outtakeTimer.time()<1) {
                     if (outtakeTimer.time()>0.2) {
                         //driver.setIntakeMode(General.IntakeMode.OUTTAKE);
-                        driver.setIntakePower(-0.5);
+                        driver.setIntakePower(-0.65);
                     }
                 } else {
                     driver.setIntakeMode(General.IntakeMode.LOCK);
