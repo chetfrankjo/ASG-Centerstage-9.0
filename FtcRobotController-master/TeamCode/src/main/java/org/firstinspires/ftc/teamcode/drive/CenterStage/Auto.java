@@ -41,8 +41,8 @@ public class Auto extends LinearOpMode {
     public double startPos;
     public double offpos = 0;
     boolean robotDetected = false;
+    boolean waitingToSeeTag = false;
     int[] portals;
-
     double Xpos;
     boolean tagDetected = false;
 
@@ -80,7 +80,7 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Park Location", parkLocation.toString());
         }
 
-        switch (allianceLocation) {
+        switch (allianceLocation) { // set localization approximation
 
             case RED_SOUTH:
                 driver.localizer.setEstimatePos(135, 34, 0);
@@ -100,15 +100,12 @@ public class Auto extends LinearOpMode {
                 break;
         }
 
-        //portals = VisionPortal.makeMultiPortalView(3, VisionPortal.MultiPortalLayout.HORIZONTAL);
+        //init camera view and multiport for all the cameras
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-
-
         portals = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 3, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-
         initCameras(allianceLocation); // initialize the correct camera
-        initAprilTag();
+        initAprilTag(); // initialize visionPortal
         driver.setWeaponsState(General.WeaponsState.HOLDING);
         driver.setClawLiftPos(false);
         driver.setUseIMUForLocalization(true);
@@ -130,8 +127,6 @@ public class Auto extends LinearOpMode {
             driver.setSlidesDepositTarget(9);
         }
 
-
-
         while (opModeIsActive()) {
             driver.update();
             telemetry.addData("x", driver.getCurrentPos().getX());
@@ -141,7 +136,6 @@ public class Auto extends LinearOpMode {
             telemetry.update();
 
             switch (autoState) {
-
                 case VISION:
                     timer.reset();
                     driver.setClawMode(General.ClawMode.BOTH);
@@ -159,7 +153,7 @@ public class Auto extends LinearOpMode {
                 case PURPLE_APPROACH:
                     visionPortal.resumeStreaming();
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
-                    if (driver.getIntakePos() < 20) {
+                    if (driver.getIntakePos() < 20) { // spinning the intake for north auto
                         driver.setIntakePower(-0.2);
                     } else {
                         driver.setIntakePower(0);
@@ -167,16 +161,13 @@ public class Auto extends LinearOpMode {
                     if (result) { // if the path is complete, move on
                         timer.reset();
                         while (timer.time() < 0.35 && opModeIsActive()) { // release the purple pixel on the spike mark
-                            driver.drive(0, 0, 0, false);
-                            //TODO: RELEASE PIXEL WITH SERVO
-
+                            driver.drive(0, 0, 0);
+                            // release purple pixel
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.RED_SOUTH) {
                                 driver.setPurpleSouthRelease(true);
                             } else {
                                 driver.setPurpleNorthRelease(true);
-
                             }
-                            // release pixel
                             driver.update();
                         }
                         autoState = General.AutoState.APPROACH_2; // advance to the next state
@@ -186,7 +177,7 @@ public class Auto extends LinearOpMode {
                             telemetry.addData("Time Remaining", timerOffset2-timer.time());
                             telemetry.update();
                             driver.update();
-                            driver.drive(0, 0, 0, false);
+                            driver.drive(0, 0, 0);
                         }
                         timer.reset();
                         stateOverrideTimer.reset();
@@ -202,15 +193,12 @@ public class Auto extends LinearOpMode {
                             telemetry.addData("Time Remaining", timerOffset2-timer.time());
                             telemetry.update();
                             driver.update();
-                            driver.drive(0, 0, 0, false);
+                            driver.drive(0, 0, 0);
                         }
                         timer.reset();
                         stateOverrideTimer.reset();
                     }
                     break;
-
-
-
                 case APPROACH_2: // approach the backdrop and prepare to detect from the ultrasonic sensors
                     result = driver.runAutoPath(trajectories.get(1).path);
 
@@ -235,7 +223,6 @@ public class Auto extends LinearOpMode {
                     }
                     robotDetected = false;
                     break;
-
                 case ULTRASONIC_DETECT:
                     autoState = General.AutoState.APPROACH_3;
                     /*
@@ -292,30 +279,27 @@ public class Auto extends LinearOpMode {
 
                      */
                     //result = driver.runAutoPath(trajectories.get(2).path);
-                    driver.update();
+                    //driver.update();
                     /*
                     if (result) {
                         autoState = General.AutoState.APPROACH_3;
                     }
 
                      */
-
-
                     break;
-
                 case APPROACH_3: // finalize backdrop position and deposit
-                    driver.drive(0,0,0,false);
+                    driver.drive(0,0,0);
+                    driver.update();
                     sleep(150);
                     startPos = driver.getCurrentPos().getX();
                     //TODO: INSERT APRILTAG CODE
                     double Xcurrent_error = 100;
                     timer.reset();
-                    while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) {
-
+                    while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) { // detect tags
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
                             if (detection.metadata != null) {
-                                if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
+                                if (allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) { // apply a position offset based on the seen tag
                                     if (detection.id == 2 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
@@ -334,14 +318,28 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                     }
+                                } else { // the same thing, for red side
+                                    if (detection.id == 5 && !tagDetected) {
+                                        Xpos = -detection.ftcPose.x;
+                                        tagDetected = true;
+                                    } else if (detection.id == 6 && !tagDetected) {
+                                        Xpos = -detection.ftcPose.x - 6;
+                                        tagDetected = true;
+                                    } else if (detection.id == 4 && !tagDetected) {
+                                        Xpos = -detection.ftcPose.x + 6;
+                                        tagDetected = true;
+                                    }
 
-
-                                } else {
-                                    sleep(10);
+                                    if (tagDetected) {
+                                        if (position == General.SpikePosition.LEFT) {
+                                            offpos = -6;
+                                        } else if (position == General.SpikePosition.RIGHT) {
+                                            offpos = 6;
+                                        }
+                                    }
                                 }
-
                             } else {
-                                driver.drive(0, 0, 0, false);
+                                driver.drive(0, 0, 0);
                             }
                             driver.update();
                         }
@@ -352,44 +350,36 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("fsr", driver.getFSRVoltage());
                         telemetry.update();
                         if (!tagDetected && timer.time() > 1) { //TODO: FIX IF THIS IS ON THE RED SIDE
+                            waitingToSeeTag = true;
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.BLUE_NORTH) {
-                                driver.drive(-0.5, 0, 0, false);
+                                driver.drive(-0.4, 0, 0);
+
+                                timer.reset();
+                            } else {
+                                driver.drive(0.4, 0, 0);
 
                                 timer.reset();
                             }
                         }
+                        if (waitingToSeeTag && tagDetected) {
+                            driver.drive(0, 0, 0);
+                        }
                         if (tagDetected) {
                             Xcurrent_error = Xpos+offpos-(-startPos + driver.getCurrentPos().getX());
-
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
-
-                            driver.drive(Xcurrent_error/8, 0.2, -driver.getCurrentPos().getHeading()/20, false);
-
+                            driver.drive(Xcurrent_error/8, 0.2, -driver.getCurrentPos().getHeading()/20);
                         }
                         driver.update();
-
-
-
                     }
-
-
-
-
 
                     visionPortal.stopStreaming();
 
-                    //visionPortal.stopStreaming();
-
-                    //---------------------------
-
                     timer.reset();
-
                     driver.setClawMode(General.ClawMode.OPEN); // drop the pixel
                     timer.reset();
-                    while (timer.time() < 0.5 && opModeIsActive()) {
-                        driver.drive(0, 0, 0, false);
-                        // release pixel
+                    while (timer.time() < 0.5 && opModeIsActive()) { // let the pixel drop
+                        driver.drive(0, 0, 0);
                         driver.update();
                     }
                     timer.reset();
@@ -398,9 +388,9 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("Time Remaining", timerOffset3-timer.time());
                         telemetry.update();
                         driver.update();
-                        driver.drive(0, 0, 0, false);
+                        driver.drive(0, 0, 0);
                     }
-                    driver.resetOdometry();
+                    driver.resetOdometry(); // reset the pos estimate by the apriltags
                     driver.localizer.resetOdoAndOffsets();
                     driver.update();
                     if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
@@ -432,12 +422,10 @@ public class Auto extends LinearOpMode {
                     timer.reset();
                     autoState = General.AutoState.PARK_1;
                     ultraTimer.reset();
-
+                    break;
                 case PARK_1:
-
-                    if (ultraTimer.time() < 0.05) {
+                    if (ultraTimer.time() < 0.05) { // retract the arms
                         driver.setWeaponsState(General.WeaponsState.DEPOSIT);
-
                     }
 
                     if (parkLocation != General.ParkLocation.CENTER) { // Follow the corresponding path for the park
@@ -448,18 +436,18 @@ public class Auto extends LinearOpMode {
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
                         if (timer.time() > 0.5) {
-                            driver.drive(0,0,0,false);
+                            driver.drive(0,0,0);
                         } else {
-                            driver.drive(0, -0.4, 0, false);
+                            driver.drive(0, -0.4, 0);
                         }
                     }
                     break;
                 case PARK2:
                     if (driver.loadParkOnWall()) {
                         if (timer.time() < 0.6) {
-                            driver.drive(0, 0.5, 0, false);
+                            driver.drive(0, 0.5, 0);
                         } else {
-                            driver.drive(0, 0, 0, false);
+                            driver.drive(0, 0, 0);
                             driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.FLOAT);
                         }
                     } else {

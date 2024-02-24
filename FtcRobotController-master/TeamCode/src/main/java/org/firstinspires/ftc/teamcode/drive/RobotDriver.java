@@ -1235,6 +1235,10 @@ public class RobotDriver {
         }
     }
 
+    public void drive(double x, double y, double t) {
+        driveXY(x, y, t);
+    }
+
     public void resetOdometry() {
         for (DcMotorEx motor : odometryEncoders) {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
