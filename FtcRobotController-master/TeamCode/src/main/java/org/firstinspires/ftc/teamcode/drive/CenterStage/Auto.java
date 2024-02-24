@@ -305,6 +305,7 @@ public class Auto extends LinearOpMode {
 
                 case APPROACH_3: // finalize backdrop position and deposit
                     driver.drive(0,0,0,false);
+                    driver.update();
                     sleep(150);
                     startPos = driver.getCurrentPos().getX();
                     //TODO: INSERT APRILTAG CODE
