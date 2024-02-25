@@ -185,7 +185,7 @@ public class Auto extends LinearOpMode {
                         timer.reset();
                         stateOverrideTimer.reset();
                     }
-                    if (stateOverrideTimer.time() > 4) { // If the robot stalls, move on to the next state
+                    if (stateOverrideTimer.time() > 6) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
                         driver.setPurpleNorthRelease(true);
                         driver.setPurpleSouthRelease(true);
@@ -219,7 +219,7 @@ public class Auto extends LinearOpMode {
                     if (result) {
                         autoState = General.AutoState.ULTRASONIC_DETECT; // move on to the next state
                     }
-                    if (stateOverrideTimer.time() > 7) { // if the robot stalls, skip to the next state
+                    if (stateOverrideTimer.time() > 10) { // if the robot stalls, skip to the next state
                         autoState = General.AutoState.ULTRASONIC_DETECT;
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
@@ -354,7 +354,7 @@ public class Auto extends LinearOpMode {
                             if ((allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) && !tagDetected) {
                                 offpos -= 1;
                             } else if (!tagDetected){
-                                offpos -= 0.75;
+                                offpos += 1;
                             }
 
                             driver.update();
