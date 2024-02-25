@@ -321,6 +321,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                     }
+                                    offpos -= 1;
                                 } else { // the same thing, for red side
                                     if (detection.id == 5 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x + 1;
@@ -340,6 +341,8 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                     }
+                                    offpos -= 1.5;
+
                                 }
                             } else {
                                 driver.drive(0, 0, 0);
@@ -351,11 +354,7 @@ public class Auto extends LinearOpMode {
                                 backpos = 1;
                             }
 
-                            if ((allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) && !tagDetected) {
-                                offpos -= 1;
-                            } else if (!tagDetected){
-                                offpos += 1;
-                            }
+
 
                             driver.update();
                         }
