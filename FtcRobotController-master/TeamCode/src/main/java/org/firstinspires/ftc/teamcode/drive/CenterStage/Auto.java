@@ -46,6 +46,7 @@ public class Auto extends LinearOpMode {
     int[] portals;
     double Xpos;
     boolean tagDetected = false;
+    double backpos = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -184,7 +185,7 @@ public class Auto extends LinearOpMode {
                         timer.reset();
                         stateOverrideTimer.reset();
                     }
-                    if (stateOverrideTimer.time() > 6) { // If the robot stalls, move on to the next state
+                    if (stateOverrideTimer.time() > 4) { // If the robot stalls, move on to the next state
                         autoState = General.AutoState.APPROACH_2;
                         driver.setPurpleNorthRelease(true);
                         driver.setPurpleSouthRelease(true);
@@ -218,7 +219,7 @@ public class Auto extends LinearOpMode {
                     if (result) {
                         autoState = General.AutoState.ULTRASONIC_DETECT; // move on to the next state
                     }
-                    if (stateOverrideTimer.time() > 9) { // if the robot stalls, skip to the next state
+                    if (stateOverrideTimer.time() > 7) { // if the robot stalls, skip to the next state
                         autoState = General.AutoState.ULTRASONIC_DETECT;
                         System.out.println("State Skipped due to timeout");
                         stateOverrideTimer.reset();
@@ -290,6 +291,7 @@ public class Auto extends LinearOpMode {
                      */
                     break;
                 case APPROACH_3: // finalize backdrop position and deposit
+
                     driver.drive(0,0,0);
                     driver.update();
                     sleep(150); // let the robot stop
@@ -321,13 +323,13 @@ public class Auto extends LinearOpMode {
                                     }
                                 } else { // the same thing, for red side
                                     if (detection.id == 5 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x;
+                                        Xpos = -detection.ftcPose.x + 1;
                                         tagDetected = true;
                                     } else if (detection.id == 6 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x - 6;
+                                        Xpos = -detection.ftcPose.x - 5;
                                         tagDetected = true;
                                     } else if (detection.id == 4 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x + 6;
+                                        Xpos = -detection.ftcPose.x + 7;
                                         tagDetected = true;
                                     }
 
@@ -342,13 +344,27 @@ public class Auto extends LinearOpMode {
                             } else {
                                 driver.drive(0, 0, 0);
                             }
+
+                            if (desiredPixelPlacement == General.PixelPlacement.LEFT && !tagDetected) {
+                                backpos = -1;
+                            } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT && !tagDetected) {
+                                backpos = 1;
+                            }
+
+                            if ((allianceLocation == General.AllianceLocation.BLUE_NORTH || allianceLocation == General.AllianceLocation.BLUE_SOUTH) && !tagDetected) {
+                                offpos -= 1;
+                            } else if (!tagDetected){
+                                offpos -= 0.75;
+                            }
+
                             driver.update();
                         }
                         telemetry.addData("Xpos", Xpos);
-                        telemetry.addData("offset", offpos);
                         telemetry.addData("tagdetect", tagDetected);
                         telemetry.addData("Xcurrent_error", Xcurrent_error);
                         telemetry.addData("fsr", driver.getFSRVoltage());
+                        telemetry.addData("backpos", backpos);
+                        telemetry.addData("offset", offpos);
                         telemetry.update();
                         if (!tagDetected && timer.time() > 1) { //TODO: FIX IF THIS IS ON THE RED SIDE
                             waitingToSeeTag = true;
@@ -366,10 +382,10 @@ public class Auto extends LinearOpMode {
                             driver.drive(0, 0, 0);
                         }
                         if (tagDetected) {
-                            Xcurrent_error = Xpos+offpos-(-startPos + driver.getCurrentPos().getX());
+                            Xcurrent_error = Xpos+offpos-backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
-                            driver.drive(Xcurrent_error/8, 0.2, -driver.getCurrentPos().getHeading()/20);
+                            driver.drive(Xcurrent_error/9, 0.1, -driver.getCurrentPos().getHeading()/50);
                         }
                         driver.update();
                     }
@@ -397,25 +413,25 @@ public class Auto extends LinearOpMode {
                     if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(31, 122, 0);
+                                driver.localizer.setEstimatePos(31-backpos, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(37, 122, 0);
+                                driver.localizer.setEstimatePos(37-backpos, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(43, 122, 0);
+                                driver.localizer.setEstimatePos(43-backpos, 122, 0);
                                 break;
                         }
                     } else {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(100, 122, 0);
+                                driver.localizer.setEstimatePos(100-backpos, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(106, 122, 0);
+                                driver.localizer.setEstimatePos(106-backpos, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(112, 122, 0);
+                                driver.localizer.setEstimatePos(112-backpos, 122, 0);
                                 break;
                         }
                     }
@@ -454,7 +470,11 @@ public class Auto extends LinearOpMode {
                     } else {
                         driver.followCurve(trajectories.get(3).path); // do the final parking move
                     }
+                    telemetry.addData("backpos", backpos);
+                    telemetry.addData("offset", offpos);
+                    telemetry.update();
                     break;
+
             }
         }
     }

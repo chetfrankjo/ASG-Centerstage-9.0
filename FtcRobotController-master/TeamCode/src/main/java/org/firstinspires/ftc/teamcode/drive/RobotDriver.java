@@ -1211,7 +1211,7 @@ public class RobotDriver {
         blp /= normalizePower;
         frp /= normalizePower;
         brp /= normalizePower;
-        double kStatic = 0.03;
+        double kStatic = 0.17;
         flp *= 1-kStatic;
         flp += Math.signum(flp)*kStatic;
         blp *= 1-kStatic;
@@ -1353,8 +1353,8 @@ public class RobotDriver {
 
     public boolean runAutoPath(ArrayList<CurvePoint> path) {
         followCurve(path);
-        if (Math.abs(currentPos.getX() - path.get(path.size() - 2).x) <= 1.0 &&
-                Math.abs(currentPos.getY() - path.get(path.size() - 2).y) <= 1.0)
+        if (Math.abs(currentPos.getX() - path.get(path.size() - 2).x) <= 1.2 &&
+                Math.abs(currentPos.getY() - path.get(path.size() - 2).y) <= 1.2)
         {
             // We are at our desired position
             // bump index and apply it to the new trajectory
@@ -1491,8 +1491,8 @@ public class RobotDriver {
         } else {    // Otherwise, follow the trig
             turnError = relativeTurnAngle;
         }
-        if (Math.abs(turnError) > Math.toRadians(0.5)) {
-            movement_turn = Range.clip(AngleWrap((slope+preferredAngle) - currenthead_rad) / Math.toRadians(30), -1, 1) * turnSpeed;
+        if (Math.abs(turnError) > Math.toRadians(2)) {
+            movement_turn = Range.clip(AngleWrap((slope+preferredAngle) - currenthead_rad) / Math.toRadians(45), -1, 1) * turnSpeed;
         } else {
             movement_turn = 0;
         }
