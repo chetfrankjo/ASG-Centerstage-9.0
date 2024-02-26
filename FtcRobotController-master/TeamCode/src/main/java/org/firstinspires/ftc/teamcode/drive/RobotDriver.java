@@ -124,7 +124,7 @@ public class RobotDriver {
     private double previousFlipperTarget;
     boolean runningRawFlipper = false;
     double intakePos = 0, previousSlidesPower = 0, distLeftIn, distRightIn, distFrontLeftIn, distFrontRightIn;
-    boolean speedyDeposit = false, convertCurPosToIMU = false;
+    boolean speedyDeposit = false, convertCurPosToIMU = false, enableRangeClipping = false;
     public RobotDriver(HardwareMap hardwareMap, boolean prepAutoCamera) {
         frp = 0;
         flp = 0;
@@ -1204,22 +1204,27 @@ public class RobotDriver {
         }
     }
 
+    public void setEnableRangeClipping(boolean bool) {
+        enableRangeClipping = bool;
+    }
 
     public void updateDriveMotors() {
-        double normalizePower = Math.max(1, Math.max(Math.max(Math.abs(flp), Math.abs(blp)), Math.max(Math.abs(frp), Math.abs(brp))));
-        flp /= normalizePower;
-        blp /= normalizePower;
-        frp /= normalizePower;
-        brp /= normalizePower;
-        double kStatic = 0.17;
-        flp *= 1-kStatic;
-        flp += Math.signum(flp)*kStatic;
-        blp *= 1-kStatic;
-        blp += Math.signum(blp)*kStatic;
-        frp *= 1-kStatic;
-        frp += Math.signum(frp)*kStatic;
-        brp *= 1-kStatic;
-        brp += Math.signum(brp)*kStatic;
+        if (enableRangeClipping) {
+            double normalizePower = Math.max(1, Math.max(Math.max(Math.abs(flp), Math.abs(blp)), Math.max(Math.abs(frp), Math.abs(brp))));
+            flp /= normalizePower;
+            blp /= normalizePower;
+            frp /= normalizePower;
+            brp /= normalizePower;
+            double kStatic = 0.17;
+            flp *= 1 - kStatic;
+            flp += Math.signum(flp) * kStatic;
+            blp *= 1 - kStatic;
+            blp += Math.signum(blp) * kStatic;
+            frp *= 1 - kStatic;
+            frp += Math.signum(frp) * kStatic;
+            brp *= 1 - kStatic;
+            brp += Math.signum(brp) * kStatic;
+        }
         fl.setPower(flp);
         bl.setPower(blp);
         br.setPower(brp);
