@@ -59,6 +59,7 @@ public class Auto extends LinearOpMode {
         driver.setDriveZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         driver.resetSlidesEncoder();
         driver.setSpeedyDeposit(true);
+        driver.setEnableRangeClipping(true);
         timerOffset1 = driver.loadTimerPreset1();
         timerOffset2 = driver.loadTimerPreset2();
         timerOffset3 = driver.loadTimerPreset3();
