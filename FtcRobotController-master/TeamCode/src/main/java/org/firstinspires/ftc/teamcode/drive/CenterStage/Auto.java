@@ -299,7 +299,7 @@ public class Auto extends LinearOpMode {
                     startPos = driver.getCurrentPos().getX();
                     double Xcurrent_error = 100;
                     timer.reset();
-                    while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) { // detect tags
+                    while (opModeIsActive() && timer.time() < 300 && !driver.getFSRPressed()) { // detect tags
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
                             if (detection.metadata != null) {
@@ -325,13 +325,13 @@ public class Auto extends LinearOpMode {
                                     offpos -= 1;
                                 } else { // the same thing, for red side
                                     if (detection.id == 5 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x + 1;
+                                        Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
                                     } else if (detection.id == 6 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x - 5;
+                                        Xpos = -detection.ftcPose.x - 6;
                                         tagDetected = true;
                                     } else if (detection.id == 4 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x + 7;
+                                        Xpos = -detection.ftcPose.x + 6;
                                         tagDetected = true;
                                     }
 
