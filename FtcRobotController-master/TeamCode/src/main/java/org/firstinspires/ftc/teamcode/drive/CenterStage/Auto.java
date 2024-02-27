@@ -157,8 +157,8 @@ public class Auto extends LinearOpMode {
                 case PURPLE_APPROACH:
                     visionPortal.resumeStreaming();
                     boolean result = driver.runAutoPath(trajectories.get(0).path); // Follow the path
-                    if (driver.getIntakePos() < 20) { // spinning the intake for north auto
-                        driver.setIntakePower(-0.2);
+                    if (driver.getIntakePos() < 18) { // spinning the intake for north auto
+                        driver.setIntakePower(-0.15);
                     } else {
                         driver.setIntakePower(0);
                     }
@@ -298,8 +298,10 @@ public class Auto extends LinearOpMode {
                     sleep(150); // let the robot stop
                     startPos = driver.getCurrentPos().getX();
                     double Xcurrent_error = 100;
+                    boolean offsetAdd = false;
                     timer.reset();
-                    while (opModeIsActive() && timer.time() < 300 && !driver.getFSRPressed()) { // detect tags
+                    while (opModeIsActive() && timer.time() < 3 && !driver.getFSRPressed()) { // detect tags
+
                         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
                         for (AprilTagDetection detection : currentDetections){
                             if (detection.metadata != null) {
@@ -307,13 +309,18 @@ public class Auto extends LinearOpMode {
                                     if (detection.id == 2 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     } else if (detection.id == 3 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x - 6;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     } else if (detection.id == 1 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x + 6;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     }
+
+
 
                                     if (tagDetected) {
                                         if (position == General.SpikePosition.LEFT) {
@@ -321,28 +328,43 @@ public class Auto extends LinearOpMode {
                                         } else if (position == General.SpikePosition.RIGHT) {
                                             offpos = 6;
                                         }
+                                        if (offsetAdd) {
+                                            offpos -= 1.25; //2.25
+                                            offsetAdd = false;
+                                        }
                                     }
-                                    offpos -= 1;
+
+
                                 } else { // the same thing, for red side
                                     if (detection.id == 5 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     } else if (detection.id == 6 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x - 6;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     } else if (detection.id == 4 && !tagDetected) {
                                         Xpos = -detection.ftcPose.x + 6;
                                         tagDetected = true;
+                                        offsetAdd = true;
                                     }
 
+
+
                                     if (tagDetected) {
-                                        if (position == General.SpikePosition.LEFT) {
+                                        if (position == General.SpikePosition.LEFT && offsetAdd) {
                                             offpos = -6;
-                                        } else if (position == General.SpikePosition.RIGHT) {
+                                        } else if (position == General.SpikePosition.RIGHT && offsetAdd) {
                                             offpos = 6;
                                         }
+                                        if (offsetAdd) {
+                                            offpos -= 1.5; //2.25
+                                            offsetAdd = false;
+                                        }
                                     }
-                                    offpos -= 1.5;
+
+
 
                                 }
                             } else {
@@ -350,9 +372,9 @@ public class Auto extends LinearOpMode {
                             }
 
                             if (desiredPixelPlacement == General.PixelPlacement.LEFT && !tagDetected) {
-                                backpos = -1;
+                                backpos = -1.5;
                             } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT && !tagDetected) {
-                                backpos = 1;
+                                backpos = 1.5;
                             }
 
 
