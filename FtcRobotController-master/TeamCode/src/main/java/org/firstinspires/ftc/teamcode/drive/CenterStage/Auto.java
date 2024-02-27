@@ -323,13 +323,13 @@ public class Auto extends LinearOpMode {
 
 
                                     if (tagDetected) {
-                                        if (position == General.SpikePosition.LEFT) {
+                                        if (position == General.SpikePosition.LEFT && offsetAdd) {
                                             offpos = -6;
-                                        } else if (position == General.SpikePosition.RIGHT) {
+                                        } else if (position == General.SpikePosition.RIGHT && offsetAdd) {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos -= 1.25; //2.25
+                                            offpos += 0.25; //2.25
                                             offsetAdd = false;
                                         }
                                     }
