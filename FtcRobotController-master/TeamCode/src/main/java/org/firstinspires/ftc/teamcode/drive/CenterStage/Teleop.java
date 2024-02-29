@@ -471,10 +471,9 @@ public class Teleop extends LinearOpMode{
 
 
             if (gamepad1.left_bumper) {
-                if (!g2Launch && !g1Launch) {
-                    gamepad2.rumble(1, 0, 500);
-                }
+
                 g1Launch = true;
+            /*
             } else {
                 g1Launch = false;
             }
@@ -487,7 +486,9 @@ public class Teleop extends LinearOpMode{
                 g2Launch = false;
             }
 
-            if (g1Launch && g2Launch) { // launch plane if both driver confirm
+            */
+            }
+            if (g1Launch) { // launch plane if both driver confirm
                 driver.launchPlane();
                 gamepad1.rumble(1, 1, 500);
                 gamepad2.rumble(1, 1, 500);
@@ -496,15 +497,14 @@ public class Teleop extends LinearOpMode{
             }
 
             if (gamepad1.right_bumper) {
-                if (!g2Hang && !g1Hang) {
-                    gamepad2.rumble(0,1, 500);
-                }
+
                 g1Hang = true;
             } else {
                 g1Hang = false;
             }
 
-            if (gamepad2.dpad_right) {
+
+            /*if (gamepad2.dpad_right) {
                 if (!g1Hang && !g2Hang) {
                     gamepad1.rumble(0, 1, 500);
                 }
@@ -513,7 +513,9 @@ public class Teleop extends LinearOpMode{
                 g2Hang = false;
             }
 
-            if (g1Hang && g2Hang) {
+             */
+
+            if (g1Hang) {
                 driver.launchHang();
                 hangHasReleased = true;
                 gamepad1.rumble(1, 1, 500);
