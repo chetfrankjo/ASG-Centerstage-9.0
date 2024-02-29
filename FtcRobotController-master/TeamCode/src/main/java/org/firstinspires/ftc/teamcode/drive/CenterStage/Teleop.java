@@ -111,10 +111,11 @@ public class Teleop extends LinearOpMode{
         intakeWhileExtendingTimer = new ElapsedTime();
         waitForStart();
         driver.setClawMode(General.ClawMode.OPEN);
+        boolean slidesResetting = false;
         while (opModeIsActive()) {
             driver.update();
 
-            driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
+
             if (gamepad2.left_stick_y > 0.1 || gamepad2.left_stick_y < -0.1) {
                 driver.setFlipperPower(-gamepad2.left_stick_y); // manual flipper
             } else {
@@ -443,10 +444,7 @@ public class Teleop extends LinearOpMode{
 
 
 
-            if (gamepad1.back) {
-                driver.resetSlidesEncoder();
-                driver.setSlidesTarget(0);
-            }
+
             /*if (gamepad2.back) {
                 if (driver.getFlipperDisable()) {
                     driver.setFlipperDisable(false);
@@ -458,7 +456,16 @@ public class Teleop extends LinearOpMode{
 
              */
             if (gamepad2.back) {
-                driver.resetFlipperEncoder();
+                slidesResetting = true;
+                //driver.resetSlidesEncoder();
+                driver.setSlidesPower(0.2);
+            } else {
+                driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
+            }
+            if (slidesResetting && !gamepad2.back) {
+                slidesResetting = false;
+                driver.resetSlidesEncoder();
+                driver.setSlidesTarget(0);
             }
             if (gamepad2.start) {
                 if (driver.getSlidesDisable()) {

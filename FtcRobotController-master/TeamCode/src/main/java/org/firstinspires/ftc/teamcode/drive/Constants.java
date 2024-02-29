@@ -15,7 +15,7 @@ public class Constants {
 
 
     public static class AssemblyConstants {
-        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.35, 0.05, 0.02, -0.035);
+        public static PIDFCoefficients slidesPIDConstants = new PIDFCoefficients(0.35, 0.05, 0.02, -0.030); //f: -0.035
         //public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(0.007, 0, 0.0005, -0.09);
         public static PIDFCoefficients flipperPIDConstants = new PIDFCoefficients(-0.0035, 0, -0.00005, 0.13);
         public static PIDFCoefficients gantryPIDConstants = new PIDFCoefficients(0, 0, 0, 0);
