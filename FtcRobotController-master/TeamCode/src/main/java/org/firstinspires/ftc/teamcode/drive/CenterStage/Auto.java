@@ -388,21 +388,30 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("backpos", backpos);
                         telemetry.addData("offset", offpos);
                         telemetry.update();
-                        if (!tagDetected && timer.time() > 1) { //TODO: FIX IF THIS IS ON THE RED SIDE
+                        driver.setEnableRangeClipping(false);
+                        if (!tagDetected && timer.time() > 1) {
                             waitingToSeeTag = true;
                             if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.BLUE_NORTH) {
-                                driver.drive(-0.4, 0, 0);
+                                driver.drive(-0.45, 0, -driver.getCurrentPos().getHeading()/50);
+
 
                                 timer.reset();
                             } else {
-                                driver.drive(0.4, 0, 0);
+                                driver.drive(0.45, 0, -driver.getCurrentPos().getHeading()/50);
 
                                 timer.reset();
                             }
                         }
+
                         if (waitingToSeeTag && tagDetected) {
                             driver.drive(0, 0, 0);
+                            driver.update();
+                            sleep(150);
+                            startPos = driver.getCurrentPos().getX();
+                            waitingToSeeTag = false;
                         }
+
+
                         if (tagDetected) {
                             Xcurrent_error = Xpos+offpos-backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
@@ -413,7 +422,7 @@ public class Auto extends LinearOpMode {
                     }
 
                     visionPortal.stopStreaming();
-
+                    driver.setEnableRangeClipping(true);
                     timer.reset();
                     driver.setClawMode(General.ClawMode.OPEN); // drop the pixel
                     timer.reset();
