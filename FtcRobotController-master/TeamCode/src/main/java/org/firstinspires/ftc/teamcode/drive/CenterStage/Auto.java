@@ -329,7 +329,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos += 0.25; //2.25
+                                            offpos += 0.0; //2.25
                                             offsetAdd = false;
                                         }
                                     }
@@ -372,9 +372,9 @@ public class Auto extends LinearOpMode {
                             }
 
                             if (desiredPixelPlacement == General.PixelPlacement.LEFT) {
-                                backpos = -1.0;
+                                backpos = 0.0;
                             } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT) {
-                                backpos = 1.2;
+                                backpos = 3.0;
                             }
 
 
@@ -444,25 +444,25 @@ public class Auto extends LinearOpMode {
                     if (allianceLocation == General.AllianceLocation.BLUE_NORTH | allianceLocation == General.AllianceLocation.BLUE_SOUTH) {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(31-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(30+backpos, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(37-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(36+backpos, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(43-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(42+backpos, 122, 0);
                                 break;
                         }
                     } else {
                         switch (position) {
                             case LEFT:
-                                driver.localizer.setEstimatePos(100-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(100+backpos, 122, 0);
                                 break;
                             case CENTER:
-                                driver.localizer.setEstimatePos(106-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(106+backpos, 122, 0);
                                 break;
                             case RIGHT:
-                                driver.localizer.setEstimatePos(112-backpos, 122, 0);
+                                driver.localizer.setEstimatePos(112+backpos, 122, 0);
                                 break;
                         }
                     }
@@ -472,7 +472,7 @@ public class Auto extends LinearOpMode {
                     ultraTimer.reset();
                     break;
                 case PARK_1:
-                    if (ultraTimer.time() < 0.05) { // retract the arms
+                    if (ultraTimer.time() < 1) { // retract the arms
                         driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     }
 
