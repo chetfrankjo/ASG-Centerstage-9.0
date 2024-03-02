@@ -416,7 +416,7 @@ public class Auto extends LinearOpMode {
                             Xcurrent_error = Xpos+offpos-backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
-                            driver.drive(Xcurrent_error/9, 0.1, -driver.getCurrentPos().getHeading()/50);
+                            driver.drive(Xcurrent_error/9, 0.2, -driver.getCurrentPos().getHeading()/50);
                         }
                         driver.update();
                     }
