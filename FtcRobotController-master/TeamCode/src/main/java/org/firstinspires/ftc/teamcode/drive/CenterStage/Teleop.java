@@ -249,16 +249,18 @@ public class Teleop extends LinearOpMode{
             if (gamepad2.y) { // extend+flip for depositing
                 intakingWhileExtending = true;
                 intakeWhileExtendingTimer.reset();
-                if (hangHasReleased) {
+                /*if (hangHasReleased) {
                     driver.storeHang();
                 }
+                 */
             }
 
-            if (hangHasReleased && driver.getSlidesLength() > 5) {
+            /*if (hangHasReleased && driver.getSlidesLength() > 5) {
                 driver.storeHang();
             } else if (hangHasReleased) {
                 driver.launchHang();
             }
+             */
 
             if (intakingWhileExtending && intakeWhileExtendingTimer.time()< 0.5) { // Intake slightly while extending so pixels dont get knocked out
                 if (intakeWhileExtendingTimer.time()>0.05&&intakeWhileExtendingTimer.time()<0.12) {
