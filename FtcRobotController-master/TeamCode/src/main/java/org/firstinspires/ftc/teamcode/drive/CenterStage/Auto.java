@@ -371,10 +371,10 @@ public class Auto extends LinearOpMode {
                                 driver.drive(0, 0, 0);
                             }
 
-                            if (desiredPixelPlacement == General.PixelPlacement.LEFT && !tagDetected) {
-                                backpos = -1.5;
-                            } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT && !tagDetected) {
-                                backpos = 1.5;
+                            if (desiredPixelPlacement == General.PixelPlacement.LEFT) {
+                                backpos = 1.2;
+                            } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT) {
+                                backpos = -2.9;
                             }
 
 
