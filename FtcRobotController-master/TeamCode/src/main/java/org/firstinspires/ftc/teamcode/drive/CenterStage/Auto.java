@@ -128,7 +128,7 @@ public class Auto extends LinearOpMode {
         if (driver.loadSlidesUpPreset()) {
             driver.setSlidesDepositTarget(11);
         } else {
-            driver.setSlidesDepositTarget(9);
+            driver.setSlidesDepositTarget(7.75);
         }
 
         while (opModeIsActive()) {
@@ -372,9 +372,9 @@ public class Auto extends LinearOpMode {
                             }
 
                             if (desiredPixelPlacement == General.PixelPlacement.LEFT) {
-                                backpos = 1.2;
+                                backpos = -1.0;
                             } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT) {
-                                backpos = -2.9;
+                                backpos = 1.2;
                             }
 
 
@@ -413,7 +413,7 @@ public class Auto extends LinearOpMode {
 
 
                         if (tagDetected) {
-                            Xcurrent_error = Xpos+offpos-backpos-(-startPos + driver.getCurrentPos().getX());
+                            Xcurrent_error = Xpos+offpos+backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
                             driver.drive(Xcurrent_error/9, 0.2, -driver.getCurrentPos().getHeading()/50);
