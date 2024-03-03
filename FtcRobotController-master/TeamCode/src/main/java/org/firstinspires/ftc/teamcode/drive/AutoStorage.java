@@ -104,7 +104,7 @@ public class AutoStorage {
             case BLUE_SOUTH:
                 switch (spikePosition) {
                     case LEFT:
-                        paths.add(new Trajectory(9, 34, 0.3, 9).addPoint(37, 34, -90).addPoint(37, 37.5, 0).build()); //Start at starting position, strafe east, drive north to place pixel
+                        paths.add(new Trajectory(9, 34, 0.25, 9).addPoint(37, 34, -90).addPoint(37, 38, 0).build()); //Start at starting position, strafe east, drive north to place pixel
                         paths.add(new Trajectory(36, 37.5, 0.5, 15).addPoint(37, 22, 180).addPoint(60, 22, -90).addPoint(60, 106, 0).addPoint(29, 106, 90).build()); // 27
                         //paths.add(new Trajectory(63, 110, 0.5, 4).addPoint(30, 110, 90).build());
                         switch (parkLocation) {
