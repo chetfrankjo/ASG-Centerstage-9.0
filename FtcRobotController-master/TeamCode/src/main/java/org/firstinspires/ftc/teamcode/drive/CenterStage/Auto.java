@@ -372,11 +372,11 @@ public class Auto extends LinearOpMode {
                             }
 
                             if (desiredPixelPlacement == General.PixelPlacement.LEFT) {
-                                backpos = 1.0;
+                                backpos = 0.0;
                             } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT) {
-                                backpos = 4.0;
+                                backpos = 3.0;
                             } else {
-                                backpos = 2.5;
+                                backpos = 1.5;
                             }
 
 

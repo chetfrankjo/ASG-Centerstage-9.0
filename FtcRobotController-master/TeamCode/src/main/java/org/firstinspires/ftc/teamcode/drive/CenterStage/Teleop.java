@@ -460,7 +460,7 @@ public class Teleop extends LinearOpMode{
             if (gamepad2.back) {
                 slidesResetting = true;
                 //driver.resetSlidesEncoder();
-                driver.setSlidesPower(0.2);
+                driver.setSlidesPower(0.8);
             } else {
                 driver.setSlidesPower(gamepad2.right_stick_y); // manual slides
             }
