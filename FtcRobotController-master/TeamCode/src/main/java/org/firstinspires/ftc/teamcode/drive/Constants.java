@@ -33,8 +33,8 @@ public class Constants {
 
         public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 171;
 
-        public static final double DRONE_LAUNCHER_STORED_POS = 0.56;
-        public static final double DRONE_LAUNCHER_RELEASE_POS = 0.89;
+        public static final double DRONE_LAUNCHER_STORED_POS = 0.256;
+        public static final double DRONE_LAUNCHER_RELEASE_POS = 0.602;
 
     }
 

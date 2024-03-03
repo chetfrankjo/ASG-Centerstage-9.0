@@ -1035,12 +1035,12 @@ public class RobotDriver {
     }
 
     public void launchHang() {
-        hangReleaseRight.setPosition(1.0);
-        hangReleaseLeft.setPosition(0.2);
+        hangReleaseRight.setPosition(0.56);
+        hangReleaseLeft.setPosition(0.315);
     }
     public void storeHang() {
-        hangReleaseRight.setPosition(0.52);
-        hangReleaseLeft.setPosition(0.67);
+        hangReleaseRight.setPosition(0.34);
+        hangReleaseLeft.setPosition(0.515);
     }
 
     public void launchPlane() {
