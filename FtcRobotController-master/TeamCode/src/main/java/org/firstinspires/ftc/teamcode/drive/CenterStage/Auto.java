@@ -295,7 +295,7 @@ public class Auto extends LinearOpMode {
 
                     driver.drive(0,0,0);
                     driver.update();
-                    sleep(150); // let the robot stop
+                    sleep(250); // let the robot stop
                     startPos = driver.getCurrentPos().getX();
                     double Xcurrent_error = 100;
                     boolean offsetAdd = false;
@@ -329,7 +329,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos += 0.0; //2.25
+                                            offpos += 0; //2.25
                                             offsetAdd = false;
                                         }
                                     }
@@ -341,11 +341,11 @@ public class Auto extends LinearOpMode {
                                         tagDetected = true;
                                         offsetAdd = true;
                                     } else if (detection.id == 6 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x - 6;
+                                        Xpos = -detection.ftcPose.x - 6.0;
                                         tagDetected = true;
                                         offsetAdd = true;
                                     } else if (detection.id == 4 && !tagDetected) {
-                                        Xpos = -detection.ftcPose.x + 6;
+                                        Xpos = -detection.ftcPose.x + 6.0;
                                         tagDetected = true;
                                         offsetAdd = true;
                                     }
@@ -359,7 +359,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos -= 1.5; //2.25
+                                            offpos -= 0; //2.25
                                             offsetAdd = false;
                                         }
                                     }
@@ -372,11 +372,11 @@ public class Auto extends LinearOpMode {
                             }
 
                             if (desiredPixelPlacement == General.PixelPlacement.LEFT) {
-                                backpos = 0.0;
+                                backpos = -1.5;
                             } else if (desiredPixelPlacement == General.PixelPlacement.RIGHT) {
-                                backpos = 3.0;
-                            } else {
                                 backpos = 1.5;
+                            } else {
+                                backpos = 0.0;
                             }
 
 
@@ -418,7 +418,7 @@ public class Auto extends LinearOpMode {
                             Xcurrent_error = Xpos+offpos+backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
-                            driver.drive(Xcurrent_error/9, 0.2, -driver.getCurrentPos().getHeading()/50);
+                            driver.drive(Xcurrent_error/6, 0.25, -driver.getCurrentPos().getHeading()/50);
                         }
                         driver.update();
                     }
