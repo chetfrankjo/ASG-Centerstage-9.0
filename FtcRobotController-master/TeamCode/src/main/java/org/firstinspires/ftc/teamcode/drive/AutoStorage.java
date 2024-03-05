@@ -151,8 +151,8 @@ public class AutoStorage {
             case BLUE_NORTH:
                 switch (spikePosition) {
                     case LEFT:
-                        paths.add(new Trajectory(9, 84, 0.3, 8).addPoint(17, 84, -90).addPoint(17, 101, 0).addPoint(37, 101, -90).build());
-                        paths.add(new Trajectory(37, 102, 0.3, 3).addPoint(37, 112, 0).addPoint(34, 112, 90).addPoint(34, 106, 180).addPoint(31, 106, 90).build());
+                        paths.add(new Trajectory(9, 84, 0.4, 12).addPoint(17, 84, -90).addPoint(17, 102, 0).addPoint(37, 102, -90).build());
+                        paths.add(new Trajectory(37, 102, 0.3, 4).addPoint(37, 112, 0).addPoint(34, 112, 90).addPoint(34, 106, 180).addPoint(31, 106, 90).build());
                         switch (parkLocation) {
                             case LEFT:
                                 paths.add(new Trajectory(29, 115, 0.3, 8, 0.1).addPoint(29, 110, 180).addPointSpeed(10, 110, 90, 0.3).build());
