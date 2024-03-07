@@ -359,7 +359,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos -= 0; //2.25
+                                            offpos += 0 ; //2.25
                                             offsetAdd = false;
                                         }
                                     }
@@ -391,19 +391,16 @@ public class Auto extends LinearOpMode {
                         telemetry.addData("offset", offpos);
                         telemetry.update();
                         driver.setEnableRangeClipping(false);
+
                         if (!tagDetected && timer.time() > 1) {
-                            waitingToSeeTag = true;
-                            if (allianceLocation == General.AllianceLocation.BLUE_SOUTH || allianceLocation == General.AllianceLocation.BLUE_NORTH) {
-                                driver.drive(-0.45, 0, -driver.getCurrentPos().getHeading()/50);
+                            //waitingToSeeTag = true;
+
+                            driver.drive(0, 0.25, -driver.getCurrentPos().getHeading()/50);
 
 
-                                timer.reset();
-                            } else {
-                                driver.drive(0.45, 0, -driver.getCurrentPos().getHeading()/50);
-
-                                timer.reset();
-                            }
                         }
+
+
 
                         if (waitingToSeeTag && tagDetected) {
                             driver.drive(0, 0, 0);
@@ -511,6 +508,7 @@ public class Auto extends LinearOpMode {
             }
         }
     }
+
 
     public void initCameras(General.AllianceLocation allianceLocation) { // handles camera intialization and selection
         //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
