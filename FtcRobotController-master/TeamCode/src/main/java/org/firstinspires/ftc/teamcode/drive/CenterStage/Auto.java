@@ -359,7 +359,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos -= 1.5; //2.25
+                                            offpos -= 0.5; //2.25
                                             offsetAdd = false;
                                         }
                                     }
