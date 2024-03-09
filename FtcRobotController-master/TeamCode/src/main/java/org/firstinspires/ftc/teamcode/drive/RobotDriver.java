@@ -154,7 +154,7 @@ public class RobotDriver {
         odometryEncoders = Arrays.asList(verticalLeft, verticalRight, horizontal);
 
         imu = hardwareMap.get(IMU.class, "adaIMU");
-        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)));
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
         //imu.resetYaw();
 
         // SLIDES
