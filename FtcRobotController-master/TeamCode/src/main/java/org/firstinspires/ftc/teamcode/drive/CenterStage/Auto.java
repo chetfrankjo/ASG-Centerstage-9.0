@@ -126,7 +126,7 @@ public class Auto extends LinearOpMode {
         timer.reset();
 
         if (driver.loadSlidesUpPreset()) {
-            driver.setSlidesDepositTarget(11);
+            driver.setSlidesDepositTarget(10.5);
         } else {
             driver.setSlidesDepositTarget(7.75);
         }
@@ -310,19 +310,19 @@ public class Auto extends LinearOpMode {
                     Tprevious_time = 0;
                     driver.update();
                     ultraTimer.reset();
-                    while (timer.time() < 4 && ultraTimer.time() < 0.5 && opModeIsActive()) {
+                    while (timer.time() < 2 && ultraTimer.time() < 0.5 && opModeIsActive()) {
                         if (driver.getCurrentPos().getHeading() > 1) {
                             if (driver.getCurrentPos().getHeading() > 1.5) {
                                 driver.drive(0, 0, -0.2);
                             } else {
-                                driver.drive(0,0,-0.15);
+                                driver.drive(0,0,-0.16);
                             }
                             ultraTimer.reset();
                         } else if (driver.getCurrentPos().getHeading() < -1) {
                             if (driver.getCurrentPos().getHeading() < -1.5) {
                                 driver.drive(0, 0, 0.2);
                             } else {
-                                driver.drive(0,0,0.15);
+                                driver.drive(0,0,0.16);
                             }
                             ultraTimer.reset();
                         } else {

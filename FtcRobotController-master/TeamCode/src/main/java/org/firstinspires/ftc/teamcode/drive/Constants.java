@@ -27,8 +27,8 @@ public class Constants {
         public static final double RIGHT_CLAW_OPEN_POS = 0.71;
 
         //TODO: adjust these for extra big open positions
-        public static final double LEFT_CLAW_OPEN_POS_MORE = 0.605;
-        public static final double RIGHT_CLAW_OPEN_POS_MORE = 0.71;
+        public static final double LEFT_CLAW_OPEN_POS_MORE = 0.570;
+        public static final double RIGHT_CLAW_OPEN_POS_MORE = 0.745;
 
         public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 171;
 
@@ -71,13 +71,13 @@ public class Constants {
 
     public static final class VisionConstants {
         public static final Point REGION1_TOPLEFT_ANCHOR_POINT_RED = new Point(0, 190);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_RED = new Point(560, 140);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_RED = new Point(1050, 225);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_RED = new Point(600, 140);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_RED = new Point(1150, 225);
 
 
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT_BLUE = new Point(0, 190);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_BLUE = new Point(560, 140);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_BLUE = new Point(1050, 225);
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT_BLUE = new Point(0, 250);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_BLUE = new Point(580, 160);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_BLUE = new Point(1180, 225);
 
 
         public static final int REGION_WIDTH = 80;
