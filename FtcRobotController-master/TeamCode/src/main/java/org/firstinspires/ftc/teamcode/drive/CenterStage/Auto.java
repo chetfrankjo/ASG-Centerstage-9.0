@@ -126,7 +126,7 @@ public class Auto extends LinearOpMode {
         timer.reset();
 
         if (driver.loadSlidesUpPreset()) {
-            driver.setSlidesDepositTarget(10);
+            driver.setSlidesDepositTarget(11);
         } else {
             driver.setSlidesDepositTarget(7.75);
         }
@@ -359,7 +359,7 @@ public class Auto extends LinearOpMode {
                                             offpos = 6;
                                         }
                                         if (offsetAdd) {
-                                            offpos -= 0.5; //2.25
+                                            offpos -= 1.5; //2.25
                                             offsetAdd = false;
                                         }
                                     }
@@ -471,7 +471,7 @@ public class Auto extends LinearOpMode {
                     ultraTimer.reset();
                     break;
                 case PARK_1:
-                    if (ultraTimer.time() < 1) { // retract the arms
+                    if (ultraTimer.time() < 0.5) { // retract the arms
                         driver.setWeaponsState(General.WeaponsState.DEPOSIT);
                     }
 
