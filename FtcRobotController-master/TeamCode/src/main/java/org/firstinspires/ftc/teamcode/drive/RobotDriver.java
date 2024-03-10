@@ -111,7 +111,7 @@ public class RobotDriver {
     ThreeZonePropDetectionPipeline propPipeline;
     boolean updateClaw = true;
     boolean openClawForPostDeposit = false;
-    boolean isFlipperOut = false;
+    boolean isFlipperOut = false, openClawExtraMore = false;
     private int tagOfInterest = 0;
     double flipperPosAnalog = 0;
     Pose2d depositPos;
@@ -942,19 +942,32 @@ public class RobotDriver {
         switch (clawMode) {
             case LEFT:
                 clawL.setPosition(AssemblyConstants.LEFT_CLAW_CLOSED_POS); //CLOSED (left)
-                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
+                if (openClawExtraMore) {
+                    clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS_MORE); // OPEN (right)
+                } else {
+                    clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
+                }
                 break;
             case RIGHT:
                 clawR.setPosition(AssemblyConstants.RIGHT_CLAW_CLOSED_POS); //CLOSED (right)
-                clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (left)
+                if (openClawExtraMore) {
+                    clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS_MORE); // OPEN (left)
+                } else {
+                    clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (left)
+                }
                 break;
             case BOTH:
                 clawL.setPosition(AssemblyConstants.LEFT_CLAW_CLOSED_POS); // CLOSED (left)
                 clawR.setPosition(AssemblyConstants.RIGHT_CLAW_CLOSED_POS); // CLOSED (right)
                 break;
             case OPEN:
-                clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (LEFT)
-                clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
+                if (openClawExtraMore) {
+                    clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS_MORE); // OPEN (LEFT)
+                    clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS_MORE); // OPEN (right)
+                } else {
+                    clawL.setPosition(AssemblyConstants.LEFT_CLAW_OPEN_POS); // OPEN (LEFT)
+                    clawR.setPosition(AssemblyConstants.RIGHT_CLAW_OPEN_POS); // OPEN (right)
+                }
                 break;
             /*case PRIMED:  
                 // ensure both claws are grabbed, and lift the thingy
@@ -1016,6 +1029,9 @@ public class RobotDriver {
             //clawLift.setPosition(0.7875);
         }
 
+    }
+    public void setOpenClawExtraMore(boolean bool) {
+        openClawExtraMore = bool;
     }
     public void updateClaw(boolean update) {
         updateClaw = update;
