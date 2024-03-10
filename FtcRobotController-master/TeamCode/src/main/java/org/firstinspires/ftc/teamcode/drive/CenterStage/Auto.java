@@ -296,18 +296,7 @@ public class Auto extends LinearOpMode {
                     driver.drive(0,0,.25);
                     sleep(200);
                     driver.setEnableRangeClipping(false);
-                    double k_p = 0;
-                    double Tk_p = 0.0132;
-                    double Tk_i = 0.00000001;
-                    double Tk_d = 0.0008;
-                    double Tangle = 0;
-                    double Tcurrent_time, Tprevious_time;
-                    double Tcurrent_error, Tprevious_error;
-                    double Tp, Ti, Td, Tmax_i, Ttotal;
-                    Tmax_i = 1;
-                    Ti = 0;
-                    Tprevious_error = 0;
-                    Tprevious_time = 0;
+                    
                     driver.update();
                     ultraTimer.reset();
                     while (timer.time() < 2 && ultraTimer.time() < 0.5 && opModeIsActive()) {
