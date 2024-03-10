@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import static org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.opencv.core.Core;
@@ -15,11 +14,30 @@ import org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants;
 
 public class ThreeZonePropDetectionPipeline extends OpenCvPipeline {
     boolean overlay;
+    Point REGION1_TOPLEFT_ANCHOR_POINT, REGION2_TOPLEFT_ANCHOR_POINT, REGION3_TOPLEFT_ANCHOR_POINT, region1_pointA, region1_pointB, region2_pointA, region2_pointB, region3_pointA, region3_pointB;
 
     General.AllianceLocation color = General.AllianceLocation.RED_NORTH;
     public ThreeZonePropDetectionPipeline(boolean enableOverlay, General.AllianceLocation color) {
         overlay = enableOverlay;
         this.color=color;
+
+        if (color == General.AllianceLocation.RED_NORTH | color == General.AllianceLocation.RED_SOUTH) {
+            REGION1_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION1_TOPLEFT_ANCHOR_POINT_RED;
+            REGION2_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION2_TOPLEFT_ANCHOR_POINT_RED;
+            REGION3_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT_RED;
+        } else {
+            REGION1_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION1_TOPLEFT_ANCHOR_POINT_BLUE;
+            REGION2_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION2_TOPLEFT_ANCHOR_POINT_BLUE;
+            REGION3_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT_BLUE;
+        }
+
+        region1_pointA = new Point(REGION1_TOPLEFT_ANCHOR_POINT.x, REGION1_TOPLEFT_ANCHOR_POINT.y);
+        region1_pointB = new Point(REGION1_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION1_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+        region2_pointA = new Point(REGION2_TOPLEFT_ANCHOR_POINT.x, REGION2_TOPLEFT_ANCHOR_POINT.y);
+        region2_pointB = new Point(REGION2_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION2_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+        region3_pointA = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x, REGION3_TOPLEFT_ANCHOR_POINT.y);
+        region3_pointB = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION3_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+
     }
 
     /*
@@ -36,19 +54,7 @@ public class ThreeZonePropDetectionPipeline extends OpenCvPipeline {
      */
     static final int REGION_WIDTH = VisionConstants.REGION_WIDTH;
     static final int REGION_HEIGHT = VisionConstants.REGION_HEIGHT;
-
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION1_TOPLEFT_ANCHOR_POINT;
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION2_TOPLEFT_ANCHOR_POINT;
-
-    Point region1_pointA = new Point(REGION1_TOPLEFT_ANCHOR_POINT.x, REGION1_TOPLEFT_ANCHOR_POINT.y);
-    Point region1_pointB = new Point(REGION1_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION1_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
-    Point region2_pointA = new Point(REGION2_TOPLEFT_ANCHOR_POINT.x, REGION2_TOPLEFT_ANCHOR_POINT.y);
-    Point region2_pointB = new Point(REGION2_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION2_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
-
-    Point region3_pointA = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x, REGION3_TOPLEFT_ANCHOR_POINT.y);
-    Point region3_pointB = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION3_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
-
-
+    
     /*
      * Working variables
      */

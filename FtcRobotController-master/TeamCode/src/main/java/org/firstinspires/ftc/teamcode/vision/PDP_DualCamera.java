@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import static org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT;
+import static org.firstinspires.ftc.teamcode.drive.Constants.VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT_RED;
 
 import org.firstinspires.ftc.teamcode.DataTypes.General;
 import org.opencv.core.Core;
@@ -37,8 +37,8 @@ public class PDP_DualCamera extends OpenCvPipeline {
     static final int REGION_WIDTH = VisionConstants.REGION_WIDTH;
     static final int REGION_HEIGHT = VisionConstants.REGION_HEIGHT;
 
-    Point region3_pointA = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x, REGION3_TOPLEFT_ANCHOR_POINT.y);
-    Point region3_pointB = new Point(REGION3_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, REGION3_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+    Point region3_pointA = new Point(REGION3_TOPLEFT_ANCHOR_POINT_RED.x, REGION3_TOPLEFT_ANCHOR_POINT_RED.y);
+    Point region3_pointB = new Point(REGION3_TOPLEFT_ANCHOR_POINT_RED.x + REGION_WIDTH, REGION3_TOPLEFT_ANCHOR_POINT_RED.y + REGION_HEIGHT);
 
 
     /*

@@ -3,12 +3,7 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.DataTypes.CurvePoint;
-import org.firstinspires.ftc.teamcode.DataTypes.General;
-import org.firstinspires.ftc.teamcode.DataTypes.Trajectory;
 import org.opencv.core.Point;
-
-import java.util.ArrayList;
 
 public class Constants {
 
@@ -71,9 +66,16 @@ public class Constants {
     }
 
     public static final class VisionConstants {
-        public static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0, 190);
-        public static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(560, 140);
-        public static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(1050, 225);
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT_RED = new Point(0, 190);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_RED = new Point(560, 140);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_RED = new Point(1050, 225);
+
+
+        public static final Point REGION1_TOPLEFT_ANCHOR_POINT_BLUE = new Point(0, 190);
+        public static final Point REGION2_TOPLEFT_ANCHOR_POINT_BLUE = new Point(560, 140);
+        public static final Point REGION3_TOPLEFT_ANCHOR_POINT_BLUE = new Point(1050, 225);
+
+
         public static final int REGION_WIDTH = 80;
         public static final int REGION_HEIGHT = 80;
         public static final int[] ACCEPTED_IDS = {1, 2, 3, 4, 5, 6};

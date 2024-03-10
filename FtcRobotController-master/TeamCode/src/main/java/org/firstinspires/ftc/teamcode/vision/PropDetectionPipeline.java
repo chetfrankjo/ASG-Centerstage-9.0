@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import org.firstinspires.ftc.teamcode.DataTypes.General;
-import org.firstinspires.ftc.teamcode.test.PropDetectionTest;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -27,9 +25,9 @@ public class PropDetectionPipeline extends OpenCvPipeline {
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION1_TOPLEFT_ANCHOR_POINT;
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION2_TOPLEFT_ANCHOR_POINT;
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION1_TOPLEFT_ANCHOR_POINT_RED;
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION2_TOPLEFT_ANCHOR_POINT_RED;
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = VisionConstants.REGION3_TOPLEFT_ANCHOR_POINT_RED;
     static final int REGION_WIDTH = VisionConstants.REGION_WIDTH;
     static final int REGION_HEIGHT = VisionConstants.REGION_HEIGHT;
 
