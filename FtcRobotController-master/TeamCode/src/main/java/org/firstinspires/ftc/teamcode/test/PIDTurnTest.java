@@ -31,10 +31,10 @@ public class PIDTurnTest extends LinearOpMode{
     long Tlast_time;
 
     public static double Tk_p = 0.0132;
-    public static double Tk_i = 0.00000001;
-    public static double Tk_d = 0.0008;
-    double Tangle = 90;
-
+    public static double Tk_i = 0;
+    public static double Tk_d = 0;
+    double Tangle = 0;
+    boolean press = false;
     @Override
     public void runOpMode(){
         RobotDriver driver = new RobotDriver(hardwareMap, false);
@@ -51,19 +51,17 @@ public class PIDTurnTest extends LinearOpMode{
                 telemetry.update();
 
                 if(gamepad1.a){
-                    Tangle = 90;
+                    Tangle = 10;
                     Tprevious_error = 0;
-                    while (gamepad1.a){
-                        sleep(10);
-                    }
+                    press = true;
                 } else if (gamepad1.b){
                     Tangle = 0;
                     Tprevious_error = 0;
-                    while (gamepad1.b){
-                        sleep(10);
-                    }
+                    press = true;
                 }
-
+                if (press && !gamepad1.a && !gamepad1.b) {
+                    press = false;
+                }
                 Tp = Tk_p * Tcurrent_error;
                 Ti += Tk_i * (Tcurrent_error * (Tcurrent_time / 1000000000));
                 if (Ti > Tmax_i) {
@@ -76,19 +74,7 @@ public class PIDTurnTest extends LinearOpMode{
                 driver.drive(0, 0, Ttotal, false);
                 Tprevious_error = Tcurrent_error;
                 Tprevious_time = Tcurrent_time;
-                if(gamepad1.a){
-                    Tangle = 90;
-                    Tprevious_error = 0;
-                    while (gamepad1.a){
-                        sleep(10);
-                    }
-                } else if (gamepad1.b){
-                    Tangle = 0;
-                    Tprevious_error = 0;
-                    while (gamepad1.b){
-                        sleep(10);
-                    }
-                }
+
                 driver.update();
             }
         }

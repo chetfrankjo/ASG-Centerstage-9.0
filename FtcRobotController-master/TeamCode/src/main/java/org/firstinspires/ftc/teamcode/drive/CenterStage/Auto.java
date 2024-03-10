@@ -292,8 +292,47 @@ public class Auto extends LinearOpMode {
                      */
                     break;
                 case APPROACH_3: // finalize backdrop position and deposit
+                    timer.reset();
+                    driver.drive(0,0,.25);
+                    sleep(200);
+                    driver.setEnableRangeClipping(false);
+                    double k_p = 0;
+                    double Tk_p = 0.0132;
+                    double Tk_i = 0.00000001;
+                    double Tk_d = 0.0008;
+                    double Tangle = 0;
+                    double Tcurrent_time, Tprevious_time;
+                    double Tcurrent_error, Tprevious_error;
+                    double Tp, Ti, Td, Tmax_i, Ttotal;
+                    Tmax_i = 1;
+                    Ti = 0;
+                    Tprevious_error = 0;
+                    Tprevious_time = 0;
+                    driver.update();
+                    ultraTimer.reset();
+                    while (timer.time() < 4 && ultraTimer.time() < 0.5 && opModeIsActive()) {
+                        if (driver.getCurrentPos().getHeading() > 1) {
+                            if (driver.getCurrentPos().getHeading() > 1.5) {
+                                driver.drive(0, 0, -0.2);
+                            } else {
+                                driver.drive(0,0,-0.15);
+                            }
+                            ultraTimer.reset();
+                        } else if (driver.getCurrentPos().getHeading() < -1) {
+                            if (driver.getCurrentPos().getHeading() < -1.5) {
+                                driver.drive(0, 0, 0.2);
+                            } else {
+                                driver.drive(0,0,0.15);
+                            }
+                            ultraTimer.reset();
+                        } else {
+                            driver.drive(0,0,0);
 
-                    driver.drive(0,0,0);
+                        }
+                        driver.update();
+                    }
+                    driver.setEnableRangeClipping(true);
+                    driver.drive(0, 0, 0);
                     driver.update();
                     sleep(250); // let the robot stop
                     startPos = driver.getCurrentPos().getX();
@@ -415,7 +454,7 @@ public class Auto extends LinearOpMode {
                             Xcurrent_error = Xpos+offpos+backpos-(-startPos + driver.getCurrentPos().getX());
                             //driver.goToAnotherPosition(new Pose2d(Xcurrent_error, 0, driver.getCurrentPos().getHeading()), 0, 0, 0.5, Math.signum(Xcurrent_error)*-90, 0.3, 1, false, 1);
 
-                            driver.drive(Xcurrent_error/6, 0.25, -driver.getCurrentPos().getHeading()/50);
+                            driver.drive(Xcurrent_error/5, 0.25, -driver.getCurrentPos().getHeading()/50);
                         }
                         driver.update();
                     }
