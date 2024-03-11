@@ -27,8 +27,8 @@ public class Constants {
         public static final double RIGHT_CLAW_OPEN_POS = 0.71;
 
         //TODO: adjust these for extra big open positions
-        public static final double LEFT_CLAW_OPEN_POS_MORE = 0.570;
-        public static final double RIGHT_CLAW_OPEN_POS_MORE = 0.745;
+        public static final double LEFT_CLAW_OPEN_POS_MORE = 0.560;
+        public static final double RIGHT_CLAW_OPEN_POS_MORE = 0.755;
 
         public static final double FLIPPER_ENCODER_DEGREES_OFFSET = 171;
 

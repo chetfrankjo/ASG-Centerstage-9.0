@@ -453,7 +453,7 @@ public class Auto extends LinearOpMode {
                     timer.reset();
                     driver.setClawMode(General.ClawMode.OPEN); // drop the pixel
                     timer.reset();
-                    while (timer.time() < 0.5 && opModeIsActive()) { // let the pixel drop
+                    while (timer.time() < 0.8 && opModeIsActive()) { // let the pixel drop
                         driver.drive(0, 0, 0);
                         driver.update();
                     }
@@ -510,7 +510,7 @@ public class Auto extends LinearOpMode {
                             timer.reset();
                         }
                     } else { // If you are doing a center park, just back up slowly for a second
-                        if (timer.time() > 0.5) {
+                        if (timer.time() > 0.25) {
                             driver.drive(0,0,0);
                         } else {
                             driver.drive(0, -0.4, 0);
